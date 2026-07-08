@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 680" font-family="'Comic Sans MS','Segoe Print','Bradley Hand',cursive">
+  <defs>
+    <marker id="aDown" markerWidth="14" markerHeight="14" refX="5" refY="9" orient="auto">
+      <path d="M0,0 L10,0 L5,11 L5,9 Z" fill="#0C0B0A"/>
+    </marker>
+    <marker id="aSide" markerWidth="12" markerHeight="12" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L9,4 L0,8 L2,4 Z" fill="#0C0B0A"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="680" fill="#F4EFE7"/>
+
+  <text x="430" y="50" text-anchor="middle" font-size="30" fill="#0C0B0A" font-weight="bold">Anatomy of one meta-skill</text>
+  <text x="430" y="78" text-anchor="middle" font-size="17" fill="#0C0B0A">the universal contract every meta-suite skill follows</text>
+
+  <!-- Step 1 — Silent intake (teal) -->
+  <path d="M150,105 L712,102 L716,176 L146,179 Z" fill="#E6F6F4" stroke="#43C9BC" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="430" y="138" text-anchor="middle" font-size="21" fill="#0C0B0A" font-weight="bold">1 · Silent intake</text>
+  <text x="430" y="163" text-anchor="middle" font-size="16" fill="#0C0B0A">auto-classify the request — never ask the user</text>
+
+  <path d="M430,180 L431,212" fill="none" stroke="#0C0B0A" stroke-width="2.8" marker-end="url(#aDown)"/>
+
+  <!-- Step 2 — Run typed reasoning internally (gold) -->
+  <path d="M150,218 L712,215 L716,289 L146,292 Z" fill="#FBF4E4" stroke="#E2B65A" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="430" y="251" text-anchor="middle" font-size="21" fill="#0C0B0A" font-weight="bold">2 · Run typed reasoning — INTERNALLY</text>
+  <text x="430" y="276" text-anchor="middle" font-size="16" fill="#0C0B0A">the category-theory machinery stays hidden</text>
+
+  <path d="M430,293 L431,325" fill="none" stroke="#0C0B0A" stroke-width="2.8" marker-end="url(#aDown)"/>
+
+  <!-- Step 3 — Emit plain deliverable (gold) -->
+  <path d="M150,331 L712,328 L716,402 L146,405 Z" fill="#FBF4E4" stroke="#E2B65A" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="430" y="364" text-anchor="middle" font-size="21" fill="#0C0B0A" font-weight="bold">3 · Emit PLAIN-language deliverable</text>
+  <text x="430" y="389" text-anchor="middle" font-size="16" fill="#0C0B0A">no jargon — just the useful result</text>
+
+  <path d="M430,406 L431,438" fill="none" stroke="#0C0B0A" stroke-width="2.8" marker-end="url(#aDown)"/>
+
+  <!-- Step 4 — Offer to reveal (teal) -->
+  <path d="M150,444 L712,441 L716,515 L146,518 Z" fill="#E6F6F4" stroke="#43C9BC" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="430" y="477" text-anchor="middle" font-size="21" fill="#0C0B0A" font-weight="bold">4 · Offer to reveal internal work</text>
+  <text x="430" y="502" text-anchor="middle" font-size="16" fill="#0C0B0A">only if the user asks to see it</text>
+
+  <!-- side box: references/internal-model.md -->
+  <path d="M812,300 L1044,297 L1048,432 L808,435 Z" fill="#EFE6D2" stroke="#0C0B0A" stroke-width="3" stroke-dasharray="9 5" stroke-linejoin="round"/>
+  <text x="928" y="345" text-anchor="middle" font-size="16" fill="#0C0B0A" font-weight="bold">references/</text>
+  <text x="928" y="372" text-anchor="middle" font-size="16" fill="#0C0B0A">internal-model.md</text>
+  <text x="928" y="404" text-anchor="middle" font-size="14" fill="#0C0B0A">(hidden unless asked)</text>
+
+  <!-- arrow from step 2/3 region to side box -->
+  <path d="M716,358 Q765,352 805,355" fill="none" stroke="#0C0B0A" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#aSide)"/>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "name": "meta-suite",
+  "version": "1.1.0",
+  "description": "Nine task-agnostic meta-skills that operate one level up — emitting the reusable structure that solves a whole category of work, not a single instance. Thinking (meta-prompting), planning (meta-planning), designing (meta-design), building (meta-mvp), compounding (meta-compound), crafting (meta-craft), reviewing (meta-review), researching (meta-research), and remembering (meta-context).",
+  "author": {
+    "name": "Manu",
+    "url": "https://github.com/manutej"
+  },
+  "homepage": "https://github.com/manutej/meta-suite",
+  "repository": "https://github.com/manutej/meta-suite",
+  "license": "MIT",
+  "keywords": [
+    "meta-prompting","meta-planning","meta-design","meta-mvp","meta-compound",
+    "meta-craft","meta-review","meta-research","meta-context",
+    "scaffolding","task-agnostic","reusable-prompts","agentic-planning","compounding"
+  ]
+}

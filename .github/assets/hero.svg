@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" role="img" aria-label="Meta-Suite — task-agnostic scaffolds that solve a whole category of work, not a single task">
+  <defs>
+    <linearGradient id="ms-accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#E2B65A"/>
+      <stop offset="1" stop-color="#43C9BC"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="360" fill="#0C0B0A"/>
+  <rect x="24" y="24" width="1152" height="312" rx="18" fill="#110F0D" stroke="#241F1A" stroke-width="1"/>
+
+  <!-- mark: alchemical "one level up" glyph, gold ring + teal cross -->
+  <g transform="translate(96,110)" fill="none" stroke-width="4">
+    <circle cx="42" cy="42" r="40" stroke="#E2B65A"/>
+    <path d="M42 8 V76 M8 42 H76" stroke="#43C9BC"/>
+    <circle cx="42" cy="42" r="6" fill="#E2B65A" stroke="none"/>
+  </g>
+
+  <!-- wordmark + tagline -->
+  <g font-family="'Hanken Grotesk','Segoe UI',system-ui,-apple-system,sans-serif">
+    <text x="212" y="128" fill="#F4EFE7" font-size="72" font-weight="800" letter-spacing="-1">Meta-Suite</text>
+    <text x="214" y="176" fill="#BDB4A6" font-size="26" font-weight="500">Scaffolds that solve a whole <tspan fill="#E2B65A" font-style="italic">category</tspan> of work — not a single task.</text>
+    <text x="214" y="212" fill="#8E857A" font-size="18" font-weight="500">Nine task-agnostic meta-skills that operate one level up: each emits the reusable structure the work follows.</text>
+  </g>
+
+  <!-- two-axis motif: make (gold) + keep (teal) -->
+  <g transform="translate(214,258)" font-family="'JetBrains Mono','SFMono-Regular',ui-monospace,monospace" font-size="15">
+    <text x="0" y="14" fill="#E2B65A" font-weight="600">MAKE</text>
+    <g transform="translate(70,9)" fill="#E2B65A">
+      <circle cx="0" cy="0" r="6"/><circle cx="26" cy="0" r="6"/><circle cx="52" cy="0" r="6"/><circle cx="78" cy="0" r="6"/>
+    </g>
+    <text x="196" y="14" fill="#8E857A">prompting · planning · design · mvp</text>
+
+    <text x="0" y="46" fill="#43C9BC" font-weight="600">KEEP</text>
+    <g transform="translate(70,41)" fill="#43C9BC">
+      <circle cx="0" cy="0" r="6"/><circle cx="26" cy="0" r="6"/><circle cx="52" cy="0" r="6"/><circle cx="78" cy="0" r="6"/><circle cx="104" cy="0" r="6"/>
+    </g>
+    <text x="222" y="46" fill="#8E857A">compound · craft · review · research · context</text>
+  </g>
+
+  <rect x="96" y="308" width="1008" height="3" rx="1.5" fill="url(#ms-accent)"/>
+</svg>

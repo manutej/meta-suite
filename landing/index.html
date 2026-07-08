@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meta-Suite — Scaffolds that solve a whole category of work</title>
+<meta name="description" content="Nine task-agnostic meta-skills that operate one level up — instead of doing the work, each emits the reusable structure the work follows." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0C0B0A;
+    --ink-2:#100E0C;
+    --card:#161412;
+    --card-2:#1C1916;
+    --cream:#F4EFE7;
+    --muted:#BDB4A6;
+    --muted-2:#A89F90;
+    --gold:#E2B65A;
+    --teal:#43C9BC;
+    --blue:#58A6FF;
+    --red:#F85149;
+    --hair:rgba(244,239,231,0.10);
+    --hair-strong:rgba(244,239,231,0.18);
+    --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:'Hanken Grotesk', system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--cream);
+    font-family:var(--sans);
+    font-weight:400;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  /* dotted + grid texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(rgba(244,239,231,0.05) 1px, transparent 1px);
+    background-size:22px 22px;
+    opacity:0.6;
+  }
+  body::after{
+    content:"";
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(900px 520px at 78% -8%, rgba(226,182,90,0.10), transparent 60%),
+      radial-gradient(760px 480px at 8% 8%, rgba(67,201,188,0.08), transparent 62%);
+  }
+  .wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+  a{color:inherit; text-decoration:none;}
+
+  /* Typography */
+  h1,h2,h3{font-weight:800; line-height:1.04; letter-spacing:-0.02em; margin:0;}
+  h2{font-size:clamp(1.8rem,3.4vw,2.7rem); letter-spacing:-0.025em;}
+  h3{font-size:1.16rem; font-weight:700; letter-spacing:-0.01em;}
+  p{margin:0;}
+  .eyebrow{
+    font-family:var(--mono); font-size:0.72rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.22em; color:var(--gold);
+    display:inline-block;
+  }
+  .eyebrow.teal{color:var(--teal);}
+  .lead{color:var(--muted); font-size:1.06rem; max-width:62ch;}
+
+  /* Nav */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:saturate(140%) blur(10px);
+    background:rgba(12,11,10,0.72);
+    border-bottom:1px solid var(--hair);
+  }
+  .nav-in{display:flex; align-items:center; justify-content:space-between; height:64px;}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:800; letter-spacing:-0.02em; font-size:1.05rem;}
+  .brand .mark{
+    width:26px; height:26px; flex:none; border-radius:7px;
+    background:linear-gradient(135deg,var(--gold),var(--teal));
+    position:relative;
+  }
+  .brand .mark::after{
+    content:""; position:absolute; inset:6px; border-radius:3px;
+    background:var(--ink);
+  }
+  .nav-links{display:flex; gap:8px; align-items:center;}
+  .nav-links a{
+    font-family:var(--mono); font-size:0.74rem; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--muted); padding:10px 12px; border-radius:8px; min-height:44px; display:inline-flex; align-items:center;
+    transition:color .2s ease, background .2s ease;
+  }
+  .nav-links a:hover{color:var(--cream); background:var(--hair);}
+  .nav-links a.cta{color:var(--ink); background:var(--gold); font-weight:600;}
+  .nav-links a.cta:hover{background:#ecc572;}
+  @media (max-width:720px){ .nav-links a.ghost{display:none;} }
+
+  /* Hero */
+  .hero{padding:96px 0 64px;}
+  .hero h1{font-size:clamp(2.6rem,6.4vw,4.9rem); max-width:16ch;}
+  .hero h1 .gold{color:var(--gold);}
+  .hero h1 .teal{color:var(--teal);}
+  .hero .tagline{margin-top:26px; font-size:clamp(1.1rem,2vw,1.4rem); color:var(--cream); max-width:42ch; font-weight:500;}
+  .hero .subhead{margin-top:18px; color:var(--muted); font-size:1.06rem; max-width:60ch;}
+  .hero-cta{display:flex; flex-wrap:wrap; gap:14px; margin-top:38px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:10px; min-height:46px;
+    padding:0 20px; border-radius:11px; font-weight:600; font-size:0.95rem;
+    border:1px solid transparent; cursor:pointer; transition:transform .18s ease, background .2s ease, border-color .2s ease;
+    font-family:var(--sans);
+  }
+  .btn-primary{background:var(--gold); color:var(--ink);}
+  .btn-primary:hover{background:#ecc572;}
+  .btn-ghost{background:transparent; color:var(--cream); border-color:var(--hair-strong); font-family:var(--mono); font-size:0.82rem; letter-spacing:0.04em;}
+  .btn-ghost:hover{border-color:var(--teal); color:var(--teal);}
+  @media (prefers-reduced-motion: no-preference){ .btn:hover{transform:translateY(-2px);} }
+
+  .hero-stats{display:flex; gap:34px; flex-wrap:wrap; margin-top:54px; padding-top:30px; border-top:1px solid var(--hair);}
+  .stat .num{font-weight:800; font-size:1.7rem; letter-spacing:-0.02em;}
+  .stat .num.teal{color:var(--teal);} .stat .num.gold{color:var(--gold);}
+  .stat .lbl{font-family:var(--mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.16em; color:var(--muted-2); margin-top:4px;}
+
+  /* Section shell */
+  section{padding:70px 0; position:relative;}
+  .sec-head{max-width:64ch; margin-bottom:42px;}
+  .sec-head .eyebrow{margin-bottom:16px;}
+  .sec-head p{margin-top:16px;}
+
+  /* Two axes */
+  .axes{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media (max-width:780px){ .axes{grid-template-columns:1fr;} }
+  .axis{
+    border:1px solid var(--hair); border-radius:18px; padding:30px 28px;
+    background:linear-gradient(180deg, var(--card), var(--ink-2));
+    position:relative; overflow:hidden;
+  }
+  .axis::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px;}
+  .axis.make::before{background:var(--gold);}
+  .axis.keep::before{background:var(--teal);}
+  .axis .label{font-family:var(--mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.18em; font-weight:600;}
+  .axis.make .label{color:var(--gold);} .axis.keep .label{color:var(--teal);}
+  .axis h3{margin:12px 0 8px; font-size:1.4rem;}
+  .axis .desc{color:var(--muted); font-size:0.98rem;}
+  .axis .pills{display:flex; flex-wrap:wrap; gap:9px; margin-top:20px;}
+  .pill{
+    font-family:var(--mono); font-size:0.74rem; padding:7px 11px; border-radius:8px;
+    border:1px solid var(--hair-strong); color:var(--cream); background:rgba(244,239,231,0.03);
+  }
+  .axis.make .pill{border-color:rgba(226,182,90,0.35);}
+  .axis.keep .pill{border-color:rgba(67,201,188,0.35);}
+
+  /* Skill cards */
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:900px){ .grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .grid{grid-template-columns:1fr;} }
+  .card{
+    border:1px solid var(--hair); border-radius:16px; padding:24px 22px 22px;
+    background:var(--card); position:relative; overflow:hidden;
+    transition:transform .22s ease, border-color .22s ease, background .22s ease;
+  }
+  .card .idx{font-family:var(--mono); font-size:0.72rem; color:var(--muted-2); letter-spacing:0.1em;}
+  .card .name{font-family:var(--mono); font-weight:600; font-size:1.0rem; margin:10px 0 0; letter-spacing:-0.01em;}
+  .card.gold .name{color:var(--gold);} .card.teal .name{color:var(--teal);}
+  .card .one{color:var(--muted); font-size:0.94rem; margin-top:10px; line-height:1.55;}
+  .card .tag{position:absolute; top:18px; right:18px; font-family:var(--mono); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--muted-2);}
+  .card::after{content:""; position:absolute; left:0; right:0; bottom:0; height:3px; transform:scaleX(0); transform-origin:left; transition:transform .25s ease;}
+  .card.gold::after{background:var(--gold);} .card.teal::after{background:var(--teal);}
+  .card:hover::after{transform:scaleX(1);}
+  @media (prefers-reduced-motion: no-preference){
+    .card:hover{transform:translateY(-5px); background:var(--card-2); border-color:var(--hair-strong);}
+  }
+
+  /* Loop / how it fits */
+  .loop{
+    border:1px solid var(--hair); border-radius:20px; padding:40px 34px;
+    background:linear-gradient(180deg,var(--card),var(--ink-2));
+  }
+  .loop-steps{display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:8px;}
+  .loop-step{
+    font-family:var(--mono); font-size:0.86rem; font-weight:600; padding:12px 16px; border-radius:11px;
+    border:1px solid var(--hair-strong); background:rgba(244,239,231,0.03); min-height:44px; display:inline-flex; align-items:center;
+  }
+  .loop-step.g{color:var(--gold); border-color:rgba(226,182,90,0.4);}
+  .loop-step.t{color:var(--teal); border-color:rgba(67,201,188,0.4);}
+  .loop-arrow{color:var(--muted-2); font-family:var(--mono);}
+  .loop .note{margin-top:24px; color:var(--muted); max-width:64ch;}
+
+  /* Promises */
+  .promises{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  @media (max-width:760px){ .promises{grid-template-columns:repeat(2,1fr);} }
+  .promise{border:1px solid var(--hair); border-radius:14px; padding:22px; background:var(--card);}
+  .promise .dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-bottom:14px;}
+  .promise:nth-child(odd) .dot{background:var(--gold);}
+  .promise:nth-child(even) .dot{background:var(--teal);}
+  .promise h3{font-size:1.05rem;}
+  .promise p{color:var(--muted); font-size:0.9rem; margin-top:8px;}
+
+  /* Why meta-prompting */
+  .why{display:grid; grid-template-columns:1.3fr 1fr; gap:36px; align-items:start;}
+  @media (max-width:820px){ .why{grid-template-columns:1fr;} }
+  .why p{color:var(--muted); margin-top:14px; max-width:58ch;}
+  .why p strong{color:var(--cream); font-weight:600;}
+  .refs{border:1px solid var(--hair); border-radius:14px; padding:22px; background:var(--card);}
+  .refs .eyebrow{margin-bottom:14px;}
+  .ref{display:block; padding:11px 0; border-bottom:1px solid var(--hair); font-size:0.88rem; color:var(--muted); min-height:44px;}
+  .ref:last-child{border-bottom:0;}
+  .ref .arxiv{font-family:var(--mono); font-size:0.78rem; color:var(--blue);}
+  .ref.primary .arxiv{color:var(--gold);}
+  .ref:hover .arxiv{text-decoration:underline;}
+
+  /* Install */
+  .install{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media (max-width:760px){ .install{grid-template-columns:1fr;} }
+  .panel{border:1px solid var(--hair); border-radius:16px; padding:26px; background:var(--card-2);}
+  .panel .ptitle{font-family:var(--mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.16em; color:var(--muted-2); margin-bottom:6px;}
+  .panel .psub{color:var(--muted); font-size:0.88rem; margin-bottom:18px;}
+  .copyrow{
+    display:flex; align-items:center; gap:12px; justify-content:space-between;
+    background:var(--ink); border:1px solid var(--hair-strong); border-radius:10px;
+    padding:6px 6px 6px 16px; margin-bottom:10px;
+  }
+  .copyrow code{font-family:var(--mono); font-size:0.84rem; color:var(--cream); overflow-x:auto; white-space:nowrap; padding:8px 0;}
+  .copyrow code .pfx{color:var(--teal);}
+  .copybtn{
+    flex:none; font-family:var(--mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em;
+    color:var(--ink); background:var(--gold); border:0; border-radius:7px; padding:0 14px;
+    min-height:44px; min-width:64px; cursor:pointer; transition:background .2s ease;
+  }
+  .copybtn:hover{background:#ecc572;}
+  .copybtn.copied{background:var(--teal);}
+  .panel.secondary .copybtn{background:transparent; color:var(--teal); border:1px solid rgba(67,201,188,0.5);}
+  .panel.secondary .copybtn:hover{background:rgba(67,201,188,0.12);}
+  .panel.secondary .copybtn.copied{background:var(--teal); color:var(--ink); border-color:var(--teal);}
+
+  /* Footer */
+  footer{border-top:1px solid var(--hair); padding:46px 0 64px; margin-top:30px;}
+  .foot{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px;}
+  .foot .meta{font-family:var(--mono); font-size:0.74rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted-2);}
+  .foot a.repo{font-family:var(--mono); font-size:0.78rem; color:var(--teal); padding:10px 0; min-height:44px; display:inline-flex; align-items:center;}
+  .foot a.repo:hover{text-decoration:underline;}
+
+  /* reveal animation */
+  .reveal{opacity:0; transform:translateY(22px);}
+  @media (prefers-reduced-motion: no-preference){
+    .reveal{transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);}
+  }
+  .reveal.in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span> Meta-Suite</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a class="ghost" href="#axes">Axes</a>
+      <a class="ghost" href="#skills">Skills</a>
+      <a class="ghost" href="#why">Why</a>
+      <a class="cta" href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow reveal">Claude plugin · nine meta-skills</span>
+      <h1 class="reveal" style="margin-top:18px;">Scaffolds that solve a <span class="gold">whole category</span> of work — not a <span class="teal">single task</span>.</h1>
+      <p class="tagline reveal">Nine task-agnostic meta-skills that operate one level up.</p>
+      <p class="subhead reveal">Instead of doing the work, each emits the reusable structure the work follows — the prompt, the plan, the schema, the constitution, the map — so the next pass starts sharper than the last.</p>
+      <div class="hero-cta reveal">
+        <a class="btn btn-primary" href="#install">Install Meta-Suite</a>
+        <a class="btn btn-ghost" href="#skills">Browse the nine skills →</a>
+      </div>
+      <div class="hero-stats reveal">
+        <div class="stat"><div class="num gold">9</div><div class="lbl">Meta-skills</div></div>
+        <div class="stat"><div class="num teal">2</div><div class="lbl">Axes · Make / Keep</div></div>
+        <div class="stat"><div class="num">0</div><div class="lbl">Plugin dependencies</div></div>
+        <div class="stat"><div class="num">1</div><div class="lbl">Level up from the task</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TWO AXES -->
+  <section id="axes">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Two axes</span>
+        <h2 style="margin-top:16px;">One to <span style="color:var(--gold)">make</span> it. One to <span style="color:var(--teal)">keep</span> it.</h2>
+        <p class="lead">The suite splits along the grain of real work: getting from an idea to a shipped thing, and keeping that thing good, durable, and self-improving.</p>
+      </div>
+      <div class="axes">
+        <div class="axis make reveal">
+          <span class="label">The MAKE axis</span>
+          <h3>Idea → shipped thing</h3>
+          <p class="desc">From a spark to a deliverable. These skills shape how a thing gets thought about, planned, designed, and assembled.</p>
+          <div class="pills">
+            <span class="pill">meta-prompting</span>
+            <span class="pill">meta-planning</span>
+            <span class="pill">meta-design</span>
+            <span class="pill">meta-mvp</span>
+          </div>
+        </div>
+        <div class="axis keep reveal">
+          <span class="label">The KEEP axis</span>
+          <h3>Good, durable, self-improving</h3>
+          <p class="desc">After it exists, keep it honest. These skills compound quality, set the bar, stress-test the work, and carry context forward.</p>
+          <div class="pills">
+            <span class="pill">meta-compound</span>
+            <span class="pill">meta-craft</span>
+            <span class="pill">meta-review</span>
+            <span class="pill">meta-research</span>
+            <span class="pill">meta-context</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow teal">The nine</span>
+        <h2 style="margin-top:16px;">Invoke the structure, not the task.</h2>
+        <p class="lead">Each card is a skill you invoke by name. It returns the reusable scaffold a category of work follows — not a one-off answer.</p>
+      </div>
+      <div class="grid">
+
+        <div class="card gold reveal">
+          <span class="tag">Make</span>
+          <div class="idx">01</div>
+          <p class="name">meta-prompting</p>
+          <p class="one">A reusable meta-prompt: how to think about a task category, not a worked example.</p>
+        </div>
+
+        <div class="card teal reveal">
+          <span class="tag">Make</span>
+          <div class="idx">02</div>
+          <p class="name">meta-planning</p>
+          <p class="one">A meta-plan: the typed scaffold a fleet of agents executes, before the plan is written.</p>
+        </div>
+
+        <div class="card gold reveal">
+          <span class="tag">Make</span>
+          <div class="idx">03</div>
+          <p class="name">meta-design</p>
+          <p class="one">A medium-specific design schema, executed into an audited artifact plus the system that generates it.</p>
+        </div>
+
+        <div class="card teal reveal">
+          <span class="tag">Make</span>
+          <div class="idx">04</div>
+          <p class="name">meta-mvp</p>
+          <p class="one">A one-liner expanded into a full, research-grounded deliverable bundle.</p>
+        </div>
+
+        <div class="card gold reveal">
+          <span class="tag">Keep</span>
+          <div class="idx">05</div>
+          <p class="name">meta-compound</p>
+          <p class="one">The compounding map: how each unit of work makes the next one easier, and where to invest first.</p>
+        </div>
+
+        <div class="card teal reveal">
+          <span class="tag">Keep</span>
+          <div class="idx">06</div>
+          <p class="name">meta-craft</p>
+          <p class="one">A tailored craft constitution plus an evidence-based Definition of Done.</p>
+        </div>
+
+        <div class="card gold reveal">
+          <span class="tag">Keep</span>
+          <div class="idx">07</div>
+          <p class="name">meta-review</p>
+          <p class="one">Adversarial multi-lens review: prioritized findings, blind-spot probes, a reusable lesson.</p>
+        </div>
+
+        <div class="card teal reveal">
+          <span class="tag">Keep</span>
+          <div class="idx">08</div>
+          <p class="name">meta-research</p>
+          <p class="one">A rigorous, cross-verified, source-cited brief with explicit confidence and reusable knowledge atoms.</p>
+        </div>
+
+        <div class="card gold reveal">
+          <span class="tag">Keep</span>
+          <div class="idx">09</div>
+          <p class="name">meta-context</p>
+          <p class="one">A context strategy and droppable-in memory scaffold so work compounds across sessions.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT FITS -->
+  <section id="loop">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">How it fits together</span>
+        <h2 style="margin-top:16px;">The two axes close a loop.</h2>
+      </div>
+      <div class="loop reveal">
+        <div class="loop-steps">
+          <span class="loop-step g">build</span>
+          <span class="loop-arrow" aria-hidden="true">→</span>
+          <span class="loop-step t">review</span>
+          <span class="loop-arrow" aria-hidden="true">→</span>
+          <span class="loop-step t">compound</span>
+          <span class="loop-arrow" aria-hidden="true">→</span>
+          <span class="loop-step t">context</span>
+          <span class="loop-arrow" aria-hidden="true">→</span>
+          <span class="loop-step g">sharper next think</span>
+          <span class="loop-arrow" aria-hidden="true">↺</span>
+        </div>
+        <p class="note">Make produces the thing. Keep makes it better and remembers why. The lesson from review feeds the compounding map; the map feeds the context scaffold; the next prompt starts from everything the last one learned. The loop tightens with every turn.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMISES -->
+  <section id="promises">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow teal">Design promises</span>
+        <h2 style="margin-top:16px;">Four things every skill keeps.</h2>
+      </div>
+      <div class="promises">
+        <div class="promise reveal"><span class="dot" aria-hidden="true"></span><h3>Standalone</h3><p>No plugin deps. Every skill runs on its own — nothing else to install.</p></div>
+        <div class="promise reveal"><span class="dot" aria-hidden="true"></span><h3>Never asks you questions</h3><p>It infers what it needs and produces. No interrogation loop.</p></div>
+        <div class="promise reveal"><span class="dot" aria-hidden="true"></span><h3>Clear over clever</h3><p>Legible scaffolds beat impressive ones. You can read what it made.</p></div>
+        <div class="promise reveal"><span class="dot" aria-hidden="true"></span><h3>It compounds</h3><p>Each pass leaves something reusable behind for the next one.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY META-PROMPTING -->
+  <section id="why">
+    <div class="wrap">
+      <div class="why">
+        <div class="reveal">
+          <span class="eyebrow">Why meta-prompting</span>
+          <h2 style="margin-top:16px;">Write one prompt that teaches a model how to think.</h2>
+          <p>Instead of writing a fresh prompt per task, write <strong>one reusable prompt</strong> that teaches a model how to think about a whole category of problems. Give it a <strong>scaffold — roles, steps, slots</strong> — not examples to imitate.</p>
+          <p>Because the scaffold is example-agnostic, a model can apply it to <strong>itself</strong>: refine the prompt, run it, fold the result back in. That recursion is the whole engine behind Meta-Suite — and the reason the loop gets sharper instead of merely repeating.</p>
+        </div>
+        <aside class="refs reveal" aria-label="References">
+          <span class="eyebrow teal">References</span>
+          <a class="ref primary" href="https://arxiv.org/abs/2311.11482" target="_blank" rel="noopener">Zhang, Yuan &amp; Yao — <em>Meta Prompting for AI Systems</em> · <span class="arxiv">arXiv:2311.11482</span> <span style="color:var(--muted-2)">(primary)</span></a>
+          <a class="ref" href="https://arxiv.org/abs/2401.12954" target="_blank" rel="noopener">Suzgun &amp; Kalai · <span class="arxiv">arXiv:2401.12954</span></a>
+          <a class="ref" href="https://arxiv.org/abs/2312.06562" target="_blank" rel="noopener">de Wynter et al. — <em>On Meta-Prompting</em> · <span class="arxiv">arXiv:2312.06562</span></a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Install</span>
+        <h2 style="margin-top:16px;">Two lines in Claude. Or clone it.</h2>
+        <p class="lead">Click any command to copy it.</p>
+      </div>
+      <div class="install">
+        <div class="panel reveal">
+          <div class="ptitle">Recommended · Plugin marketplace</div>
+          <div class="psub">Add the marketplace, then install the suite.</div>
+          <div class="copyrow">
+            <code data-copy="/plugin marketplace add manutej/meta-suite"><span class="pfx">/plugin</span> marketplace add manutej/meta-suite</code>
+            <button class="copybtn" type="button" aria-label="Copy command">Copy</button>
+          </div>
+          <div class="copyrow">
+            <code data-copy="/plugin install meta-suite@meta-suite"><span class="pfx">/plugin</span> install meta-suite@meta-suite</code>
+            <button class="copybtn" type="button" aria-label="Copy command">Copy</button>
+          </div>
+        </div>
+        <div class="panel secondary reveal">
+          <div class="ptitle">Secondary · Clone &amp; run local</div>
+          <div class="psub">Pull the repo and point Claude at the directory.</div>
+          <div class="copyrow">
+            <code data-copy="git clone https://github.com/manutej/meta-suite"><span class="pfx">git</span> clone https://github.com/manutej/meta-suite</code>
+            <button class="copybtn" type="button" aria-label="Copy command">Copy</button>
+          </div>
+          <div class="copyrow">
+            <code data-copy="claude --plugin-dir ./meta-suite"><span class="pfx">claude</span> --plugin-dir ./meta-suite</code>
+            <button class="copybtn" type="button" aria-label="Copy command">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="meta">MIT © 2026 Manu</div>
+    <a class="repo" href="https://github.com/manutej/meta-suite" target="_blank" rel="noopener">github.com/manutej/meta-suite ↗</a>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Scroll reveal
+    var revealEls = document.querySelectorAll('.reveal');
+    if (reduce || !('IntersectionObserver' in window)) {
+      revealEls.forEach(function(el){ el.classList.add('in'); });
+    } else {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      revealEls.forEach(function(el){ io.observe(el); });
+    }
+
+    // Click to copy
+    function copy(text){
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      return new Promise(function(res){
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        try { document.execCommand('copy'); } catch(e){}
+        document.body.removeChild(ta); res();
+      });
+    }
+    document.querySelectorAll('.copyrow').forEach(function(row){
+      var code = row.querySelector('code');
+      var btn = row.querySelector('.copybtn');
+      var text = code.getAttribute('data-copy');
+      function doCopy(){
+        copy(text).then(function(){
+          var prev = btn.textContent;
+          btn.textContent = 'Copied'; btn.classList.add('copied');
+          setTimeout(function(){ btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
+        });
+      }
+      btn.addEventListener('click', doCopy);
+      code.addEventListener('click', doCopy);
+      code.style.cursor = 'pointer';
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+name: validate
+
+# meta-suite dogfoods its own bar: this gate keeps the plugin itself honest.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate manifests, skills, bundled tool, SVGs, and links
+        run: python scripts/validate.py

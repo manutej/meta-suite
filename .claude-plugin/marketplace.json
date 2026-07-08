@@ -1,0 +1,20 @@
+{
+  "name": "meta-suite",
+  "owner": { "name": "Manu", "email": "manutej@gmail.com" },
+  "description": "The meta-* family: task-agnostic scaffolds that make any project think, plan, design, build, compound, craft, review, research, and remember — one level up.",
+  "plugins": [
+    {
+      "name": "meta-suite",
+      "source": "./",
+      "displayName": "Meta-Suite",
+      "description": "Nine task-agnostic meta-skills that emit the reusable structure solving a whole category of work, not a single instance.",
+      "author": "Manu",
+      "version": "1.1.0",
+      "homepage": "https://github.com/manutej/meta-suite",
+      "license": "MIT",
+      "category": "productivity",
+      "tags": ["meta","scaffolding","planning","prompting","compounding","craft","research"],
+      "keywords": ["meta-prompting","meta-planning","meta-mvp","meta-compound","meta-craft","meta-review","meta-research","meta-context","meta-design"]
+    }
+  ]
+}
