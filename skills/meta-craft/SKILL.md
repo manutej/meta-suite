@@ -1,6 +1,17 @@
 ---
 name: meta-craft
-description: Apply the discipline of craft — building things that survive contact with reality and stay easy to change — to any project, and emit a project-specific craft constitution plus a Definition of Done. Use whenever someone wants work done to a senior standard rather than a quick-and-dirty one: "do this properly", "make it production-grade", "what's the craft standard here", "give me a definition of done", "review this for quality", "clear not clever", "avoid slop", "meta-craft", or "/meta-craft". Task-agnostic — works for code, writing, design, analysis, or operations. Produces a tailored set of craft rules, a slop-vs-craft contrast for the work at hand, and an evidence-based completion checklist, in plain language. Do NOT use for genuinely disposable throwaway work where polish has no value.
+description: >-
+  Apply the discipline of craft — building things that survive contact with reality and stay easy to
+  change — to any project, and emit a project-specific craft constitution plus a Definition of Done.
+  Use whenever someone wants work done to a senior standard rather than a quick-and-dirty one: "do
+  this properly", "make it production-grade", "what's the craft standard here", "give me a
+  definition of done", "review this for quality", "clear not clever", "avoid slop", "meta-craft", or
+  "/meta-craft". Task-agnostic — works for code, writing, design, analysis, or operations. Produces
+  a tailored set of craft rules, a slop-vs-craft contrast for the work at hand, and an
+  evidence-based completion checklist, in plain language. Do NOT use for genuinely disposable
+  throwaway work where polish has no value.
+metadata:
+  short-description: "Hold any work to a senior craft standard: a project-specific craft constitution, slop-vs-craft contrast, and evidence-based Definition of Done. Use for \"do this properly\", \"production-grade\"."
 ---
 
 # Meta-Craft

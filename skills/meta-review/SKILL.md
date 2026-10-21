@@ -1,6 +1,17 @@
 ---
 name: meta-review
-description: Derive the right set of review lenses for any deliverable and run an adversarial, multi-perspective review that returns prioritized findings plus a reusable lesson — so the same problem gets caught automatically next time. Use whenever someone wants something checked rigorously before it ships: "review this", "what's wrong with this", "tear this apart", "is this ready", "red-team this", "find the problems", "critique my plan/code/doc/design", "meta-review", or "/meta-review". Task-agnostic — works for code, writing, plans, designs, analyses, or decisions. Produces P1/P2/P3 findings with rationale, the author's blind-spot probes, an ordered fix list, and a durable lesson atom. Do NOT use to generate new content from scratch (use the relevant maker skill first, then review its output).
+description: >-
+  Derive the right set of review lenses for any deliverable and run an adversarial,
+  multi-perspective review that returns prioritized findings plus a reusable lesson — so the same
+  problem gets caught automatically next time. Use whenever someone wants something checked
+  rigorously before it ships: "review this", "what's wrong with this", "tear this apart", "is this
+  ready", "red-team this", "find the problems", "critique my plan/code/doc/design", "meta-review",
+  or "/meta-review". Task-agnostic — works for code, writing, plans, designs, analyses, or
+  decisions. Produces P1/P2/P3 findings with rationale, the author's blind-spot probes, an ordered
+  fix list, and a durable lesson atom. Do NOT use to generate new content from scratch (use the
+  relevant maker skill first, then review its output).
+metadata:
+  short-description: "Adversarial multi-lens review of any deliverable: P1/P2/P3 findings with rationale, blind-spot probes, an ordered fix list, and a reusable lesson. For \"review this\", \"is this ready\"."
 ---
 
 # Meta-Review

@@ -1,6 +1,17 @@
 ---
 name: meta-research
-description: Run a rigorous, task-agnostic research scaffold — decompose a question, fan out across sources, triage by credibility, cross-verify claims adversarially, and synthesize a cited answer with explicit confidence — then leave behind reusable knowledge atoms. Use whenever someone needs something investigated properly rather than answered off the cuff: "research X", "look into Y", "what's the latest on Z", "find sources for", "verify this claim", "compare these options with evidence", "deep dive", "meta-research", or "/meta-research". Task-agnostic across any subject. Produces a structured, sourced brief with confidence levels and open questions, plus 1-3 durable knowledge atoms for reuse. Do NOT use for questions answerable from common knowledge with no need for sources or verification.
+description: >-
+  Run a rigorous, task-agnostic research scaffold — decompose a question, fan out across sources,
+  triage by credibility, cross-verify claims adversarially, and synthesize a cited answer with
+  explicit confidence — then leave behind reusable knowledge atoms. Use whenever someone needs
+  something investigated properly rather than answered off the cuff: "research X", "look into Y",
+  "what's the latest on Z", "find sources for", "verify this claim", "compare these options with
+  evidence", "deep dive", "meta-research", or "/meta-research". Task-agnostic across any subject.
+  Produces a structured, sourced brief with confidence levels and open questions, plus 1-3 durable
+  knowledge atoms for reuse. Do NOT use for questions answerable from common knowledge with no need
+  for sources or verification.
+metadata:
+  short-description: "Research anything rigorously: decompose the question, triage sources, cross-verify claims, and return a cited brief with explicit confidence plus reusable knowledge atoms."
 ---
 
 # Meta-Research

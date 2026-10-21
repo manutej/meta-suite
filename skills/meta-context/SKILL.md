@@ -1,6 +1,17 @@
 ---
 name: meta-context
-description: Design the context strategy for a project or working session — what knowledge to keep, where it lives, what to load when, how to compress it, and how to hand it off — so work stays grounded and compounds across sessions instead of starting cold every time. Use whenever someone wants their setup to remember and reuse context: "set up memory for this project", "what context should the agent have", "stop re-explaining everything", "organize my project knowledge", "design a CLAUDE.md / context file", "session handoff", "context engineering", "meta-context", or "/meta-context". Task-agnostic. Produces a durable substrate plan, a load/compression policy, a persistence & handoff policy, a discoverability index, and a starter substrate scaffold — in plain language. Do NOT use for a one-off question with no project or continuity.
+description: >-
+  Design the context strategy for a project or working session — what knowledge to keep, where it
+  lives, what to load when, how to compress it, and how to hand it off — so work stays grounded and
+  compounds across sessions instead of starting cold every time. Use whenever someone wants their
+  setup to remember and reuse context: "set up memory for this project", "what context should the
+  agent have", "stop re-explaining everything", "organize my project knowledge", "design a CLAUDE.md
+  / context file", "session handoff", "context engineering", "meta-context", or "/meta-context".
+  Task-agnostic. Produces a durable substrate plan, a load/compression policy, a persistence &
+  handoff policy, a discoverability index, and a starter substrate scaffold — in plain language. Do
+  NOT use for a one-off question with no project or continuity.
+metadata:
+  short-description: "Design a project's context strategy: what to remember, where it lives, what to load when, how to compress and hand off, plus a starter memory scaffold so sessions never start cold."
 ---
 
 # Meta-Context

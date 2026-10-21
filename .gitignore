@@ -19,5 +19,5 @@ venv/
 
 # Dependency dirs / build output / deploy state
 node_modules/
-dist/
+# dist/ is committed on purpose: it holds the generated per-tool packages (scripts/package.py)
 .vercel/

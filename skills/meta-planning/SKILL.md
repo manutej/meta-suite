@@ -1,6 +1,18 @@
 ---
 name: meta-planning
-description: Generate a customized META-PLAN — a typed, example-agnostic planning scaffold — before any complete plan is written, for agentic tasks executed by one or many agents. Bridges /meta-prompting (generic tasks) to agentic planning (ultraplan-class capability). Use whenever the user wants to plan work that agents will execute, orchestrate subagents, decompose a complex build, decide what can run in parallel vs. in sequence, hand context-complete work packets to fresh agents, or asks for "meta-plan", "/meta-planning", "ultraplan", "plan the plan", "deep planning", "map the domain before planning", or "a plan another agent can execute without me". Also use when the input TASK is itself a meta-prompt (operating from meta-meta-prompt space), or when the user wants anti-slop quality gates and kaizen-style iterative execution baked into a plan. Do NOT use for simple single-agent to-do lists a direct plan would serve.
+description: >-
+  Generate a customized META-PLAN — a typed, example-agnostic planning scaffold — before any
+  complete plan is written, for agentic tasks executed by one or many agents. Bridges
+  /meta-prompting (generic tasks) to agentic planning (ultraplan-class capability). Use whenever the
+  user wants to plan work that agents will execute, orchestrate subagents, decompose a complex
+  build, decide what can run in parallel vs. in sequence, hand context-complete work packets to
+  fresh agents, or asks for "meta-plan", "/meta-planning", "ultraplan", "plan the plan", "deep
+  planning", "map the domain before planning", or "a plan another agent can execute without me".
+  Also use when the input TASK is itself a meta-prompt (operating from meta-meta-prompt space), or
+  when the user wants anti-slop quality gates and kaizen-style iterative execution baked into a
+  plan. Do NOT use for simple single-agent to-do lists a direct plan would serve.
+metadata:
+  short-description: "Write a meta-plan before the plan: a typed scaffold that agents can execute, with parallel vs sequential lanes, context-complete work packets, and quality gates. For multi-agent builds."
 ---
 
 > **Meta-Suite doctrine (overrides anything below).** Never ask the user clarifying questions —
