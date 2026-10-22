@@ -1,8 +1,8 @@
 # Compound Engineering — the compounding invariant for meta-plans
 
 > **Self-contained pointer.** The compounding map this plan-level invariant draws on
-> ships *inside this plugin* as the **`meta-compound`** skill
-> (`../meta-compound/SKILL.md` + `references/pillars.md`). Read that when the TASK is a
+> ships *inside this suite* as the **`meta-compound`** skill
+> (`../meta-compound/SKILL.md` + `references/pillars.md`, when the full suite is installed). Read that when the TASK is a
 > recurring capability; this file only states *why meta-planning cares* and *what to lift*.
 > (If the workspace also has a standalone `/compound` skill, it drives the same loop
 > interactively — but nothing here depends on it being installed.)

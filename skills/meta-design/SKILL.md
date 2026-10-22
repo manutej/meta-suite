@@ -1,6 +1,19 @@
 ---
 name: meta-design
-description: Derive a typed, medium-specific DESIGN SCHEMA from any design brief, then execute it into an audited, self-contained artifact plus the design system that generates it. Use whenever the user wants to design — but design rigorously and reusably rather than by imitation — teaching material, slides, animations, web pages, dashboards, or adjacent media. Triggers include "meta-design", "/meta-design", "derive a design system for X", "design schema", "build the system then all the instances", "make a design generator not a one-off", "audited design with WCAG predicates", "tokens + component library + composed artifact", or any request to map a brief into a structure-preserving design meta-prompt. This skill operates one level up: it emits the medium-specific schema that designs the whole category the brief belongs to, executes it through a render-and-verify loop, and refines via critique edit-scripts until convergence. Do NOT use for a single ad-hoc visual with no reuse and no audit requirement.
+description: >-
+  Derive a typed, medium-specific DESIGN SCHEMA from any design brief, then execute it into an
+  audited, self-contained artifact plus the design system that generates it. Use whenever the user
+  wants to design — but design rigorously and reusably rather than by imitation — teaching material,
+  slides, animations, web pages, dashboards, or adjacent media. Triggers include "meta-design",
+  "/meta-design", "derive a design system for X", "design schema", "build the system then all the
+  instances", "make a design generator not a one-off", "audited design with WCAG predicates",
+  "tokens + component library + composed artifact", or any request to map a brief into a
+  structure-preserving design meta-prompt. This skill operates one level up: it emits the
+  medium-specific schema that designs the whole category the brief belongs to, executes it through a
+  render-and-verify loop, and refines via critique edit-scripts until convergence. Do NOT use for a
+  single ad-hoc visual with no reuse and no audit requirement.
+metadata:
+  short-description: "Derive a typed design schema from any brief, then execute it into an audited, self-contained artifact plus the design system that generates it. For slides, pages, dashboards, animation."
 ---
 
 > **Meta-Suite doctrine (overrides anything below).** Never ask the user clarifying questions —

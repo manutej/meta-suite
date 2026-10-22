@@ -1,20 +1,19 @@
 ---
 name: meta-mvp
-description: >
-  Turn a minimal prompt — even one line — into a complete, WOW-grade deliverable bundle,
-  right-sized to the domain and scope: grounded research, a project vision, a reusable meta-prompt,
-  an execution plan, a grounded data model, and the production-quality artifacts that fit the work
-  (interactive dashboards for a data/pitch/ops product, a report or doc site, an API/spec, a
-  prototype — whatever the domain needs), plus an optional animated explainer with custom SVG.
-  Research-grounded, mobile-ready, and adapts on call to different business/domain needs. Use when
-  the user says meta-mvp, build an MVP or vision or prototype for something, go from this one-liner
-  to something I can show, make me the full pitch, or spin up a new project for a client. Resolves
-  its own scoping by default (never interrogates you — it studies the task's structure and, for
-  high-stakes ambiguity, cross-checks with a small agent panel) and asks only if you opt in.
-  Optionally composes meta-prompting, meta-planning, research-synthesis, user-research, dict-color
-  (bundled), bertin, editorial-dashboard, docs-dashboard, ceti-explainer, frontend-design, and
-  motion-media-l2 — and degrades gracefully without them. Do not use for a single fully-specified
-  one-off file, or pure question answering.
+description: >-
+  Turn a minimal prompt — even one line — into a complete, WOW-grade deliverable bundle right-sized
+  to the domain: grounded research, a project vision, a reusable meta-prompt, an execution plan, a
+  grounded data model, and the production-quality artifacts the work needs (interactive dashboards,
+  a report or doc site, an API/spec, a prototype), plus an optional animated SVG explainer.
+  Research-grounded and mobile-ready. Use when the user says meta-mvp, "build an MVP / vision /
+  prototype for X", "go from this one-liner to something I can show", "make me the full pitch", or
+  "spin up a new project for a client". Resolves its own scoping (never interrogates you; for
+  high-stakes ambiguity it cross-checks with a small agent panel). Optionally composes other
+  installed skills (meta-prompting, meta-planning, frontend-design, and similar) and degrades
+  gracefully without them. Do not use for a single fully-specified one-off file or pure question
+  answering.
+metadata:
+  short-description: "Turn a one-line idea into a full, research-grounded deliverable bundle: vision, meta-prompt, plan, data model, and production-quality artifacts such as dashboards, docs or a prototype."
 ---
 
 > **Meta-Suite doctrine (overrides anything below).** Never ask the user clarifying questions —
@@ -33,7 +32,7 @@ WOW effect from the first glance.
 > If sibling skills happen to be loaded you may also use them, but the bundled kits are the source of
 > truth — the result must be identical with or without them. **Read the kits; don't wing it from the
 > description.** Thin runs that skip the kits regress to generic output. A bundled palette tool ships
-> at `bin/dict_color.py` (stdlib-only) so the palette gate runs with no external install.
+> at `scripts/dict_color.py` in this skill's folder (stdlib-only) so the palette gate runs with no external install.
 
 ## The core move (do it, then hide it)
 A minimal prompt is an object; the bundle is its image under a structure-preserving map. Expand the
@@ -97,7 +96,7 @@ Full contracts in `references/pipeline.md`. The stages:
 6. **MODEL** — grounded entities; emit valid `seed_data.json`; gate sensitive facts out.
 7. **BUILD** — build the domain's surface artifact(s) (see "What it ships" + `dashboard-playbook.md`):
    dashboards via `templates/dashboard-skeleton.md`, explainer via `templates/ceti-engine.md`, or the
-   domain-appropriate artifact. Palette via bundled `bin/dict_color.py`; custom SVG; mobile.
+   domain-appropriate artifact. Palette via bundled `scripts/dict_color.py`; custom SVG; mobile.
 8. **VERIFY** — every gate in `references/quality-gates.md` passes. For high stakes, a verify sub-agent.
 9. **SHIP** — present in order; offer the appendix; offer a Vercel deploy only on explicit approval.
 

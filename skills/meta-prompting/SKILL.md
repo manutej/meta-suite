@@ -1,6 +1,18 @@
 ---
 name: meta-prompting
-description: Generate a structured, example-agnostic META-PROMPT from any input task — a reusable "how to think" scaffold rather than worked examples. Use this whenever the user wants to design a prompt/system prompt for a CATEGORY of tasks, build a prompt template or reasoning harness, turn a one-off prompt into a reusable structure, create an "expert persona" system prompt with typed slots, or apply Meta Prompting / Recursive Meta Prompting (RMP). Triggers include "write a meta-prompt", "design a system prompt for X tasks", "make a reusable prompt template", "prompt that works for any category of problem", "structure the reasoning for this task", "self-improving prompt", "functor/typed-slot prompt", or any request to map an input task into a valid meta-prompt. This skill maps the meta-meta-prompt space: given a task, it emits the meta-prompt that solves the whole category.
+description: >-
+  Generate a structured, example-agnostic META-PROMPT from any input task — a reusable "how to
+  think" scaffold rather than worked examples. Use this whenever the user wants to design a
+  prompt/system prompt for a CATEGORY of tasks, build a prompt template or reasoning harness, turn a
+  one-off prompt into a reusable structure, create an "expert persona" system prompt with typed
+  slots, or apply Meta Prompting / Recursive Meta Prompting (RMP). Triggers include "write a
+  meta-prompt", "design a system prompt for X tasks", "make a reusable prompt template", "prompt
+  that works for any category of problem", "structure the reasoning for this task", "self-improving
+  prompt", "functor/typed-slot prompt", or any request to map an input task into a valid
+  meta-prompt. This skill maps the meta-meta-prompt space: given a task, it emits the meta-prompt
+  that solves the whole category.
+metadata:
+  short-description: "Turn any task into a reusable, example-agnostic meta-prompt: a \"how to think\" scaffold with typed slots that solves the whole category. For system prompts, templates, reasoning harnesses."
 ---
 
 > **Meta-Suite doctrine (overrides anything below).** Never ask the user clarifying questions —

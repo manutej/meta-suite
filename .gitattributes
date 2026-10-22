@@ -1,0 +1,2 @@
+*.zip binary
+dist/** linguist-generated=true

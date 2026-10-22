@@ -1,6 +1,19 @@
 ---
 name: meta-compound
-description: Derive the core essential pillars that make any project COMPOUND — where each unit of work makes the next one easier instead of harder — and emit a concrete, task-agnostic compounding map for the project at hand. Use whenever someone wants work to accrue rather than decay: "make this project compound", "set up a system that gets faster over time", "where should I invest so future work is cheaper", "stop redoing the same work", "build a flywheel / leverage map", "turn lessons into reusable assets", "meta-compound", or "/meta-compound". Works for engineering, writing, design, research, ops, or any repeated effort. Produces a compounding loop, the durable anchors, the highest-leverage system investments, and the capture/retrieval/refresh policy — in plain language. Works even for a single high-stakes deliverable: compound the method, not just the artifact — leave behind a reusable template, checklist, or playbook for the next one like it. Do NOT use for a trivial one-off where no future work will ever resemble it.
+description: >-
+  Derive the core essential pillars that make any project COMPOUND — where each unit of work makes
+  the next one easier instead of harder — and emit a concrete, task-agnostic compounding map for the
+  project at hand. Use whenever someone wants work to accrue rather than decay: "make this project
+  compound", "set up a system that gets faster over time", "where should I invest so future work is
+  cheaper", "stop redoing the same work", "build a flywheel / leverage map", "turn lessons into
+  reusable assets", "meta-compound", or "/meta-compound". Works for engineering, writing, design,
+  research, ops, or any repeated effort. Produces a compounding loop, durable anchors, the
+  highest-leverage investments, and a capture/retrieval/refresh policy — in plain language. Works
+  even for a single high-stakes deliverable: compound the method, not just the artifact — leave
+  behind a reusable template, checklist, or playbook for the next one like it. Do NOT use for a
+  trivial one-off where no future work will ever resemble it.
+metadata:
+  short-description: "Make any project compound: map the loop, durable anchors and highest-leverage investments so each unit of work makes the next one easier. Use for flywheels, reuse, \"stop redoing work\"."
 ---
 
 # Meta-Compound

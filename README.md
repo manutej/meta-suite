@@ -18,7 +18,7 @@ Nine meta-skills that operate **one level up**: instead of doing the work, each 
 reusable structure the work follows. Think, plan, design, build, compound, craft, review, research,
 and remember — for any project.
 
-**[Install](#install) · [The nine skills](#the-nine-skills) · [How it fits together](#how-it-fits-together-the-meta-meta-space) · [Why meta-prompting](#why-meta-prompting) · [Design promises](#design-promises) · [Web page](landing/index.html)**
+**[Install](#install) · [Every tool](INSTALL.md) · [The nine skills](#the-nine-skills) · [How it fits together](#how-it-fits-together-the-meta-meta-space) · [Why meta-prompting](#why-meta-prompting) · [Design promises](#design-promises) · [Web page](landing/index.html)**
 
 </div>
 
@@ -41,20 +41,20 @@ for the next one.
 
 | Skill | Invoke | What it emits |
 |---|---|---|
-| **meta-prompting** | `/meta-prompting` | A reusable meta-prompt: *how to think* about a task category, not a worked example. |
-| **meta-planning** | `/meta-planning` | A meta-plan: the typed scaffold a fleet of agents executes — before the plan is written. |
-| **meta-design** | `/meta-design` | A medium-specific design schema, executed into an audited artifact plus the system that generates it. |
-| **meta-mvp** | `/meta-mvp` | A one-liner expanded into a full, research-grounded deliverable bundle. |
+| **meta-prompting** | `/meta-suite:meta-prompting` | A reusable meta-prompt: *how to think* about a task category, not a worked example. |
+| **meta-planning** | `/meta-suite:meta-planning` | A meta-plan: the typed scaffold a fleet of agents executes — before the plan is written. |
+| **meta-design** | `/meta-suite:meta-design` | A medium-specific design schema, executed into an audited artifact plus the system that generates it. |
+| **meta-mvp** | `/meta-suite:meta-mvp` | A one-liner expanded into a full, research-grounded deliverable bundle. |
 
 ### → The *keep* axis — good, durable, self-improving
 
 | Skill | Invoke | What it emits |
 |---|---|---|
-| **meta-compound** | `/meta-compound` | The compounding map: how each unit of work makes the next one easier, and where to invest first. |
-| **meta-craft** | `/meta-craft` | A tailored craft constitution + an evidence-based Definition of Done. |
-| **meta-review** | `/meta-review` | Adversarial multi-lens review: prioritized findings, blind-spot probes, a reusable lesson. |
-| **meta-research** | `/meta-research` | A rigorous, cross-verified, source-cited brief with explicit confidence + reusable knowledge atoms. |
-| **meta-context** | `/meta-context` | A context strategy + droppable-in memory scaffold so work compounds across sessions. |
+| **meta-compound** | `/meta-suite:meta-compound` | The compounding map: how each unit of work makes the next one easier, and where to invest first. |
+| **meta-craft** | `/meta-suite:meta-craft` | A tailored craft constitution + an evidence-based Definition of Done. |
+| **meta-review** | `/meta-suite:meta-review` | Adversarial multi-lens review: prioritized findings, blind-spot probes, a reusable lesson. |
+| **meta-research** | `/meta-suite:meta-research` | A rigorous, cross-verified, source-cited brief with explicit confidence + reusable knowledge atoms. |
+| **meta-context** | `/meta-suite:meta-context` | A context strategy + droppable-in memory scaffold so work compounds across sessions. |
 
 > Every skill is **task-agnostic**: the same scaffold works for engineering, writing, design,
 > research, and operations.
@@ -90,21 +90,27 @@ compounding feeds **context**, and richer context sharpens the next round of **t
 
 ## Install
 
-```bash
-# add this repo as a plugin marketplace, then install
+**Claude Code** (CLI, desktop, web, IDE). Run this inside a session:
+
+```
 /plugin marketplace add manutej/meta-suite
 /plugin install meta-suite@meta-suite
 ```
 
-Or point Claude Code at a local clone for development:
+Start a new session, then just describe what you want: each skill auto-triggers from its
+description. You can also invoke one directly with `/meta-suite:meta-review`, `/meta-suite:meta-mvp`,
+and so on (plugin skills are namespaced).
+
+**Codex, Cursor, Grok Build, Copilot, Gemini CLI, and others:** one command.
 
 ```bash
-git clone https://github.com/manutej/meta-suite
-claude --plugin-dir ./meta-suite
+npx skills add manutej/meta-suite --skill '*' -g -a codex -a cursor -a grok
 ```
 
-Then invoke any skill by name (`/meta-compound`, `/meta-review`, …) or just describe what you want —
-each skill auto-triggers on its description.
+**claude.ai / Claude Desktop, ChatGPT, Grok, and raw APIs** use the ready-made packages in
+[`dist/`](dist/): one zip per skill for upload, plus single-file prompts for tools without skills.
+
+**→ [INSTALL.md](INSTALL.md)** has exact steps for every tool, update instructions, and troubleshooting.
 
 ## Why meta-prompting
 
@@ -141,15 +147,16 @@ Every skill in meta-suite holds to four promises:
 ```
 meta-suite/
 ├── .claude-plugin/
-│   ├── plugin.json          # manifest (9 skills)
-│   └── marketplace.json     # marketplace entry
-├── skills/                  # the nine meta-* skills (SKILL.md + references/)
-├── bin/                     # dict_color.py — bundled stdlib palette tool (no install)
-├── scripts/                 # validate.py — repo integrity check (dogfoods the bar)
+│   ├── plugin.json          # Claude Code plugin manifest
+│   └── marketplace.json     # marketplace entry (/plugin marketplace add manutej/meta-suite)
+├── skills/                  # the nine meta-* skills (SKILL.md + references/) — the source of truth
+├── dist/                    # generated packages for every other tool (see INSTALL.md)
+├── scripts/                 # validate.py (integrity gate) · package.py (builds dist/)
 ├── .github/                 # hero asset + validate CI workflow
 ├── docs/                    # workflow diagrams (Excalidraw + SVG)
 ├── landing/                 # the project web page (index.html)
 ├── _archive/                # internal meta-plan & specs — PRUNABLE, safe to delete
+├── INSTALL.md               # per-tool install guide
 ├── README.md
 └── LICENSE
 ```

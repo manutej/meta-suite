@@ -14,14 +14,14 @@ One shared data model + one shared SVG icon set feed both; only the motion layer
 
 ## Palette (dict-color — bundled, stdlib-only)
 
-`bin/dict_color.py` ships inside this plugin; no install needed. Use `${CLAUDE_PLUGIN_ROOT}/bin/dict_color.py`
-(installed) or `./bin/dict_color.py` (local clone). Prefer a richer external dict-color tool if present;
+`scripts/dict_color.py` ships inside this skill; no install needed. Run it as `<skill-dir>/scripts/dict_color.py`,
+where `<skill-dir>` is the folder holding this skill's SKILL.md. Prefer a richer external dict-color tool if present;
 degrade gracefully (derive/audit by hand against the ≤12-core-colors rule) if the script can't be found.
 
-- Generate a palette: `python3 "${CLAUDE_PLUGIN_ROOT}/bin/dict_color.py" generate --mood <warm|earthy|dark|vivid|cool|mono|editorial> --size 4`.
+- Generate a palette: `python3 "<skill-dir>/scripts/dict_color.py" generate --mood <warm|earthy|dark|vivid|cool|mono|editorial> --size 4`.
 - Name the colors when you present (names carry intent).
 - If a real brand palette exists, use it; if you can't extract exact hex, derive + flag honestly.
-- Audit coherence: `python3 "${CLAUDE_PLUGIN_ROOT}/bin/dict_color.py" audit <file>.html --threshold 12` → expect PASS.
+- Audit coherence: `python3 "<skill-dir>/scripts/dict_color.py" audit <file>.html --threshold 12` → expect PASS.
 
 ## Encoding (/bertin)
 

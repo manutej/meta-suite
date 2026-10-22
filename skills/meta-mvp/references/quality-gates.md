@@ -21,9 +21,9 @@ narrative. Confirm `seed_data.json` parses and counts are right.
 
 ## 4 · Palette coherence (dict-color — bundled)
 ```
-# dict-color ships INSIDE this plugin (bin/dict_color.py), stdlib-only — no install needed.
-# $CLAUDE_PLUGIN_ROOT is set when installed as a plugin; from a local clone use ./bin/dict_color.py
-python3 "${CLAUDE_PLUGIN_ROOT}/bin/dict_color.py" audit FILE.html --threshold 12   # expect PASS (~90–100%)
+# dict-color ships INSIDE this skill (scripts/dict_color.py), stdlib-only — no install needed.
+# <skill-dir> = the folder holding this skill's SKILL.md (works in any agent, plugin or not)
+python3 "<skill-dir>/scripts/dict_color.py" audit FILE.html --threshold 12   # expect PASS (~90–100%)
 ```
 If a richer external dict-color tool is installed, prefer it. If the script can't be located,
 **degrade gracefully** (like meta-design does): check by hand that the file collapses onto ≤12
