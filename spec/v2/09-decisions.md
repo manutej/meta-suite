@@ -100,3 +100,11 @@ self-adaptation, VR-00 breadth, and the fidelity loop itself. The full results a
 | D-060 | 2026-10-29 | **Depth where nuance is made:** D1 insider probes per region, a stronger gather model for contested regions, and R2-lite in the standard tier. **Amends D-032.** | VR-03. Every atom verified, but nothing pushed toward insider knowledge. | D1, D2, R2 |
 | D-061 | 2026-10-29 | **v1 inventory** (`11-v1-inventory.md`): every v1 element is mapped to a v2.0 atom, a v2.x port, or dropped (none). It sets a port order and a plan B if Phase A is a no-go. **"Works best with Opus 5.5"** may be claimed only if Opus beats Sonnet and Haiku on M1 and M8. v1 stays the default install until v2.0 passes. M9 (human input) and M10 (speed) added. A1 takes the reasoning sequence as input. | VR-00, 23, 14, 07. | 11, 05, A1 |
 
+## Owner decisions on the open trade-offs (2026-10-29)
+
+| ID | Date | Decision | Why | Consequence |
+|---|---|---|---|---|
+| D-062 | 2026-10-29 | **Owner approved the port order in [v1 inventory](11-v1-inventory.md):** meta-lens first. Then review, prompting and mvp in v2.1, and design, planning, craft, compound and context in v2.2. v1 stays the default install meanwhile. | Signed off by the owner (VR-00 deviation accepted). | 11 |
+| D-063 | 2026-10-29 | **Owner chose: cross-run learning (playbook loading and domain memory) arrives in v2.1, after proof.** Only rules that pass a with/without test are used. In-run stage-boundary adaptation (D-057) stays in v2.0. | Signed off by the owner (VR-10/12 phasing accepted). | S2, parking lot |
+| D-064 | 2026-10-29 | **Owner chose depth as the default.** Standard tier is the default run, and the quick tier is one tap away. The speed criterion (D-059) still applies. | Signed off by the owner. | O1 default tier, I1 |
+
