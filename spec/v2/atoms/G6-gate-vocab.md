@@ -2,19 +2,26 @@
 
 **Purpose:** Enforce P1. The internal formal machinery never reaches the reader.
 
-**In:** user-facing text: artifact content, captions, and the final chat summary
-**Out:** a verdict plus the exact locations of any hits
+**Internal construct:** —
+
+**In:** all user-facing text: artifact content, captions and the chat summary
+**Out:** a verdict, plus the location of every hit
 
 **Contract**
-- The banned-term list lives in config and can be extended. It includes functor, morphism, pullback,
-  pushout, colimit, sheaf, operad, operadic, Yoneda, adjunction, adjoint, natural transformation,
-  monad and cohomology.
-- Matching is whole-word and case-insensitive.
-- The only exemption is a run where the user explicitly asked to see the internal view. The ledger
-  records that flag.
-- Domain-legitimate uses are allowed only through a per-run allowlist with a logged reason. For
-  example, a brief that is itself about category theory.
+- **Terms** (config: `gates.g6.terms`) are matched by stem or prefix, not whole word. "sheaf" also
+  catches "sheaves" and "functor" catches "functorial". The list covers:
+  - functor, morphism, pullback, pushout, colimit, cocone, sheaf, presheaf, stalk
+  - operad, Yoneda, adjunction/adjoint, natural transformation, monad, cohomology
+  - category theory
+- **Phrases** (config: `gates.g6.phrases`) catch paraphrases, for example "fails to commute",
+  "commuting square", "fibre product" and "gluing condition".
+- **Allowlist.** Only I1's `vocab_allowlist` can exempt a term, for a brief that is itself about
+  formal methods. The reason is logged.
+- **Internal-view exemption.** The other exemption is a user who explicitly asked for the internal
+  view. That flag is recorded in S1.
 
 **Check:** zero hits outside the allowlist.
 
 **Guards against:** jargon leaking into client deliverables.
+
+**Evidence:** —

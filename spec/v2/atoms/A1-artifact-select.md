@@ -1,32 +1,42 @@
 # A1 · artifact.select
 
-**Purpose:** Choose the artifact form. The question decides what kind of artifact it is; the shape
-of the domain graph decides how it is laid out.
+**Purpose:** Choose the artifact's form and layout. The question type(s) set the form, and the shape
+of the domain graph sets the layout.
 
-**In:** `Brief` (question type, medium if stated, audience), `DomainGraph` shape metrics, the
-artifact types available on the host
-**Out:** `ArtifactPlan`: form, layout and the host artifact type to use
+**Internal construct:** —
+
+**In:** `Brief` (question types, medium, audience), the merged graph's `shape_metrics`, and the
+host's available artifact types
+**Out:** `ArtifactPlan`
 
 **Contract**
+- **Default forms** (config: `artifact.forms`). These are defaults, not a closed list.
 
-| Question type | Default form |
-|---|---|
-| `profile` | Profile page: traits, what sets it apart, evidence |
-| `compare` | Decision workbench: side-by-side, tensions first |
-| `synthesize` | Atlas or report: structure follows the merged graph |
+  | Question type | Form |
+  |---|---|
+  | `profile` | profile page |
+  | `compare` | decision workbench, tensions first |
+  | `synthesize` | atlas or report |
 
-| Graph shape | Layout |
-|---|---|
-| hub-heavy | navigate from the hubs outward |
-| long chain | sequential narrative |
-| two-sided | split view |
-| time-dense | timeline spine |
+  With two question types, the form is a composite: the primary type's form, plus a section built
+  for the secondary type.
+- **Layout comes from the shape metrics**, using thresholds in config (`artifact.layout`):
 
-- A medium stated by the user always wins, for example "a deck."
-- Use a host artifact type when one fits (Docs, Slides, Dashboard, Design). A hand-built page is
-  the fallback.
-- The rules live in config, so new rows are added without code changes.
+  | Shape | Layout |
+  |---|---|
+  | high hub concentration | hub-first navigation |
+  | long chains | sequential narrative |
+  | two-sidedness | split view |
+  | temporal density | timeline spine |
 
-**Check:** the plan is schema-valid (G1). The chosen rule is logged.
+  Metrics can combine, for example a split view with a timeline spine.
+- **A stated medium always wins**, for example "a deck."
+- **Use a host artifact type when one fits.** A hand-built page is the fallback.
+- **Rules are data.** The chosen rule's id and a one-line rationale are logged. New rules are added
+  in config, never in code.
 
-**Guards against:** one template for every question.
+**Check:** G1 on the plan.
+
+**Guards against:** using one template for every question.
+
+**Evidence:** E10.

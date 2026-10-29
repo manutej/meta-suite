@@ -1,36 +1,26 @@
 # S2 · playbook.delta
 
-**Purpose:** Self-improvement without context collapse. Small learned rules accumulate, and none is
-trusted until it has been measured.
+**Purpose:** Capture candidate learned rules as small delta entries, so later versions can test and
+promote them. v2.0 records rules but never promotes them.
 
-**Internal construct:** a Writer-style accumulating edit log over the playbook.
+**Internal construct:** an accumulating edit log over the playbook, in the Writer style.
 
-**In:** completed runs (from S1), R1 edit scripts, gate failures
-**Out:** `PlaybookEntry` candidates, and promotions or demotions
+**In:** finished runs from S1, R1 edit scripts and gate failures
+**Out:** `PlaybookEntry` candidates at `1_observation`. An entry rises to `2_field_note` when it
+recurs in at least `playbook.recur_min` runs.
 
 **Contract**
-- A run proposes at most 3 entries. Each has a rule, a trigger (when it applies), and its evidence
-  runs.
-- Promotion through elevation levels:
+- **At most `playbook.max_per_run` proposals per run** (default 3). Each states a rule, the trigger
+  that fired it, and the runs that evidence it.
+- **The playbook only grows.** It changes by delta edits and is never rewritten wholesale.
+- **No promotion in v2.0.** Promotion to `3_shared_insight` or `4_canon` needs ablations at eval
+  scale, which belong to v2.1. Until then, entries are **not loaded** into run context.
+- **Off during eval.** Playbook writes are disabled and `playbook_hash` is recorded per run, so eval
+  runs stay independent of each other.
 
-  | Level | Requirement |
-  |---|---|
-  | `1_observation` | proposed by a run |
-  | `2_field_note` | recurs in at least N runs |
-  | `3_shared_insight` | a reviewer agrees |
-  | `4_canon` | an ablation on held-out briefs shows a gain and no regression |
+**Check:** G1. `meta playbook` has no promote command in v2.0.
 
-- An entry whose later ablation fails is demoted.
-- Only entries at level `3_shared_insight` or above are loaded into context, and only at stage
-  boundaries (P10). Nothing is swapped mid-stage.
-- The playbook is never rewritten wholesale. It changes only by delta edits.
-
-**Check:** `meta playbook promote` refuses to promote to `4_canon` without an attached ablation result.
-
-**Guards against:**
-- brevity bias
-- context collapse
-- self-generated rules that make things worse (self-generated skills averaged −1.3 points in
-  SkillsBench)
+**Guards against:** context collapse, and self-generated rules that make things worse without
+anyone noticing (−1.3 points in SkillsBench).
 
 **Evidence:** E15, E16, E17.

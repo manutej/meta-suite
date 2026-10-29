@@ -1,28 +1,33 @@
 # D2 · domain.gather
 
-**Purpose:** Collect local evidence, one subagent per region, running in parallel.
+**Purpose:** Collect local evidence with one subagent per region, running in parallel.
 
-**Internal construct:** local sections. Each claim is true only of the region and source it came from.
+**Internal construct:** local sections. Each claim holds only for its region and source.
 
-**In:** `Cover.regions[i]`, `relation_vocab`, tier settings
-**Out:** `Claim[]`, written only through `meta claim add`
+**In:** a region from `Cover`, `relation_vocab`, a stage token
+**Out:** `Claim[]`, appended to `claims/<agent>.jsonl` only through `meta claim add`
 
 **Contract**
-- Claims are written through the typed tool. Writes that fail the schema are rejected immediately,
-  with the error returned to the agent.
-- Every claim carries:
-  - a source locator, such as a URL or document reference. No long quotes.
-  - an `independence_key`, the publisher or origin.
-  - its region, agent, model and prompt hash.
-- The gather model tier is configurable: a fast, cheap model for gathering, top-tier models for
-  judging.
-- The agent searches; it does not summarize. Synthesis happens later, in L3.
-- A targeted re-gather can be triggered by L1, G4, R1 or R2 for a single region.
+- **Typed writes only.**
+  - `meta claim add` validates the claim (G1) and returns either a kernel-issued ULID or a schema
+    error the agent can act on.
+  - Run, region, agent, model and prompt hash come from the **kernel-issued stage token**
+    (`meta stage begin`). They are never typed in by the model.
+- **Every claim names its source.**
+  - A locator (URL or document reference). No long quotes.
+  - An `independence_key`: the publisher or origin.
+- **Model tier.** Configurable (`roles.gather`). The default is a fast, cheap model; judges use a
+  top-tier model.
+- **Gather is not synthesis.** No summarising; synthesis happens in L3.
+- **Targeted re-gather.** L1, R1 or R2 can trigger a re-gather of a single region. Re-entry to D2
+  is limited by `loop.d2_reentry_max`.
 
-**Check:** G1 at write time. G2 after the stage.
+**Check:** G1 at write time, then G2 after the stage. The kernel merges shards at the stage boundary.
 
-**Guards against:** hallucinated facts entering as global truth, citations that can't be traced,
-and context bloat in the main thread.
+**Guards against:**
+- hallucinated facts entering as global truth
+- citations that can't be traced
+- forged provenance
+- bloating the main thread's context
 
-**Evidence:** E9 (+27 F1 when the schema is enforced during construction), E22 (sub-agents for
-context hygiene).
+**Evidence:** E9, E22.

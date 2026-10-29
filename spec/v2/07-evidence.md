@@ -20,7 +20,7 @@ in their own papers are treated as hypotheses until the eval reproduces them.
 | E13 | Si, Yang, Hashimoto, [arXiv:2409.04109](https://arxiv.org/abs/2409.04109); *Ideation–Execution Gap*, [arXiv:2506.20803](https://arxiv.org/abs/2506.20803) | preprint | experts impressed at first glance, less so after execution; M3 SME panel |
 | E14 | Agrawal et al. — *GEPA*, [arXiv:2507.19457](https://arxiv.org/abs/2507.19457) | ICLR 2026 | improvement as a measured search loop with held-out sets |
 | E15 | Zhang et al. — *ACE: Agentic Context Engineering*, [arXiv:2510.04618](https://arxiv.org/abs/2510.04618) | ICLR 2026 | S2 delta edits; avoids brevity bias and context collapse |
-| E16 | Wang et al. — *Agent Workflow Memory*, [arXiv:2409.07429](https://arxiv.org/abs/2409.07429) | ICML 2025 | S2/S3 reusable workflows and residue |
+| E16 | Wang et al. — *Agent Workflow Memory*, [arXiv:2409.07429](https://arxiv.org/abs/2409.07429) | ICML 2025 | S2 reusable workflows; domain residue (parked to v2.1) |
 | E17 | Li et al. — *SkillsBench*, [arXiv:2602.12670](https://arxiv.org/abs/2602.12670) | NeurIPS 2026 | compact skills, 2–3 modules; self-generated skills −1.3 points without validation |
 | E18 | Meincke, Mollick et al. — *Prompting Science Report 2*, [arXiv:2506.07142](https://arxiv.org/abs/2506.07142) | report | P7: no chain-of-thought boilerplate for reasoning models |
 | E19 | Basil, Mollick et al. — *Prompting Science Report 4*, [arXiv:2512.05858](https://arxiv.org/abs/2512.05858) | report | P7: no accuracy personas |
@@ -29,7 +29,7 @@ in their own papers are treated as hypotheses until the eval reproduces them.
 | E22 | Anthropic — [Effective context engineering for AI agents](https://anthropic.com/engineering/effective-context-engineering-for-ai-agents) (2025) | guidance | right altitude, sub-agents, minimal high-signal tokens |
 | E23 | Anthropic — [Equipping agents with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (2025) | guidance | progressive disclosure; descriptions drive triggering |
 | E24 | Opsahl-Ong et al. — *MIPROv2*, [arXiv:2406.11695](https://arxiv.org/abs/2406.11695) | EMNLP 2024 | optimize instructions and examples jointly (v2.x) |
-| E25 | Suzgun et al. — *Dynamic Cheatsheet*, [arXiv:2504.07952](https://arxiv.org/abs/2504.07952) | preprint | S3 persistent memory; risk that wrong entries persist, hence S2 elevation |
+| E25 | Suzgun et al. — *Dynamic Cheatsheet*, [arXiv:2504.07952](https://arxiv.org/abs/2504.07952) | preprint | persistent memory (residue, parked); risk that wrong entries persist, hence no promotion in v2.0 |
 
 **Searched and not found:** the gluing construction attributed to Grant & Wang (CWRU), which
 `meta-score` is planned to build on. It could not be verified (see Q3).

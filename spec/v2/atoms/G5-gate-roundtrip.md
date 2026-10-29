@@ -2,18 +2,19 @@
 
 **Purpose:** Turn intent drift into a number with a threshold.
 
-**In:** `Brief`, `Brief'` (from I3)
-**Out:** a field-level agreement table, a `drift` score, and a verdict
+**Internal construct:** —
+
+**In:** `Brief`, `Brief'`
+**Out:** `DriftReport`
 
 **Contract**
-- **Exact fields:** `question_type` and `audience`.
-- **Semantic fields:** `objective` and each constraint. Each is judged k times by an LLM, and the
-  kernel aggregates.
-- Weights and the threshold live in config.
-- **If the gate fails:** return the per-field diff to I2. After 2 re-expands, proceed anyway and
-  log the residual drift as an assumption shown in the artifact.
+- **Exact-match field:** `question_types`.
+- **Semantic fields:** `audience`, `objective` and each constraint. Each is a J1 `judge` task.
+- **Configuration:** field weights and the threshold are set in config: `gates.g5.*`.
+- **On failure:** the per-field diff goes back to I2, within the limit of `intake.re_expand_max`
+  re-expands.
 
-**Check:** `drift ≤ threshold`.
+**Check:** `drift ≤ gates.g5.threshold`.
 
 **Guards against:** a beautifully executed answer to the wrong question.
 

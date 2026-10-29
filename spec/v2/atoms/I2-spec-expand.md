@@ -1,24 +1,23 @@
 # I2 · spec.expand
 
-**Purpose:** Expand an unfinished query into the fullest typed `Spec` that stays faithful to the
-user's intent: the methodology, slots, constraints and success criteria the rest of the run is
-held to.
+**Purpose:** Expand an unfinished query into the fullest typed `Spec` that stays faithful to it. The
+spec sets the methodology, slots, constraints and success criteria the rest of the run is held to.
 
-**Internal construct:** the expanding half of an adjunction (the free construction). I3 provides
-the compressing half, and G5 measures what the round trip lost.
+**Internal construct:** the expanding half of an adjunction (the free construction). I3 is the
+compressing half, and G5 measures what the round trip loses.
 
-**In:** `Brief`
-**Out:** `Spec` (content-hashed)
+**In:** `Brief`, and on a re-expand, a `DriftReport`
+**Out:** `Spec`, as JSON with a content hash. When shown to a model it is rendered as an XML contract.
 
 **Contract**
 - Every slot and constraint carries `origin` ∈ {`stated`, `inferred`, `default`}.
-- No domain facts go in the spec. Facts come only from D2 gather.
+- No domain facts go in the spec. Facts come only from D2.
 - Success criteria are checkable. Each names the finding kind or gate that will satisfy it.
-- The spec is an XML contract: typed slots, rules and success criteria, with no worked examples.
+- No worked examples of domain content.
 
 **Check:** G1. G5 runs after I3.
 
-**Guards against:** over-expansion (requirements the user never implied) and under-expansion
-(a vague target that lets the run drift).
+**Guards against:** over-expansion (requirements the user never implied) and under-expansion (a
+vague target that lets the run drift).
 
-**Evidence:** E1 (typed slots plus a validator), E22 (right altitude: expand intent, not boilerplate).
+**Evidence:** E1, E22.

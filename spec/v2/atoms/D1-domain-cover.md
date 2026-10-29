@@ -1,28 +1,26 @@
 # D1 · domain.cover
 
 **Purpose:** Decide how the domain is split up. The same split is reused for gathering, for
-recombining answers, and for checking consistency.
+recombining answers and for consistency checks.
 
 **Internal construct:**
-- An operadic decomposition tree: each sub-question has a typed answer slot, and a parent's answer
-  is composed from its children's.
-- An open cover of the domain by regions with overlaps, which is what makes gluing checkable.
+- An operadic decomposition tree: each node is a sub-question with a typed answer slot, and a
+  parent's answer is composed from its children's.
+- An open cover of the domain by overlapping regions, which is what makes gluing checkable.
 
 **In:** `Spec`
-**Out:** `Cover` (tree + regions) and an initial `relation_vocab[]`, the typed relation kinds for
-this domain.
+**Out:** `Cover`, containing the tree, regions, overlaps and `relation_vocab`
 
 **Contract**
-- Every pair of adjacent regions shares at least one object or sub-question. With no overlaps
-  there is nothing to glue, so G3 cannot run.
-- The region count is capped by the budget tier.
-- `relation_vocab` is a controlled vocabulary. D2 must use it, or propose an extension, which is
-  flagged and reviewed in D3.
-- No region is defined by naming a specific answer in advance.
+- **Overlaps.** Every pair of adjacent regions shares at least one tree node or expected object,
+  declared in `overlaps[]`.
+- **Region count.** At most `tiers.<tier>.max_regions`.
+- **Relation vocabulary.** `relation_vocab` is controlled. D2 must use it, or propose an extension;
+  D3 decides on extensions and logs the decision.
+- **No pre-written answers.** No region or node is defined by naming the answer it expects.
 
 **Check:** G1. The kernel verifies that the overlap graph is connected.
 
-**Guards against:** siloed research that can't be cross-checked, and relation sprawl (a hundred
-synonyms for "depends on").
+**Guards against:** siloed research that can't be cross-checked, and sprawling relation vocabularies.
 
-**Evidence:** E4, E5 (operadic decomposition), E9 (fixed schema at write time).
+**Evidence:** E4, E5, E9.

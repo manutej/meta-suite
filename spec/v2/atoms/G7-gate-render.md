@@ -1,29 +1,33 @@
 # G7 · gate.render
 
-**Purpose:** Every artifact must pass the accessibility and layout checks before it is shown (P11).
-The checks are carried over from v1 meta-design and made computable.
+**Purpose:** Every artifact passes computed accessibility and layout checks before it is shown (P11).
+
+**Internal construct:** —
 
 **In:** the artifact (HTML, SVG, or a host artifact type's data)
-**Out:** a predicate table with the computed values
-
-**Predicates**
-- **Contrast:** at least 4.5 for every text pair, or at least 3.0 for large text. Computed from the
-  resolved colours, not estimated.
-- **Headings:** nested strictly, and reading order matches source order.
-- **Interactive targets:** at least 24px, with 44px preferred.
-- **Motion:** a `prefers-reduced-motion` fallback exists, and nothing flashes more than 3 times per
-  second.
-- **Layout:** no horizontal overflow at 360px and at the declared breakpoints.
+**Out:** a predicate table with computed values, and a count of `unchecked` predicates
 
 **Contract**
-- Static predicates (contrast, headings, targets declared in CSS) are computed in Go by parsing the
-  HTML and CSS.
-- Overflow checks need a real render. Use a headless browser if one is present in the environment.
-  If not, mark the predicate `unchecked` rather than `pass`.
-- For host artifact types (docs, slides and similar), use the host's own checks where they exist,
-  and record which checks were not available.
+- **Contrast** is computed over the **declared colour-token pairs** (foreground/background tokens and
+  the components that use them). The default thresholds are 4.5, or 3.0 for large text
+  (config: `gates.g7.*`).
+  - On a hand-built page every text colour must come from a token, so contrast can **never** be
+    `unchecked`.
+  - On host artifact types, the host's own checks are used where they exist, and the gaps are
+    recorded.
+- **Static predicates** computed in Go:
+  - heading nesting
+  - reading order matching source order
+  - declared target sizes (default minimum 24px, 44px preferred)
+  - a `prefers-reduced-motion` fallback
+  - no flashing above 3 per second in declared animations
+- **Render predicates** (horizontal overflow at 360px and the declared breakpoints) run only when a
+  headless browser is present. Otherwise they are `unchecked`, never `pass`.
+- **Visibility.** The number of `unchecked` predicates appears in "how this was checked" and in the
+  ledger.
 
-**Check:** every predicate is `pass` or explicitly `unchecked`. None is `fail`.
+**Check:** no predicate is `fail`. Contrast is never `unchecked` on a hand-built page.
 
-**Open:** whether a headless browser is available in each surface's sandbox. This is resolved in
-the M0 spike.
+**Guards against:** inaccessible deliverables, and "looks fine to me."
+
+**Evidence:** —

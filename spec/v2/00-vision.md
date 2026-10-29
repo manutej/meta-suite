@@ -7,10 +7,11 @@ whose nuance makes domain experts lean in:
 - the tensions practitioners argue about
 - the exceptions only insiders know
 - the contested facts, named as contested
-- the second-order effects
+- the facts that rest on only one source, marked as such
 
-Every claim is sourced and every structural check ran as code. The whole run uses less human input
-and fewer tokens than a traditional harness.
+Every claim is sourced and every structural check ran as code. The run needs less human input than a
+traditional harness, and its cost is capped and measured. Second-order effects are a v2.1 goal
+(composition operator, see D-031).
 
 ## Why the category-theory lens is the core
 

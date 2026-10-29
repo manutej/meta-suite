@@ -1,32 +1,34 @@
 # G3 · gate.sheaf
 
-**Purpose:** Check whether the local claims form a single consistent global picture. Report exactly
-where they do not, axiom by axiom, and name the smallest sets of claims that cannot all be true.
+**Purpose:** Measure how well the local claims fit together where regions overlap, and name the
+claims that conflict.
 
-**Internal construct:** the sheaf axioms over the region cover:
-- **locality:** sections that agree on every region are equal
-- **gluing:** compatible local sections extend to a global one
+**Internal construct:** the sheaf conditions over the region cover, made operational for v2.0 as two
+computable measures:
+- **Gluing:** the overlap-conflict rate. It is the share of overlap keys that hold conflicting
+  claims from different regions.
+- **Coverage:** the uncovered-overlap count. It is the number of declared overlaps where one side
+  has no claims at all.
 
-**In:** claims, cover overlaps, and the conflict candidates from L2 and L3
-**Out:** a per-axiom report and `minimal_conflict_sets[]`. Each conflict becomes
+**In:** claims, `Cover.overlaps`, and conflict candidates from L2 and L3
+**Out:** the two measures, `ConflictEdge[]`, and conflict components. Each component becomes a
 `Finding[kind=obstruction]`.
 
 **Contract**
-- Whether two natural-language claims conflict is a semantic judgment. The LLM judges each pair k
-  times, and the kernel treats those judgments as data.
-- The kernel computes:
-  - a per-axiom pass/fail
-  - minimal conflicting subsets (sets that are jointly inconsistent, but each of whose proper
-    subsets is consistent)
-- Obstructions are **findings**, not run failures. In the artifact they become "contested."
-- The gate fails only if an obstruction is missing from the artifact, or is presented as settled.
+- **Blocking.** Candidate pairs are grouped by `(subject, relation)` key. Only pairs that share a key
+  are judged, up to `tiers.<tier>.g3_pair_cap`, ordered by how central the subject is in the graph.
+- **Each pair is a J1 `judge` task** with the verdict values `conflict`, `compatible` or
+  `unrelated`.
+- **Conflict components.** Connected components of the conflict edges.
+  - For v2.0 these replace minimal conflicting sets, since computing true minimal sets over natural
+    language costs exponentially many judgments.
+  - Conflicts among three or more claims that no pair reveals are out of scope for v2.0.
+- **Report only.** At stage 4, G3 writes its report and nothing else.
+- **Coverage verdict at stage 5.** G3 passes only if every obstruction is mapped in A2's
+  `section_map` to a section tagged `contested`.
 
-**Check:** the per-axiom report is written to S1. Each axiom is reported separately; there is no
-single blended score.
+**Check:** the stage-5 structural coverage check on `section_map`. Both measures are logged to S1.
 
-**Guards against:** smoothing over real disagreement, and a single "coherence score" that hides
-which kind of failure happened.
+**Guards against:** smoothing over real disagreement, and a single blended "coherence" score.
 
-**Evidence:** E6 (axioms fail separately), E7 (minimal conflicting sets), E8.
-
-**Open:** cost of pairwise judgments on large claim sets. The plan is to block by shared key first.
+**Evidence:** E6 (report conditions separately), E7 (conflict sets), E8.

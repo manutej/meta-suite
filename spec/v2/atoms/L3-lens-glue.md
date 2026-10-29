@@ -1,25 +1,31 @@
 # L3 · lens.glue
 
-**Purpose:** Combine local models, whether regions, literatures or frameworks, into one synthesis
-without silently treating different things as the same thing.
+**Purpose:** Merge the per-region subgraphs into one synthesis without silently conflating things.
+This is the **only** merge in the pipeline.
 
-**Internal construct:** a pushout, or a colimit in general. Merge only along a declared interface.
+**Internal construct:** a pushout (colimit in general), taken along declared interfaces.
 
-**In:** per-region subgraphs, `Cover` overlaps
-**Out:** merged `DomainGraph`, `interface[]`, obstruction candidates passed to G3, and a synthesis
-skeleton for A2
+**In:** `RegionGraph[]`, `Interface[]` candidates from D3, `Cover.overlaps`
+**Out:**
+- the merged `DomainGraph`
+- the accepted `Interface[]`
+- conflict candidates inside each interface, passed to G3
+- a synthesis skeleton for A2
 
 **Contract**
-- The kernel refuses any merge that has no declared interface: the objects and relations treated
-  as the same across regions.
-- Everything outside the interface stays separate, with its source attached.
-- Conflicts inside the interface become obstruction candidates. They are never averaged away.
-- The synthesis skeleton follows the shape of the merged structure, not a generic report template.
+- **No interface, no merge.** `meta interface merge` refuses any merge without a declared interface.
+- **Declaring an interface.** For each candidate from D3 the model either:
+  - accepts it, or
+  - edits it, with a reason.
 
-**Check:** G3 (gluing, per axiom).
+  Identifying two objects requires a J1 `judge` verdict.
+- **Outside the interface** everything stays separate and keeps its sources.
+- **Conflicts inside the interface** go to G3. They are never averaged.
+- **Always runs.** For `profile` and `compare` it merges along interfaces only. For `synthesize` the
+  skeleton follows the merged structure, not a stock report template.
 
-**Guards against:** drift by conflation, the most common failure of LLM synthesis, and
-"both-sides" mush.
+**Check:** the kernel refuses undeclared merges. G3 gets the conflicts.
 
-**Evidence:** E3 (colimit synthesizer), E7 (minimal conflicting sets), E11 and E12 (analysis depth
-is the gap).
+**Guards against:** drift through conflation, and "both sides" mush.
+
+**Evidence:** E3 (colimit synthesizer), E11, E12.

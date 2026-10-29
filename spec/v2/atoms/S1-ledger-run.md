@@ -1,26 +1,31 @@
 # S1 · ledger.run
 
-**Purpose:** An append-only record of each run. It is the substrate for evaluation, playbook
-learning and audit.
+**Purpose:** Keep an append-only record of each run. Evaluation, learning and audit all read from it.
 
-**In:** events from every stage
-**Out:** `runs/<run_id>/ledger.jsonl` and a `RunRecord` summary
+**Internal construct:** an accumulating edit and event log, in the Writer style.
+
+**In:** events from every stage, and judgments from J1
+**Out:** `runs/<run_id>/ledger.jsonl` and a `RunRecord`
 
 **Contract**
-- Each prompt is identified by a content hash. The same hash means the same prompt bytes.
-- Each run records:
-  - the model mapping per role (gather, judge, reviewer)
-  - the seed and the tier
-  - tokens and wall time per stage
-  - every gate verdict and report
-  - every edit script
-  - the user's internal-view flag
-- Append-only: corrections are new events, never rewrites.
-- Runs stay in the user's workspace. They are never committed to the public repo (P13).
+- **Prompts are identified by content hash.**
+- **Every `RunRecord` captures:**
+  - surface
+  - `kernel` flag (present or absent)
+  - model map
+  - `config_hash`, `schema_version`, `playbook_hash`
+  - seed and tier
+  - `usage`, with its source (`api`, `harness` or `estimated`)
+  - wall time per stage
+  - every gate verdict, judgment and edit script
+  - blind attestations
+  - the internal-view flag
+- **Append-only, under a file lock.** A correction is a new event.
+- **Runs stay in the user's workspace.** They are never committed. CI checks that `runs/` is
+  gitignored (P13).
 
 **Check:** G1 on every event.
 
-**Guards against:** irreproducible claims about what improved, and the question "which prompt
-version produced this?"
+**Guards against:** improvement claims nobody can reproduce, and "which prompt produced this?"
 
-**Evidence:** E1 (edit log as an accumulating record), E15.
+**Evidence:** E1, E15.

@@ -13,7 +13,7 @@ is a wish. Principles that have no gate say so.
 | P6 | No hardcoded domain content and no mocked data. Test fixtures are recorded from real runs. Thresholds live in config, not code. | code review + [G1](atoms/G1-gate-schema.md) |
 | P7 | Prompts are pitched at the right altitude: no personas or chain-of-thought boilerplate. Procedures are written as programs where possible. | prompt lint in CI (no gate yet; M1) |
 | P8 | Progressive disclosure: SKILL.md ≤ 500 words, and 2–3 modules loaded per run. Depth lives in nested folders. | CI word-count check (M1) |
-| P9 | Ask only when a wrong guess is expensive or irreversible. Otherwise state the assumption and proceed. | [O1](atoms/O1-loop-controller.md) |
+| P9 | Ask only under the single rule owned by O1: an assumption that is high-stakes **and** either expensive to redo or irreversible. Otherwise state the assumption and proceed. | [O1](atoms/O1-loop-controller.md) |
 | P10 | Refactor between stages, never mid-stage. Every prompt version is content-hashed and logged. | [S1](atoms/S1-ledger-run.md), [S2](atoms/S2-playbook-delta.md) |
 | P11 | Every artifact passes the accessibility gate before it is shown. | [G7](atoms/G7-gate-render.md) |
 | P12 | Show what the code did. Every artifact carries a plain-language "how this was checked" section built from the actual gate results. | [A2](atoms/A2-artifact-compose.md) |

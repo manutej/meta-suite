@@ -1,26 +1,31 @@
 # R1 · review.blind
 
-**Purpose:** An adversarial review by a critic that never saw the work being produced.
+**Purpose:** An adversarial review by a critic that never saw the work being made.
 
-**In:** the artifact, the `Spec`, findings, and gate reports. The critic gets **no** drafting trace,
-no chat history and no intermediate reasoning.
-**Out:** an `EditScript` only. The critic cannot edit anything.
+**Internal construct:** —
+
+**In:** the artifact, `Spec`, findings and gate reports. **No** drafting trace, chat or intermediate
+reasoning.
+**Out:** `EditScript` only. The critic cannot edit.
 
 **Contract**
-- The reviewer runs in a fresh context, on a different model family where one is configured. If it
-  falls back to the same family, that fallback is logged.
-- Each edit names `target_stage`, `target_id`, `op` and `rationale`, and is graded P1, P2 or P3.
-- Lenses the reviewer applies:
+- **Isolation.** Fresh subagent context, using the reviewer model from the role map
+  (`roles.reviewer`). On a surface without subagents the review is recorded `blind=false`.
+- **Product default.** The reviewer is the host's best model in a fresh context. The eval measures
+  this default configuration, not a cross-family reviewer that users would not have.
+- **Edits.** Each edit names `target_stage`, `target_id`, `op`, `rationale` and a priority from P1
+  to P3.
+- **Lenses:**
   - faithfulness to the spec
   - unsupported claims
-  - missing obvious expert concerns
+  - expert concerns that are missing
   - generic content that could fit any domain
   - findings stated with more certainty than their evidence supports
-- O1 applies the edits by routing back to the earliest stage they touch.
-- The review loop stops when there are no P1 or P2 edits, or when the tier's pass cap is reached.
+- **Stop rule.** The loop stops when there are no P1 or P2 edits, or when the pass cap
+  `tiers.<tier>.review_passes` is reached.
 
-**Check:** the edit script is schema-valid (G1), and the `blind: true` attestation is recorded in S1.
+**Check:** G1 on the edit script. The `blind` attestation is recorded in S1.
 
-**Guards against:** self-grading bias, and polish being mistaken for depth.
+**Guards against:** self-grading, and mistaking polish for depth.
 
 **Evidence:** E20, E21.
