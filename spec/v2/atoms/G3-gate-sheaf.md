@@ -51,7 +51,7 @@ triple overlaps), and conflict candidates from L2/L3
   D3's job. G3 does not report it as a separate axiom.
 
 **Check:** the stage-5 structural coverage check. Every layer's numeric output must match golden
-reports from the sheaf-core oracle within tolerance in CI (see [roadmap](../06-roadmap.md)).
+reports from the sheaf-core oracle within tolerance in `meta check` (see [roadmap](../06-roadmap.md)).
 
 **Guards against:**
 - smoothing over real disagreement

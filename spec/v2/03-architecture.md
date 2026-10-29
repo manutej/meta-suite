@@ -109,6 +109,17 @@ Where a surface exposes no usage data, the run records call counts and is labell
 | `RunRecord` | `run_id`, `brief_hash`, `tier`, `surface`, `kernel` ∈ {present, absent}, `model_map`, `prompt_hashes{}`, `config_hash`, `schema_version`, `playbook_hash`, `gate_results[]`, `usage` (source ∈ {api, harness, estimated}), `wall_ms`, `seed` |
 | `PlaybookEntry` | `id`, `rule`, `trigger`, `evidence_runs[]`, `elevation` ∈ {1_observation, 2_field_note} (v2.0) |
 
+## Opus-native execution (VR-06, D-059)
+
+- **Programmatic tool calling.** The model drives the kernel from a short script or loop (gather
+  shards, `meta sample run` batches, gate runs), not one chat turn per call.
+- **Batching.** Judgments are issued as n × k batches and run by one subagent each.
+- **Parallel by default.** Gather regions run concurrently.
+- **Caching.** Every op prompt has a stable prefix (contract + procedure) and a variable suffix (slots).
+- **Budgets per stage.** Token and wall-time budgets per stage come from the tier config.
+- **Logging.** Wall time and turn count are ledger fields (M10).
+- **Speed is a ship criterion** ([eval](05-eval.md)), not a hope.
+
 ## Kernel CLI (`meta`) → atoms
 
 | Command | Atom |
@@ -117,7 +128,7 @@ Where a surface exposes no usage data, the run records call counts and is labell
 | `meta validate <file>` | G1 |
 | `meta claim add` (stdin JSON; returns ULID or a schema error) | D2, G1 |
 | `meta stage begin <stage> [--region r]` → stage token (env) | O1 |
-| `meta sample issue \| record \| aggregate` | J1 |
+| `meta sample issue \| record \| aggregate \| run` (batch) | J1 |
 | `meta gate G2\|G3\|G4\|G5\|G6\|G7 <run_dir>` | gates |
 | `meta graph build \| shape <run_dir>` | D3 |
 | `meta interface declare \| merge <run_dir>` | L3 (refuses a merge without an interface) |
@@ -167,7 +178,7 @@ The capability matrix is resolved in the M0 spike:
 kernel/                       Go module: cmd/meta, internal/{schema,gates,ledger,loop,sample,graph,sheaf}
   schemas/*.json              core types (versioned)
   config/defaults.toml        every threshold, tier value, rule table and canonical-unit table (hashed per run)
-  internal/sheaf/             Go port of the sheaf-core graph subset, MIT (D-038, D-047); CI parity vs golden reports
+  internal/sheaf/             Go port of the sheaf-core graph subset, MIT (D-038, D-047); parity vs golden reports in `meta check`
   testdata/sheaf/             golden fixtures + oracle reports (`frontier-sheaf/v1`)
 skills/meta-lens/
   SKILL.md                    L0 trailhead, ≤500 words; step 0 = kernel probe

@@ -32,6 +32,8 @@ Any later change is logged as a decision and flagged in the report.
 | **v2** | `meta-lens`, standard tier |
 | **v2−lens** | v2 with L1, L3's interface discipline, L4, G4 and **all three G3 layers** off (see below) |
 | **v2-quick** | v2 at quick tier; a secondary row that roughly matches v1's cost |
+| **v2-adaptive** | v2 with stage-boundary adaptation **on** (D-057); every other arm freezes it |
+| **v1-mvp** | meta-suite 1.2.0 `meta-mvp`, native artifact. Used **only for M8**, so v2's artifact is compared with v1's most visible output |
 | **baseline** | same model, same tools, plain request |
 
 **What v2−lens keeps and loses:**
@@ -80,6 +82,9 @@ The two contrasts:
 | M5 | Contested-fact precision | The share of G3 obstructions a judge and an SME confirm as genuinely contested, reported **separately** for numeric-layer obstructions (layers 1–2) and judgment-layer obstructions (pairwise + layer 3) |
 | M6 | Cost | Dollars, tokens and wall time per run, from usage logs only. M1 points per dollar are also reported. |
 | M7 | Stability | Between-seed variance of M1 and M2 |
+| M8 | **Artifact first look** (VR-02) | **Rendered artifacts, not stripped**, compared side by side, blind to arm. A cross-family judge plus SMEs rate four things: "would forward to a client", "learned something in the first 60 seconds", visual hierarchy and clarity, and "looks like it was made by an expert". Compared against v1-mvp and v1's native artifacts. |
+| M9 | Human input per run (VR-14) | Count of clarifying questions, interventions and retries a user needed, logged by O1 |
+| M10 | Speed (VR-06) | p50 and p90 wall time and turns per run, from harness logs |
 
 ## Rubrics
 
@@ -108,11 +113,19 @@ only.
 2. **M2:** v2 is preferred over v1 in at least 60% of comparisons.
 3. **Lens:** v2 − v2−lens on M1 is greater than 0, with a pooled CI that excludes 0.
 4. **No regression:** no model shows v2 more than 5 points below v1 on M1.
-5. **Cost:** v2's median dollars per run is at most `eval.cost_multiplier_max` × v1's (the ceiling
+5. **Speed:** v2-quick p50 wall time ≤ v1's. v2 standard p50 ≤ `eval.wall_multiplier_max` × v1's (committed at M0).
+6. **Artifact:** v2 ≥ v1-mvp and ≥ v1 on M8 (pooled), with SMEs agreeing in direction.
+7. **Cost:** v2's median dollars per run is at most `eval.cost_multiplier_max` × v1's (the ceiling
    is 3×; the exact value is set from Phase A and committed before Phase B). M1 points per dollar
    for v2-quick is also reported against v1.
-6. **SME:** v2 beats v1 on M3 in a paired sign test. If fewer than 2 SMEs per domain could be
-   recruited, M3 is reported as a non-blocking signal, and that downgrade is logged as a decision.
+8. **SME:** v2 beats v1 on M3 in a paired sign test. If fewer than 2 SMEs per domain could be
+   recruited, M3 is reported as a non-blocking signal, but only with the owner's explicit sign-off, logged as a decision.
+
+## The "works best with Opus 5.5" claim (VR-23)
+
+- **v1 stays the default install** until v2.0 meets every ship criterion.
+- "Works best with Opus 5.5" may be said only if v2 on Opus beats v2 on Sonnet **and** on Haiku on M1 and M8, with pooled CIs that exclude 0.
+- Otherwise, the framing states the measured per-tier results ("strongest on X, good on Y"). No claim goes beyond the data.
 
 ## Outputs
 

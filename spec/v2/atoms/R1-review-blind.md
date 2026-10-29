@@ -15,6 +15,7 @@ reasoning.
   this default configuration, not a cross-family reviewer that users would not have.
 - **Edits.** Each edit names `target_stage`, `target_id`, `op`, `rationale` and a priority from P1
   to P3.
+- **The reviewer looks at the rendered artifact**, not only its text: a screenshot or page render where available. The first lens is: would an SME forward this, and does the reader learn something in the first 60 seconds?
 - **Lenses:**
   - faithfulness to the spec
   - unsupported claims

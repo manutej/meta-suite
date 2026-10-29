@@ -23,6 +23,7 @@ skeleton from L3
 - **Assumptions are shown,** including unsupported-type mappings and residual drift.
 - **"How this was checked"** is a plain-language section (P12) built only from the actual gate
   reports. It includes `unchecked` predicates and `kernel=absent` when they apply.
+- **Artifact bar (M8, D-056).** The key insight is visible on first view. The hierarchy makes the most important finding first in the visual order, not just in the text. The tone is expert, not generic. Exemplars are the owner's own ICP-grade artifacts, supplied locally and never committed (P13). A rendered first-look check by R1 is required before "done".
 - **Rendering** uses the host artifact type or the existing design skills, with the user's or
   host's design system. Nothing visual is hardcoded.
 

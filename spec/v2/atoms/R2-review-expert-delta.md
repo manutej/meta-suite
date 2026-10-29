@@ -10,7 +10,7 @@ the same model, with no lens, no gather and the quick budget.
 **Out:** `DeltaReport`
 
 **Contract**
-- **Runs only in the deep tier and in eval** (config: `tiers.<tier>.r2`). This keeps standard runs
+- **Full in the deep tier and in eval. R2-lite in the standard tier** (D-060): `review.r2.lite_max_findings` sampled findings, one baseline. Config: `tiers.<tier>.r2`. This keeps standard runs
   affordable.
 - **Fresh baseline every run.** The baseline is never cached across briefs.
 - **Eligible findings.** Only these kinds count:

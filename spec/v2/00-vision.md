@@ -9,7 +9,7 @@ whose nuance makes domain experts lean in:
 - the contested facts, named as contested
 - the facts that rest on only one source, marked as such
 
-Every claim is sourced and every structural check ran as code. The run needs less human input than a
+Every claim is sourced. Structural checks run as code, and semantic judgments are sampled and recorded (J1), so every verdict is auditable. The run needs less human input than a
 traditional harness, and its cost is capped and measured. Second-order effects are a v2.1 goal
 (composition operator, see D-031).
 
@@ -50,7 +50,7 @@ Evidence is in [evidence](07-evidence.md).
 
 | Horizon | Shape |
 |---|---|
-| **v2.0** | One new end-to-end pipeline skill on a shared Go kernel. It ships alongside the v1 skills and is measured against v1. |
+| **v2.0** | One new end-to-end pipeline skill on a shared Go kernel. It ships alongside the v1 skills and is measured against v1. The kernel (`meta`) is already the **harness core**: any agent can call its gates, ledger and sheaf check. |
 | **v2.x** | The v1 skills are ported onto the kernel as specialists behind `meta-lens`, which becomes the front door. More question types and operators come in from the parking lot. |
 | **v3** | A harness and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
 

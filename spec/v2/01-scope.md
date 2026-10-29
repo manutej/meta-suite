@@ -4,7 +4,7 @@
 
 - **One new pipeline skill, `meta-lens`** (D-036). It turns a rough query into a verified research
   view or artifact through five lanes: **Frame → Map → See → Make → Check** (D-037). The user
-  picks only the question; the lanes run on their own.
+  only types a question; the question type is inferred (I1), and the lanes run on their own.
 - **Three question types.** A brief can carry one or two of them; with two, the operator sets are
   combined.
 
@@ -26,12 +26,13 @@
 
 ## Not in v2.0
 
-- **Porting the nine v1 skills.** They stay as they are until v2.0 passes its eval.
+- **Porting the other v1 skills.** Every v1 element is mapped in the [v1 inventory](11-v1-inventory.md), with a port order and a plan B. v1 stays the default install until v2.0 passes its eval.
 - **v2 in the non-Claude bundles** (`dist/` for ChatGPT, Grok and plain-prompt hosts).
 - **Product and service layers:** Stitch integration, watch mode and alerting, a hosted service, a
   public API.
-- **Swapping prompts mid-stage.** Promoting playbook entries or loading them into context.
-- **Rust in the shipped kernel.** Rust is used only as the test oracle (sheaf-core, D-038). New question types (`path`, `tradeoff`, `analogy`, `monitor`).
+- **Swapping prompts mid-stage.** Adaptation happens at stage boundaries (D-057).
+- **Rust in the shipped kernel.** Rust is used only as the test oracle (sheaf-core, D-038).
+- **New question types** (`path`, `tradeoff`, `analogy`, `monitor`).
 - **Custom UI** beyond the host's artifact types and the existing design skills.
 - **`meta-score` integration**, until its source is verified.
 - **Articles and marketing collateral.** These are a separate track that uses this spec as input.

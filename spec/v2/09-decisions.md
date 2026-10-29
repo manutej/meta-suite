@@ -50,7 +50,7 @@ Every P1 finding was accepted. The P2 and P3 findings were accepted except where
 | D-034 | 2026-10-29 | JSON is the canonical format for every typed object. XML is used only to render contracts inside prompts. | I2 and G1 disagreed on the format. | 03, I2 |
 | D-035 | 2026-10-29 | **Supersedes D-015.** Thresholds, briefs and rubrics freeze at **M0** as the hashed config plus `evals/sealed/`. | Pre-registration was dated inconsistently across the spec. | 05, 06 |
 | D-036 | 2026-10-29 | **The pipeline skill is named `meta-lens`.** `meta-atlas` and `meta-forge` were rejected. | The name says what sets the skill apart (how it sees). The rejected names collide with existing skills (`/atlas`, the Forge plugins) and emphasize the output instead. | Q2 closed |
-| D-037 | 2026-10-29 | **Five user-facing lanes inside the one skill: Frame → Map → See → Make → Check.** The lanes are stages, not separate skills. The user picks only the question type. When the v1 skills are ported (v2.x), they become specialists behind `meta-lens` as the front door. | Keeps the plugin simple to use, and lets the internal structure be explained in plain words. | 03 lane column, 04 lane map |
+| D-037 | 2026-10-29 | **Five user-facing lanes inside the one skill: Frame → Map → See → Make → Check.** The lanes are stages, not separate skills. The user only types a question; the type is inferred by I1. When the v1 skills are ported (v2.x), they become specialists behind `meta-lens` as the front door. | Keeps the plugin simple to use, and lets the internal structure be explained in plain words. | 03 lane column, 04 lane map |
 
 ## Review round 2: sheaf-core integration audit (2026-10-29)
 
@@ -81,3 +81,22 @@ tested sheaf code.
 | D-052 | 2026-10-29 | **Local checks are the gate; remote CI is an asynchronous witness.** `meta check` runs in seconds and is what agents run before every push, so it is the gate that blocks progress. GitHub CI is **optional**: it runs the same command on PRs and merges as independent, non-self-reported evidence, with `continue-on-error`. It is never a required status check and never blocks a merge or an agent's iteration loop. Cross-builds also run locally. | Remote CI is too slow for an agentic build loop, but the only evidence an agent can't fake is a check it didn't run itself. | 06 M1; supersedes "CI checks" wording elsewhere |
 | D-053 | 2026-10-29 | **P14 plug and play.** End users never see setup: there is no terminal, keys, config or git, and degraded mode still delivers the artifact. M4's exit gate includes a first-run test by a non-technical person. Probes, tags and parity tests are maintainer-only. | meta-suite's audience includes non-technical professionals; it is a lead magnet. | P14, M4 |
 | D-054 | 2026-10-29 | **Q1 resolved for the Claude app.** Installed plugins land in a writable folder that keeps exec bits, and they are not mounted noexec. `meta-probe` passed there with exec bits stripped, and on a read-only mount through the temp-copy fallback. A fresh **Haiku** agent following only SKILL.md also passed every step with no help (plug-and-play evidence for P14). Still open: Cowork desktop and a real Mac. | Spike evidence from 2026-10-29. | 03 surface matrix, Q1 |
+
+## Cross-tier fidelity review round 1 (2026-10-29)
+
+Opus, Sonnet and Haiku reviewers, blind to each other, audited the spec against the
+[vision ledger](10-vision-ledger.md). **All three returned "drifting, recoverable."** The engine is
+faithful, but the product the owner described was under-served: artifact quality, speed,
+self-adaptation, VR-00 breadth, and the fidelity loop itself. The full results are in
+[reviews/2026-10-29-fidelity-r1.md](reviews/2026-10-29-fidelity-r1.md).
+
+| ID | Date | Decision | Why | Consequence |
+|---|---|---|---|---|
+| D-055 | 2026-10-29 | **Cross-tier fidelity review at every milestone exit.** Opus, Sonnet and Haiku, blind to each other, audit the spec and the build against the vision ledger. Any VR `missing` or `contradicted` blocks the exit unless the owner signs off. Results are saved in `reviews/`. | VR-22. The ledger cited this decision before it existed, and all three reviewers flagged that. | 06 exit gates |
+| D-056 | 2026-10-29 | **The artifact is measured and gated.** M8 is a first-look rating of the rendered artifact against v1-mvp and v1. A2 has an artifact bar using the owner's exemplars, and R1 reviews the rendered output. Ship criterion 6 is "v2 ≥ v1-mvp on M8". | VR-02/03. Text-only grading (D-020) could not see "stunning". D-020 is kept for M1. | 05, A2, R1, P11 |
+| D-057 | 2026-10-29 | **Amends D-005: adapt during the run at stage boundaries.** O1 rewrites the next stage's prompt from edit scripts and gate results. Each version is hashed and logged, never mid-stage. Frozen in eval except in a `v2-adaptive` arm. | VR-10/08. The eval-hygiene reason only applies to eval arms. | P10, O1, 05 |
+| D-058 | 2026-10-29 | **Walking skeleton at M2.** One dev brief runs Frame → Map → Make → Check end to end with a real rendered artifact, published for the owner. | VR-24. The first visible output came too late (M4). | 06 M2 |
+| D-059 | 2026-10-29 | **Opus-native execution:** programmatic tool-calling loops, batched J1 (`meta sample run`), prompt caching, per-stage budgets, and wall time and turns in the ledger. **Speed is a ship criterion** (v2-quick ≤ v1 p50). | VR-06. Speed had gone backwards and was unmeasured. | 03, J1, 05 |
+| D-060 | 2026-10-29 | **Depth where nuance is made:** D1 insider probes per region, a stronger gather model for contested regions, and R2-lite in the standard tier. **Amends D-032.** | VR-03. Every atom verified, but nothing pushed toward insider knowledge. | D1, D2, R2 |
+| D-061 | 2026-10-29 | **v1 inventory** (`11-v1-inventory.md`): every v1 element is mapped to a v2.0 atom, a v2.x port, or dropped (none). It sets a port order and a plan B if Phase A is a no-go. **"Works best with Opus 5.5"** may be claimed only if Opus beats Sonnet and Haiku on M1 and M8. v1 stays the default install until v2.0 passes. M9 (human input) and M10 (speed) added. A1 takes the reasoning sequence as input. | VR-00, 23, 14, 07. | 11, 05, A1 |
+

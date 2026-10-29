@@ -17,7 +17,7 @@ to the reader.
 | L1 | deciding *what* and *why* | [vision](00-vision.md) · [scope](01-scope.md) · [principles](02-principles.md) |
 | L2 | deciding *how* | [architecture](03-architecture.md) · [atom index](04-atoms.md) |
 | L3 | building one piece | [`atoms/`](atoms/): one file per atom, each a typed contract |
-| L4 | proving it works, or auditing why | [eval](05-eval.md) · [roadmap](06-roadmap.md) · [evidence](07-evidence.md) · [open questions](08-open-questions.md) · [decisions](09-decisions.md) |
+| L4 | proving it works, or auditing why | [eval](05-eval.md) · [roadmap](06-roadmap.md) · [evidence](07-evidence.md) · [open questions](08-open-questions.md) · [decisions](09-decisions.md) · [**vision ledger**](10-vision-ledger.md) · [v1 inventory](11-v1-inventory.md) · [reviews](reviews/) |
 
 ## Scope fence (anti-creep)
 
@@ -34,4 +34,5 @@ to the reader.
 | v0.1 | Drafted from the design conversation of 2026-10-29. |
 | v0.2 | Blind review round 1: two independent critics, one on scope and coherence, one on feasibility and eval validity. All P1 findings were applied, recorded as D-017 to D-035. |
 | v0.3 | Round 2: an independent audit against the working sheaf-core repo (70/70 tests, toy proof, Go port parity 11/11). G3 gets three real sheaf layers. L3 coherence, the D1 covering condition and Claim units were added (D-038 to D-046). |
-| next | Fold in the M0 spike results, then freeze as **spec 1.0** at M0 exit. |
+| v0.4 | M0 spike, MIT sheaf subset, plug and play (D-047 to D-054). The **vision ledger** was added, and the first **cross-tier fidelity review** (Opus, Sonnet, Haiku) all said "drifting". D-055 to D-061 apply the fixes: artifact measured and gated, speed criterion, in-run adaptation, walking skeleton, v1 inventory. |
+| next | Owner decisions on open trade-offs, fidelity review round 2, then freeze as **spec 1.0** at M0 exit. |

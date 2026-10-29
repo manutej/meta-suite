@@ -22,6 +22,8 @@ the model doesn't.
   continue. I1 and every other atom defer to this rule.
 - **Stage tokens.** Each stage gets a token that stamps run, stage, region, agent, model and prompt
   hash onto everything written during that stage.
+- **Stage-boundary adaptation (D-057).** In product runs, before each stage starts, O1 can rewrite that stage's op prompt from the edit scripts and gate results so far. The rewrite is a new content-hashed version, and the diff is logged. It never happens mid-stage. In eval arms adaptation is frozen, except in `v2-adaptive`.
+- **Human-input log (M9).** Every `ask_user`, user interruption and retry is counted in S1.
 - **Early exit.** When every gate passes and the edit script is empty, the run is done.
 - **Hitting a cap.** Ship the best artifact so far, with the open issues listed under "how this was
   checked."
