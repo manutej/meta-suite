@@ -17,6 +17,7 @@ is a wish. Principles that have no gate say so.
 | P10 | Refactor between stages, never mid-stage. Every prompt version is content-hashed and logged. | [S1](atoms/S1-ledger-run.md), [S2](atoms/S2-playbook-delta.md) |
 | P11 | Every artifact passes the accessibility gate before it is shown. | [G7](atoms/G7-gate-render.md) |
 | P12 | Show what the code did. Every artifact carries a plain-language "how this was checked" section built from the actual gate results. | [A2](atoms/A2-artifact-compose.md) |
+| P14 | **Plug and play for non-technical users.** Install is one action (add the plugin, or upload one zip). There is no terminal, no keys, no config and no git. The user types a question and gets the artifact. The kernel, gates and binaries are invisible. If the kernel can't run, the user still gets the artifact, with a plain note that some checks didn't run. All setup and verification steps belong to the maintainer, never the user. | M4 exit: a first-run test by a non-technical person (D-053) |
 | P13 | Nothing client-identifying goes in the public repo. Eval domains are public. | review checklist |
 
 ## Working with a model that hallucinates, drifts and is non-deterministic
