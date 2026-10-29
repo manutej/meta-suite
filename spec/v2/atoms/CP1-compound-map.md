@@ -2,13 +2,13 @@
 
 **Purpose:** Show how this project's work can make the next unit of work cheaper: what to capture, where it lives, how it is retrieved and refreshed.
 
-**Internal construct:** —
+**Internal construct:** compounding as structure carried over between successive units of work; an investment is judged by what it preserves across units (a composition check).
 
 **In:** `Spec`, plus optionally S1 ledgers from past runs
 **Out:** `CompoundMap`: the loop, the durable anchors, the highest-leverage investments, and the capture/retrieve/refresh policy
 
 **Contract**
-- Every investment names the repeated cost it removes and how the saving will be measured.
+- Every investment names the repeated cost it removes, the structure it carries over to the next unit, and how the saving will be measured.
 - It points at S2 and the playbook for capture. Loading learned material across runs waits for v2.1 (D-063).
 - **Modes:** deep by default; `--fast` loads only the core op (D-066).
 

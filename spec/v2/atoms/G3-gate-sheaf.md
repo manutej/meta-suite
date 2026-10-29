@@ -32,7 +32,7 @@ triple overlaps), and conflict candidates from L2/L3
 
 **Contract**
 - **Pairwise candidates.**
-  - Blocked by the (subject, relation) key, up to `tiers.<tier>.g3_pair_cap`.
+  - Blocked by the (subject, relation) key, up to `modes.<mode>.g3_pair_cap`.
   - Each pair is a J1 `judge` task with the verdict values `conflict`, `compatible` or `unrelated`.
     Vote counts are kept.
   - Coverage is reported as `judged_pairs / candidate_pairs`. When the cap bites, pairs are sampled

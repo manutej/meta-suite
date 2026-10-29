@@ -15,8 +15,9 @@
   - category theory, harmonic, Laplacian, nerve, cochain, H0/H1 (as tokens)
 - **Phrases** (config: `gates.g6.phrases`) catch paraphrases, for example "fails to commute",
   "commuting square", "fibre product" and "gluing condition".
-- **Allowlist.** Only I1's `vocab_allowlist` can exempt a term, for a brief that is itself about
-  formal methods. The reason is logged.
+- **Allowlist.** Only I1's `vocab_allowlist` can exempt a term: a per-brief entry derived from the
+  Spec's domain vocabulary (for example "harmonic" in a music brief), or a formal term in a brief that
+  is itself about formal methods. Each exemption's reason is logged.
 - **Internal-view exemption.** The other exemption is a user who explicitly asked for the internal
   view. That flag is recorded in S1.
 

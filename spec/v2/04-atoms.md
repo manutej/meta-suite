@@ -36,9 +36,9 @@ skill ([suite map](11-suite.md)).
 | [G4](atoms/G4-gate-operadic.md) | gate.operadic | kernel | gate G4 | M3 | Composed vs collapsed answers disagree = uncertainty (advisory in v2.0) |
 | [G5](atoms/G5-gate-roundtrip.md) | gate.roundtrip | kernel | gate G5 | M2 | Drift between original and reconstructed intent |
 | [G6](atoms/G6-gate-vocab.md) | gate.vocab | kernel | gate G6 | M1 | No internal formal vocabulary reaches the reader |
-| [G7](atoms/G7-gate-render.md) | gate.render | kernel | gate G7 | M4 | Accessibility and layout predicates, computed |
+| [G7](atoms/G7-gate-render.md) | gate.render | kernel | gate G7 | M4 | Accessibility, layout and rubric machine checks, computed |
 | [R1](atoms/R1-review-blind.md) | review.blind | operator | stage | M4 | Fresh-context critic; outputs only an edit script |
-| [R2](atoms/R2-review-expert-delta.md) | review.expert_delta | operator→kernel | delta, sample | M4 | Sourced insights a plain answer misses (deep tier + eval) |
+| [R2](atoms/R2-review-expert-delta.md) | review.expert_delta | operator→kernel | delta, sample | M4 | Sourced insights a plain answer misses (deep mode + eval) |
 | [A1](atoms/A1-artifact-select.md) | artifact.select | operator→kernel | validate | M4 | Question type(s) × graph shape × medium → form + layout |
 | [A2](atoms/A2-artifact-compose.md) | artifact.compose | operator | gate G6/G7 | M4 | Domain structure → artifact structure; "how this was checked" |
 | [S1](atoms/S1-ledger-run.md) | ledger.run | kernel | ledger | M1 | Append-only run record: hashes, usage, verdicts |
@@ -51,15 +51,15 @@ The parked domain-residue atom (formerly S3) is in the [parking lot](01-scope.md
 
 | ID | Atom | Skill | Layer | M | One line |
 |---|---|---|---|---|---|
-| [P1](atoms/P1-prompt-generate.md) | prompt.generate | meta-prompting | operator | M4b | Task → example-agnostic meta-prompt for the whole category |
-| [P2](atoms/P2-prompt-sibling-test.md) | prompt.sibling_test | meta-prompting | operator→kernel | M4b | Proves the meta-prompt on unseen sibling instances |
-| [PL1](atoms/PL1-plan-packets.md) | plan.packets | meta-planning | operator | M4b | Context-complete work packets with checkable done-criteria |
-| [PL2](atoms/PL2-gate-plan-dag.md) | gate.plan_dag | meta-planning | kernel | M4b | Acyclic, no orphan inputs; parallel groups computed |
-| [DS1](atoms/DS1-design-schema.md) | design.schema | meta-design | operator→kernel | M4b | Design system first, every instance generated from it |
-| [MV1](atoms/MV1-bundle-compose.md) | bundle.compose | meta-mvp | operator→kernel | M4b | One-liner → right-sized bundle from suite recipes, types checked |
-| [CR1](atoms/CR1-craft-dod.md) | craft.dod | meta-craft | operator | M4b | Project-specific constitution; every DoD item names its check |
-| [CP1](atoms/CP1-compound-map.md) | compound.map | meta-compound | operator | M4b | What to capture, reuse and refresh, with measurable savings |
-| [CX1](atoms/CX1-context-scaffold.md) | context.scaffold | meta-context | operator | M4b | Context strategy + droppable L0–L4 substrate |
+| [P1](atoms/P1-prompt-generate.md) | prompt.generate | meta-prompting | operator | M5b | Task → example-agnostic meta-prompt for the whole category |
+| [P2](atoms/P2-prompt-sibling-test.md) | prompt.sibling_test | meta-prompting | operator→kernel | M5b | Proves the meta-prompt on unseen sibling instances |
+| [PL1](atoms/PL1-plan-packets.md) | plan.packets | meta-planning | operator | M5b | Context-complete work packets with checkable done-criteria |
+| [PL2](atoms/PL2-gate-plan-dag.md) | gate.plan_dag | meta-planning | kernel | M5b | Acyclic, no orphan inputs; parallel groups computed |
+| [DS1](atoms/DS1-design-schema.md) | design.schema | meta-design | operator→kernel | M5b | Design system first, every instance generated from it |
+| [MV1](atoms/MV1-bundle-compose.md) | bundle.compose | meta-mvp | operator→kernel | M5b | One-liner → right-sized bundle from suite recipes, types checked |
+| [CR1](atoms/CR1-craft-dod.md) | craft.dod | meta-craft | operator | M5b | Project-specific constitution; every DoD item names its check |
+| [CP1](atoms/CP1-compound-map.md) | compound.map | meta-compound | operator | M5b | What to capture, reuse and refresh, with measurable savings |
+| [CX1](atoms/CX1-context-scaffold.md) | context.scaffold | meta-context | operator | M5b | Context strategy + droppable L0–L4 substrate |
 
 ## Lane map (D-037)
 

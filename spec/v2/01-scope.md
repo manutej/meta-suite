@@ -18,19 +18,20 @@
 - **Two modes for every skill:** deep (default) and `--fast` (D-066).
 - **An artifact rubric** whose minimum bar is the owner's recent work ([rubric](12-artifact-rubric.md), D-067).
 - **A shared Go kernel**, shipped as a single static `meta` binary for 5 platforms. It owns schemas,
-  gates, judgment sampling, the ledger and the loop controller. It holds no model credentials.
+  gates, judgment sampling, the ledger and the loop controller. It holds no model credentials. v2.0
+  ships the `meta` CLI as an agent-callable harness core; a stable public API/SDK is v3.
 - **Degraded mode** when the binary can't run: every gate is reported `unchecked`, and no verdict is
   ever simulated.
 - **A progressive-disclosure layout** inside the skill folder (L0–L4).
-- **A pre-registered evaluation:** v1 vs v2 vs v2-without-lens vs v2-quick vs a plain baseline,
-  across models.
+- **A pre-registered evaluation:** v1 vs v2 vs its ablations (v2-frozen, v2−lens, v2-fast) vs a plain
+  baseline, across models, plus a v1 comparison per specialist skill ([eval](05-eval.md)).
 - **One results page per milestone**, each published as its own locked artifact.
 
 ## Not in v2.0
 
 - **v2 in the non-Claude bundles** (`dist/` for ChatGPT, Grok and plain-prompt hosts).
-- **Product and service layers:** Stitch integration, watch mode and alerting, a hosted service, a
-  public API.
+- **Product and service layers:** Stitch integration, a hosted service, a stable public API/SDK.
+  Watch and alerts are in v2, at milestone M7 after the v2.0 release (D-074).
 - **Swapping prompts mid-stage.** Adaptation happens at stage boundaries (D-057).
 - **Rust in the shipped kernel.** Rust is used only as the test oracle (sheaf-core, D-038).
 - **New question types** (`path`, `tradeoff`, `analogy`, `monitor`).
@@ -50,8 +51,8 @@
 | `analogy` question type + functor operator | not needed to prove the lens | v2.2 |
 | v2 in non-Claude bundles | the binary can't run there | v2.x |
 | `meta-score` | source unverified | v2.x |
-| Watch mode: re-run on a cadence, alert on changed facts | belongs with Stitch | v3 |
-| Harness/middleware API for any agent | product layer | v3 |
+| Watch and alerts: re-run on a cadence, alert on changed facts and gate results | in v2 scope, after the suite release (D-074); atoms decided at M7 entry | v2 · M7 |
+| Stable public API/SDK and middleware for any agent | product layer | v3 |
 | Learned orchestrator | research bet | unscheduled |
 
 ## Change control

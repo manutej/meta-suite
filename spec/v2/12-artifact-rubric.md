@@ -8,11 +8,30 @@ L2 (minimum bar) is the owner's recent work, measured. L3 goes beyond it.
 
 | Used by | How |
 |---|---|
-| **A2 build bar** | No handoff until every dimension is at L2 and every machine check passes. |
-| **R1 rendered review** | Scores the render, not the source. Any L1 is a P1 edit. A judged L2 with a clear route to L3 is a P3 edit. |
+| **G7 machine checks** | `meta rubric <artifact>` runs each dimension's *Check* line from the config table `rubric.checks` (D-069). Without a headless browser a render check is `unchecked`, and the artifact may not claim L2 on that dimension; "how this was checked" says so. |
+| **A2 build bar** | No handoff until every applicable dimension is at L2 and every machine check passes. In deep mode, one L3 pass follows. |
+| **R1 rendered review** | Scores every applicable dimension on the render, not the source. Any L1 is a P1 edit. A judged L2 with a clear route to L3 is a P3 edit, executed only in deep mode's L3 pass. |
 | **Eval M8** | Blind judges and SMEs score D1, D2, D9 and D10 using the 60-second protocol. Machine results sit beside, never blended in. |
 
-**Ship:** no dimension at L1, and all machine checks green.
+**Ship:** no applicable dimension at L1, and all machine checks green. Eval ship criterion 6 adds: ≥ L2
+on every applicable dimension for ≥ 90% of v2 artifacts.
+
+**Precedence.** The owner's or brand's design inputs override this rubric's numbers for token count
+and font families (D3, D4). The structural dimensions are non-negotiable: verdict first (D1),
+hierarchy and layering (D2), mobile (D5), provenance (D7) and accessibility (contrast, targets,
+focus, reduced motion).
+
+## Applicability by form
+
+A dimension a form cannot meet is marked **N/A with a reason**, never failed.
+
+| Form | N/A | Reason |
+|---|---|---|
+| interactive page | — | every dimension applies |
+| dashboard | D9 unless it animates | motion is optional |
+| slide deck (host type) | D2 drawer/`details` structure, D5 overflow and breakpoints, D8 controls | the host sets navigation, layout and controls; layering is judged across slides |
+| document or brief (host type) | D5 breakpoints, D8, D9 | the host renders and reflows; there are no controls or motion |
+| plain files (CX1 scaffold) | D1–D5, D8, D9 | text files for a repo; D6, D7 and D10 apply to their content |
 
 ## Dimensions
 

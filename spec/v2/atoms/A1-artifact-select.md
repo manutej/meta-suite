@@ -17,6 +17,8 @@ host's available artifact types
   | `profile` | profile page |
   | `compare` | decision workbench, tensions first |
   | `synthesize` | atlas or report |
+  | data that is monitored or explored (any type) | dashboard |
+  | a mechanism or process to explain (any type) | animated explainer, through an installed explainer skill when present |
 
   With two question types, the form is a composite: the primary type's form, plus a section built
   for the secondary type.

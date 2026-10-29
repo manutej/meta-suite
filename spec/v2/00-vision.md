@@ -50,14 +50,17 @@ Evidence is in [evidence](07-evidence.md).
 
 | Horizon | Shape |
 |---|---|
-| **v2.0** | **A new suite**: `meta-lens` as the front door plus the nine skills rebuilt on one shared Go kernel and shared lanes. Every skill has a deep mode (default) and `--fast`. Each skill is measured against its v1 version. The kernel (`meta`) is already the **harness core**: any agent can call its gates, ledger and sheaf check. |
-| **v2.x** | Cross-run learning and the domain memory bank (v2.1, D-063). More question types and operators come in from the parking lot. |
-| **v3** | A harness and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
+| **v2.0** | **A new suite**: `meta-lens` as the front door plus the nine skills rebuilt on one shared Go kernel and shared lanes. Every skill has a deep mode (default) and `--fast`. Each skill is measured against its v1 version. v2.0 ships the `meta` CLI as an **agent-callable harness core**: any agent can call its gates, ledger and sheaf check. A stable public API/SDK is v3. |
+| **v2.x** | Cross-run learning and the domain memory bank (v2.1, D-063). **Watch and alerts** (milestone M7, D-074): re-run on a cadence, detect changed facts and gate results, notify the user. More question types and operators come in from the parking lot. |
+| **v3** | A stable public API/SDK and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
 
 ## Success, defined
 
-v2.0 succeeds when the pre-registered evaluation in [eval](05-eval.md) shows four things:
+v2.0 succeeds when the pre-registered evaluation in [eval](05-eval.md) shows seven things:
 1. v2 beats v1 on expert-relevant recall and analysis.
 2. Removing the lens measurably hurts (so the lens is proven, not assumed).
 3. No model in the matrix regresses.
-4. Cost is at or below v1's.
+4. Cost stays within the pre-registered ceiling over v1's.
+5. Artifacts meet the [rubric](12-artifact-rubric.md)'s minimum bar and are at least as good as v1's best artifacts.
+6. `--fast` is no slower than v1.
+7. Each specialist skill is at least as good as its v1 version.

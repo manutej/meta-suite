@@ -1,9 +1,9 @@
 # meta-suite v2 — specification
 
-**Status:** DRAFT v0.3 (after review rounds 1–2) · branch `v2` · v1 baseline = commit `8cdbf73`
+**Status:** DRAFT v0.6 (after fidelity review round 2) · branch `v2` · v1 baseline = commit `8cdbf73`
 (v1.2.0, untouched on `main`)
 
-**Suite:** a new v2 suite of 10 skills on one kernel. `meta-lens` is the front door, and the other nine keep their v1 names ([suite map](11-suite.md)). Every skill runs the five lanes **Frame → Map → See → Make → Check**, in **deep** mode by default or with `--fast`.
+**Suite:** a new v2 suite of 10 skills on one kernel. `meta-lens` is the front door, and the other nine keep their v1 names ([suite map](11-suite.md)). Every skill composes the lanes it needs from **Frame → Map → See → Make → Check**, in **deep** mode by default or with `--fast`.
 
 **In one line:** v2 turns an unfinished question into an expert-grade, verified research view or
 artifact. A category-theory lens is the executable engine: mandatory inside the machine, invisible
@@ -36,4 +36,6 @@ to the reader.
 | v0.3 | Round 2: an independent audit against the working sheaf-core repo (70/70 tests, toy proof, Go port parity 11/11). G3 gets three real sheaf layers. L3 coherence, the D1 covering condition and Claim units were added (D-038 to D-046). |
 | v0.4 | M0 spike, MIT sheaf subset, plug and play (D-047 to D-054). The **vision ledger** was added, and the first **cross-tier fidelity review** (Opus, Sonnet, Haiku) all said "drifting". D-055 to D-061 apply the fixes: artifact measured and gated, speed criterion, in-run adaptation, walking skeleton, v1 inventory. |
 | v0.4+ | Owner decisions D-062 to D-064 (port order, learning in v2.1, depth default). |
+| v0.5 | Owner correction: v2.0 is a new suite of 10 skills on 34 atoms (D-065), deep default plus `--fast` (D-066), artifact rubric (D-067). |
+| v0.6 | Fidelity review round 2 (Opus, Sonnet, Haiku): consistency sweep, rubric wired into G7/A2/R1/M8, adaptation on by default, suite packaging, lens in the specialists, right-sized eval (D-068 to D-073). Owner: watch and alerts in v2 at M7 (D-074). |
 | next | Fidelity review round 2, then freeze as **spec 1.0** at M0 exit. |

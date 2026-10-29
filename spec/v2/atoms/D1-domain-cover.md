@@ -24,7 +24,7 @@ recombining answers, and for gluing checks.
   "adjacent" simply means "has a non-empty overlap." The overlap graph must be connected; if it
   isn't, D1 must add a bridging element.
 - **Triple overlaps** are computed for G3's 2-cells and L3's coherence check.
-- **Region count** is at most `tiers.<tier>.max_regions`.
+- **Region count** is at most `modes.<mode>.max_regions`.
 - **Relation vocabulary.**
   - `relation_vocab` is controlled.
   - Each relation declares `value_type` ∈ {`qualitative`, `numeric`, `relative`}. Numeric and
