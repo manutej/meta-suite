@@ -2,8 +2,9 @@
 
 ## In v2.0
 
-- **One new pipeline skill**, working name `meta-lens` (see [open questions](08-open-questions.md)).
-  It turns a rough query into a verified research view or artifact.
+- **One new pipeline skill, `meta-lens`** (D-036). It turns a rough query into a verified research
+  view or artifact through five lanes: **Frame → Map → See → Make → Check** (D-037). The user
+  picks only the question; the lanes run on their own.
 - **Three question types.** A brief can carry one or two of them; with two, the operator sets are
   combined.
 

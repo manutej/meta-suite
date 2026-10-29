@@ -3,6 +3,8 @@
 **Status:** DRAFT v0.2 (after review round 1) · branch `v2` · v1 baseline = commit `8cdbf73`
 (v1.2.0, untouched on `main`)
 
+**Skill:** `meta-lens`. Five lanes run in order: **Frame → Map → See → Make → Check**.
+
 **In one line:** v2 turns an unfinished question into an expert-grade, verified research view or
 artifact. A category-theory lens is the executable engine: mandatory inside the machine, invisible
 to the reader.

@@ -44,6 +44,20 @@
 
 The parked domain-residue atom (formerly S3) is in the [parking lot](01-scope.md#parking-lot).
 
+## Lane map (D-037)
+
+| Lane | What the user sees | Atoms |
+|---|---|---|
+| **Frame** | The rough question becomes a checked brief | I1, I2, I3, G5 |
+| **Map** | The domain is researched and mapped, with sources | D1, D2, D3, L2 |
+| **See** | Structure, tensions and contested points are found | L1, L3, L4, G3, G4 |
+| **Make** | The artifact is built | A1, A2, G6, G7 |
+| **Check** | Blind review, and the record | R1, R2, S1, S2 |
+| *(kernel, all lanes)* | — | J1, G1, G2, O1 |
+
+**L2 sits in Map, not See.** Verifying claims against independent sources belongs to the harness,
+not the lens (D-021).
+
 ## Atom file template
 
 Every atom file uses these headings, in this order:
