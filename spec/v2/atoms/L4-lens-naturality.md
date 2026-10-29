@@ -17,6 +17,7 @@ relations to that side's terms and claims.
   in B" equals "relate in A, then translate." This is a J1 `judge` task with k samples.
 - **Tensions.** Each failing square becomes a tension with `sides[0]` and `sides[1]`, each holding at
   least 1 claim.
+- **Limit, stated honestly.** v2.0 checks the squares only. It does not check that each view respects how relations compose (the functor condition).
 - **Comparing two entities.** When the brief compares two entities rather than two views, run L1 on
   each one, then L4 over the probes they share.
 - **Cost cap.** At most `lens.naturality.max_squares` squares per run, highest-degree objects first.

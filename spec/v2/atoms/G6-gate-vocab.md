@@ -12,7 +12,7 @@
   catches "sheaves" and "functor" catches "functorial". The list covers:
   - functor, morphism, pullback, pushout, colimit, cocone, sheaf, presheaf, stalk
   - operad, Yoneda, adjunction/adjoint, natural transformation, monad, cohomology
-  - category theory
+  - category theory, harmonic, Laplacian, nerve, cochain, H0/H1 (as tokens)
 - **Phrases** (config: `gates.g6.phrases`) catch paraphrases, for example "fails to commute",
   "commuting square", "fibre product" and "gluing condition".
 - **Allowlist.** Only I1's `vocab_allowlist` can exempt a term, for a brief that is itself about

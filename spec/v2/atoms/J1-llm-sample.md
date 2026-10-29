@@ -20,7 +20,7 @@ declared verdict enum) or `answer` (produce a typed short answer, for example a 
   surface allows it. When it cannot, the judgment is recorded with `blind=false` and
   `same_model=true`. That is allowed, but it is visible.
 - **Aggregate.**
-  - `judge` tasks: majority vote. Ties are impossible because k is odd.
+  - `judge` tasks: majority vote, **with the vote counts kept** (G3's layer 3 weights edges by vote margin). Ties are impossible because k is odd.
   - `answer` tasks: the set of answers, passed to the requesting atom.
   - The rule is set in config: `sample.aggregate`.
 - Every judgment is a ledger event: model, prompt_hash, temperature and output. A verdict can be
