@@ -51,7 +51,7 @@ Evidence is in [evidence](07-evidence.md).
 | Horizon | Shape |
 |---|---|
 | **v2.0** | One new end-to-end pipeline skill on a shared Go kernel. It ships alongside the v1 skills and is measured against v1. |
-| **v2.x** | The v1 skills are ported onto the kernel. More question types and operators are added from the parking lot. |
+| **v2.x** | The v1 skills are ported onto the kernel as specialists behind `meta-lens`, which becomes the front door. More question types and operators come in from the parking lot. |
 | **v3** | A harness and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
 
 ## Success, defined

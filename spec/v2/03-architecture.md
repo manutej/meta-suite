@@ -32,16 +32,16 @@ contract inside prompts.
 
 ## Pipeline (one run)
 
-| Stage | Atoms | What happens | Exit check |
-|---|---|---|---|
-| 0 intake | (kernel check) → I1 → I2 → I3 | `meta version` probe. Classify the brief, expand it into a spec, round-trip the spec. | G5 drift ≤ threshold, at most `re_expand_max` re-expands |
-| 1 decompose | D1 | Question tree, overlapping region cover, relation vocabulary | G1, cover overlaps connected |
-| 2 gather | D2 (parallel) | One subagent per region. Claims are written via `meta claim add`. | G1 at write time, G2 |
-| 3 assemble | D3 | Per-region subgraphs plus candidate interfaces | G1, G2 |
-| 4 lens | operators for the question type(s); J1 | Lens operators run. G3 and G4 **emit reports only.** | reports written |
-| 5 artifact | A1 → A2 | Choose form and layout, compose, render | G6, G7, plus coverage: every obstruction and flagged node maps to a section tagged contested or uncertain in `section_map` |
-| 6 review | R1 (all tiers), R2 (deep tier and eval) | Blind critic, plus expert-delta in deep runs | no P1/P2 edits, or pass cap reached |
-| 7 record | S1, S2 | Ledger and playbook observations | always runs |
+| Lane | Stage | Atoms | What happens | Exit check |
+|---|---|---|---|---|
+| **Frame** | 0 intake | (kernel check) → I1 → I2 → I3 | `meta version` probe. Classify the brief, expand it into a spec, round-trip the spec. | G5 drift ≤ threshold, at most `re_expand_max` re-expands |
+| **Map** | 1 decompose | D1 | Question tree, overlapping region cover, relation vocabulary | G1, cover overlaps connected |
+| **Map** | 2 gather | D2 (parallel) | One subagent per region. Claims are written via `meta claim add`. | G1 at write time, G2 |
+| **Map** | 3 assemble | D3 | Per-region subgraphs plus candidate interfaces | G1, G2 |
+| **See** | 4 lens | operators for the question type(s); J1 | Lens operators run. G3 and G4 **emit reports only.** | reports written |
+| **Make** | 5 artifact | A1 → A2 | Choose form and layout, compose, render | G6, G7, plus coverage: every obstruction and flagged node maps to a section tagged contested or uncertain in `section_map` |
+| **Check** | 6 review | R1 (all tiers), R2 (deep tier and eval) | Blind critic, plus expert-delta in deep runs | no P1/P2 edits, or pass cap reached |
+| **Check** | 7 record | S1, S2 | Ledger and playbook observations | always runs |
 
 **Loop rule:** an edit script sends the run back to the **earliest stage it touches**. A return to
 D2 is allowed at most `d2_reentry_max` times per run (default 1).
