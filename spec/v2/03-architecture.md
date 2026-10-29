@@ -138,7 +138,7 @@ The capability matrix is resolved in the M0 spike:
 
 | Capability | Claude Code | Claude app (uploaded skill) | Cowork | non-Claude hosts |
 |---|---|---|---|---|
-| exec binary | **verified** in the cloud sandbox (M0 spike), including the noexec fallback | **to verify** with `meta-probe` | expected | no |
+| exec binary | **verified** in the cloud sandbox (M0 spike), including the noexec fallback | **verified** (D-054): installed-plugin path, exec bits stripped, and a read-only mount (temp-copy fallback) | expected | no |
 | subagents (blind contexts) | yes | to verify | yes | varies |
 | network for gather | yes | yes | yes | varies |
 | headless browser (G7) | **verified**: Chrome for Testing + Playwright in the cloud sandbox | to verify (`meta-probe` step 6) | to verify | no |

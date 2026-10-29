@@ -5,7 +5,7 @@ an entry in the [decision log](09-decisions.md).
 
 | # | Question | Owner | By |
 |---|---|---|---|
-| Q1 | Can a skill-folder binary run, with its exec bit set, in the Claude app's uploaded-skill sandbox, in Claude Code and in Cowork? What size limits apply to skill zips that carry binaries for 5 platforms? | Claude (spike) | M0 |
+| Q1 | **Claude app resolved by D-054.** Still open: Cowork desktop and a real Mac (darwin binaries, Gatekeeper). Can a skill-folder binary run, with its exec bit set, in the Claude app's uploaded-skill sandbox, in Claude Code and in Cowork? What size limits apply to skill zips that carry binaries for 5 platforms? | Claude (spike) | M0 |
 | Q2 | **Resolved by D-036:** the skill is named `meta-lens`. | — | — |
 | Q3 | Source for the Grant & Wang gluing construction behind `meta-score`. It is needed before that skill is scheduled. | Manu | before v2.x |
 | Q4 | The claimed "up to 95% token reduction" from progressive disclosure and memory banks. It will be measured as M6 against v1, not assumed. | eval | M6 |
