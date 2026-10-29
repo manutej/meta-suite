@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/claiminput.schema.json",
+  "title": "ClaimInput",
+  "description": "A claim as an agent sends it to `meta claim add` (no id, no stage_token; region is optional, the token's region wins). Spec: spec/v2/03-architecture.md, Core types. schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "relation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "object": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "value": {
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ]
+    },
+    "value_type": {
+      "enum": [
+        "qualitative",
+        "numeric",
+        "relative"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "as_of": {
+      "type": "string",
+      "pattern": "^\\d{4}(-\\d{2}(-\\d{2}([T ]\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?(Z|[+-]\\d{2}:?\\d{2})?)?)?)?$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "retrieved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "independence_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 253,
+          "pattern": "^\\S(.*\\S)?$"
+        }
+      },
+      "required": [
+        "locator",
+        "retrieved_at",
+        "independence_key"
+      ]
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    }
+  },
+  "required": [
+    "subject",
+    "relation",
+    "object",
+    "value_type",
+    "source"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "value_type": {
+            "const": "numeric"
+          }
+        },
+        "required": [
+          "value_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  ]
+}

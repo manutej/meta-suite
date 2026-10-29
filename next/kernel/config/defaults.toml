@@ -1,0 +1,155 @@
+# meta-suite v2 kernel defaults (meta-config/v1).
+#
+# Every threshold, mode value, rule table and canonical-unit table the kernel uses lives here, never in code
+# (P6). The kernel embeds this file; a run records the sha256 of the bytes it actually used (config_hash).
+# An override file named by the META_CONFIG environment variable replaces it whole (it must define every key).
+#
+# Source of truth for mode values: spec/v2/03-architecture.md, "Modes" table (D-066, D-068).
+
+schema = "meta-config/v1"
+
+# `meta run init --mode deep` resolves to this row; `meta run scope <run_dir> broad` switches to deep_broad.
+[mode_aliases]
+deep = "deep_narrow"
+fast = "fast"
+
+[modes.fast]
+review_passes = 1
+max_regions = 3
+k = 1
+g3_layers = "numeric"
+g3_pair_cap = 50
+g4 = false
+r2 = "off"
+loaded_layers = "L0 + core op only"
+p50_minutes = 3
+p90_minutes = 6
+
+[modes.deep_narrow]
+review_passes = 2
+max_regions = 6
+k = 3
+g3_layers = "all"
+g3_pair_cap = 200
+g4 = true
+r2 = "lite"
+loaded_layers = "L0 -> L3 as needed"
+p50_minutes = 10
+p90_minutes = 20
+
+[modes.deep_broad]
+review_passes = 3
+max_regions = 12
+k = 5
+g3_layers = "all"
+g3_pair_cap = 600
+g4 = true
+r2 = "full"
+loaded_layers = "L0 -> L3 as needed"
+p50_minutes = 20
+p90_minutes = 40
+
+[loop]
+d2_reentry_max = 1
+
+[intake]
+re_expand_max = 1
+
+[roles]
+gather = "fast"
+gather_contested = "strong"
+reviewer = "best"
+
+[claims]
+# Stages whose tokens may write claims (D2 gather, including a targeted re-gather).
+allowed_stages = ["D2"]
+
+[lens.pullback]
+# A finding is verified when at least this many distinct independence keys agree on its key and value.
+min_independent = 2
+# Two numeric values on the same key (in the same canonical unit) agree when |a-b| <= tol * max(|a|,|b|).
+numeric_rel_tol = 0.01
+
+[graph]
+# Within-region entity merge. Slice 1 merges by exact normalized label only; relation-profile merging
+# (scores below 1.0) arrives with D3's full version.
+merge_threshold = 1.0
+
+[independence]
+# Prefixes stripped when comparing independence keys ("www.example.org" == "example.org").
+strip_prefixes = ["www."]
+
+[gates.g6]
+# Matched as the start of a word, case-insensitive: "sheaf" catches "sheafs", "functor" catches "functorial".
+terms = [
+  "functor", "morphism", "pullback", "pushout", "colimit", "cocone", "sheaf", "sheav", "presheaf",
+  "stalk", "operad", "yoneda", "adjunction", "adjoint", "monad", "cohomolog", "harmonic", "laplacian",
+  "nerve", "cochain", "coboundar", "simplicial",
+]
+# Matched as whole tokens, case-sensitive.
+tokens = ["H0", "H1", "H^0", "H^1"]
+# Matched case-insensitive with any run of whitespace between words.
+phrases = [
+  "category theory", "natural transformation", "fails to commute", "commuting square",
+  "commutative diagram", "fibre product", "fiber product", "gluing condition", "glueing condition",
+  "restriction map", "global section",
+]
+
+[artifact.forms]
+profile = "profile page"
+compare = "decision workbench, tensions first"
+synthesize = "atlas or report"
+monitored = "dashboard"
+mechanism = "animated explainer"
+
+[artifact.layout]
+hub_first_min_hub_concentration = 0.35
+sequential_min_longest_chain = 4
+split_min_two_sidedness = 0.6
+timeline_min_temporal_density = 0.4
+
+[report]
+# Gates listed in how_checked.json. A gate with no recorded result is reported "unchecked", with the reason.
+gates = ["G1", "G2", "G3", "G4", "G5", "G6", "G7"]
+# Gates this build implements; the others are reported unchecked as "not part of this build".
+implemented = ["G1", "G2", "G6"]
+
+[check]
+# `meta check` (the local gate, D-052): spec atom count (D-065: 25 core + 9 specialist) and the L0 word cap.
+atom_count = 34
+skill_max_words = 500
+
+# Canonical units (D-043). A claim's unit is matched case-sensitively against each dimension's factors; the
+# value is multiplied by the factor and the claim's unit becomes the canonical one. Unknown units are kept as
+# given and the claim is reported unit_normalized=false. Currencies are not converted (no static rate).
+[units.length]
+canonical = "m"
+factors = { "m" = 1.0, "km" = 1000.0, "cm" = 0.01, "mm" = 0.001, "mi" = 1609.344, "ft" = 0.3048, "in" = 0.0254 }
+
+[units.mass]
+canonical = "kg"
+factors = { "kg" = 1.0, "g" = 0.001, "mg" = 0.000001, "t" = 1000.0, "lb" = 0.45359237 }
+
+[units.duration]
+canonical = "s"
+factors = { "s" = 1.0, "ms" = 0.001, "min" = 60.0, "h" = 3600.0, "day" = 86400.0, "d" = 86400.0 }
+
+[units.data]
+canonical = "B"
+factors = { "B" = 1.0, "KB" = 1000.0, "MB" = 1000000.0, "GB" = 1000000000.0, "TB" = 1000000000000.0, "KiB" = 1024.0, "MiB" = 1048576.0, "GiB" = 1073741824.0 }
+
+[units.ratio]
+canonical = "%"
+factors = { "%" = 1.0, "percent" = 1.0, "pct" = 1.0, "bp" = 0.01 }
+
+[units.power]
+canonical = "W"
+factors = { "W" = 1.0, "kW" = 1000.0, "MW" = 1000000.0, "GW" = 1000000000.0 }
+
+[units.energy]
+canonical = "Wh"
+factors = { "Wh" = 1.0, "kWh" = 1000.0, "MWh" = 1000000.0, "GWh" = 1000000000.0, "TWh" = 1000000000000.0 }
+
+[units.count]
+canonical = "count"
+factors = { "count" = 1.0, "thousand" = 1000.0, "million" = 1000000.0, "billion" = 1000000000.0 }

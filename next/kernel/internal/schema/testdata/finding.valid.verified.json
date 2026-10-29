@@ -1,0 +1,1 @@
+{"id":"F-0001","kind":"verified","evidence":["01JBQ6Z3V8K4M2N5P7R9T1W3X6","01JBQ6Z3V8K4M2N5P7R9T1W3X7"],"regions":["r1"],"confidence":"settled","plain_text":"entity-a has part entity-b (2 independent sources)","key":{"subject":"entity-a","relation":"has_part","object":"entity-b"},"independence_keys":["example.org","example.net"]}

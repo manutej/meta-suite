@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/brief.schema.json",
+  "title": "Brief",
+  "description": "Typed brief produced by I1 from the raw request. Spec: spec/v2/03-architecture.md, Core types. schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "raw": {
+      "type": "string",
+      "minLength": 1
+    },
+    "question_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "profile",
+          "compare",
+          "synthesize"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "medium": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stakes": {
+      "enum": [
+        "high",
+        "normal",
+        "low"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "stakes": {
+                "enum": [
+                  "high",
+                  "normal",
+                  "low"
+                ]
+              },
+              "costly_to_redo": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "text",
+              "stakes"
+            ]
+          }
+        ]
+      }
+    },
+    "vocab_allowlist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "term": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "term",
+          "reason"
+        ]
+      }
+    }
+  },
+  "required": [
+    "raw",
+    "question_types",
+    "objective",
+    "audience",
+    "stakes",
+    "constraints",
+    "targets",
+    "assumptions",
+    "vocab_allowlist"
+  ]
+}
