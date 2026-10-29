@@ -3,7 +3,7 @@
 **Status:** DRAFT v0.3 (after review rounds 1–2) · branch `v2` · v1 baseline = commit `8cdbf73`
 (v1.2.0, untouched on `main`)
 
-**Skill:** `meta-lens`. Five lanes run in order: **Frame → Map → See → Make → Check**.
+**Suite:** a new v2 suite of 10 skills on one kernel. `meta-lens` is the front door, and the other nine keep their v1 names ([suite map](11-suite.md)). Every skill runs the five lanes **Frame → Map → See → Make → Check**, in **deep** mode by default or with `--fast`.
 
 **In one line:** v2 turns an unfinished question into an expert-grade, verified research view or
 artifact. A category-theory lens is the executable engine: mandatory inside the machine, invisible
@@ -17,11 +17,11 @@ to the reader.
 | L1 | deciding *what* and *why* | [vision](00-vision.md) · [scope](01-scope.md) · [principles](02-principles.md) |
 | L2 | deciding *how* | [architecture](03-architecture.md) · [atom index](04-atoms.md) |
 | L3 | building one piece | [`atoms/`](atoms/): one file per atom, each a typed contract |
-| L4 | proving it works, or auditing why | [eval](05-eval.md) · [roadmap](06-roadmap.md) · [evidence](07-evidence.md) · [open questions](08-open-questions.md) · [decisions](09-decisions.md) · [**vision ledger**](10-vision-ledger.md) · [v1 inventory](11-v1-inventory.md) · [reviews](reviews/) |
+| L4 | proving it works, or auditing why | [eval](05-eval.md) · [roadmap](06-roadmap.md) · [evidence](07-evidence.md) · [open questions](08-open-questions.md) · [decisions](09-decisions.md) · [**vision ledger**](10-vision-ledger.md) · [suite map](11-suite.md) · [reviews](reviews/) |
 
 ## Scope fence (anti-creep)
 
-- **v2.0 is exactly the 25 atoms** in the [atom index](04-atoms.md). From M1, `meta check` verifies that this
+- **v2.0 is a new suite** of 10 skills ([suite map](11-suite.md)) built on exactly **34 atoms** (25 core + 9 specialist) in the [atom index](04-atoms.md). From M1, `meta check` verifies that this
   count matches across files.
 - **A new atom enters only through a [decision](09-decisions.md)** that names what it displaces.
 - **Everything else is in the [parking lot](01-scope.md#parking-lot)**, with a target version.

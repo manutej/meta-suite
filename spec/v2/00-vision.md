@@ -50,8 +50,8 @@ Evidence is in [evidence](07-evidence.md).
 
 | Horizon | Shape |
 |---|---|
-| **v2.0** | One new end-to-end pipeline skill on a shared Go kernel. It ships alongside the v1 skills and is measured against v1. The kernel (`meta`) is already the **harness core**: any agent can call its gates, ledger and sheaf check. |
-| **v2.x** | The v1 skills are ported onto the kernel as specialists behind `meta-lens`, which becomes the front door. More question types and operators come in from the parking lot. |
+| **v2.0** | **A new suite**: `meta-lens` as the front door plus the nine skills rebuilt on one shared Go kernel and shared lanes. Every skill has a deep mode (default) and `--fast`. Each skill is measured against its v1 version. The kernel (`meta`) is already the **harness core**: any agent can call its gates, ledger and sheaf check. |
+| **v2.x** | Cross-run learning and the domain memory bank (v2.1, D-063). More question types and operators come in from the parking lot. |
 | **v3** | A harness and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
 
 ## Success, defined

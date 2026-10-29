@@ -57,18 +57,20 @@ D2 is allowed at most `d2_reentry_max` times per run (default 1).
 **L3 always runs**, because it is the only atom that merges per-region subgraphs. For `profile` and
 `compare` it merges along interfaces only.
 
-## Budget tiers
+## Modes: deep (default) and `--fast` (D-066)
 
-All values are **defaults** in `config/defaults.toml`. The config file is hashed, and the hash is
-recorded in every run.
+Every value here is a **default** in `config/defaults.toml`. The config file is hashed, and the hash
+is recorded in every run. Config keys keep the form `tiers.<mode>.*`.
 
-| Tier | Review passes | Max regions | k (judge samples, odd) | G3 pair cap | R2 | p50 / p90 wall time target |
-|---|---|---|---|---|---|---|
-| quick | 1 | 3 | 1 | 50 | off | 3 / 6 min |
-| standard | 2 | 6 | 3 | 200 | off | 8 / 15 min |
-| deep | 3 | 12 | 5 | 600 | on | 20 / 40 min |
+| Mode | Review passes | Max regions | k (odd) | G3 | G4 | R2 | Loaded layers | p50 / p90 target |
+|---|---|---|---|---|---|---|---|---|
+| **fast** (`--fast`) | 1 | 3 | 1 | numeric layers + ≤ 50 pairs | off | off | L0 + core op only | 3 / 6 min |
+| **deep** (default), narrow scope | 2 | 6 | 3 | all layers, ≤ 200 pairs | on | lite | L0 → L3 as needed | 10 / 20 min |
+| **deep**, broad scope or deep research | 3 | 12 | 5 | all layers, ≤ 600 pairs | on | full | L0 → L3 as needed | 20 / 40 min |
 
-The wall-time targets are initial estimates, recalibrated from Phase A logs.
+- **Scope inside deep mode.** I2 estimates scope (narrow or broad) from the spec, and the user can
+  override it ("deep research"). Deep mode scales within its caps; it never silently drops to fast.
+- **Targets.** The wall-time targets are initial estimates, recalibrated from Phase A logs.
 
 ## Cost model (per run)
 

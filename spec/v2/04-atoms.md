@@ -1,4 +1,7 @@
-# 04 · Atom index (v2.0 = these 25, no more)
+# 04 · Atom index (v2.0 suite = these 34, no more)
+
+There are **25 core atoms** shared by every skill, plus **9 specialist atoms**, at most 2 per
+skill ([suite map](11-suite.md)).
 
 **What an atom is:** one unit of functionality with:
 - a typed contract (in → out)
@@ -43,6 +46,20 @@
 | [O1](atoms/O1-loop-controller.md) | loop.controller | kernel | loop, stage | M1 | Stage state machine: next stage, caps, the single ask rule |
 
 The parked domain-residue atom (formerly S3) is in the [parking lot](01-scope.md#parking-lot).
+
+## Specialist atoms (D-065)
+
+| ID | Atom | Skill | Layer | M | One line |
+|---|---|---|---|---|---|
+| [P1](atoms/P1-prompt-generate.md) | prompt.generate | meta-prompting | operator | M4b | Task → example-agnostic meta-prompt for the whole category |
+| [P2](atoms/P2-prompt-sibling-test.md) | prompt.sibling_test | meta-prompting | operator→kernel | M4b | Proves the meta-prompt on unseen sibling instances |
+| [PL1](atoms/PL1-plan-packets.md) | plan.packets | meta-planning | operator | M4b | Context-complete work packets with checkable done-criteria |
+| [PL2](atoms/PL2-gate-plan-dag.md) | gate.plan_dag | meta-planning | kernel | M4b | Acyclic, no orphan inputs; parallel groups computed |
+| [DS1](atoms/DS1-design-schema.md) | design.schema | meta-design | operator→kernel | M4b | Design system first, every instance generated from it |
+| [MV1](atoms/MV1-bundle-compose.md) | bundle.compose | meta-mvp | operator→kernel | M4b | One-liner → right-sized bundle from suite recipes, types checked |
+| [CR1](atoms/CR1-craft-dod.md) | craft.dod | meta-craft | operator | M4b | Project-specific constitution; every DoD item names its check |
+| [CP1](atoms/CP1-compound-map.md) | compound.map | meta-compound | operator | M4b | What to capture, reuse and refresh, with measurable savings |
+| [CX1](atoms/CX1-context-scaffold.md) | context.scaffold | meta-context | operator | M4b | Context strategy + droppable L0–L4 substrate |
 
 ## Lane map (D-037)
 

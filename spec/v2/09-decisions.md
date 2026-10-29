@@ -98,13 +98,21 @@ self-adaptation, VR-00 breadth, and the fidelity loop itself. The full results a
 | D-058 | 2026-10-29 | **Walking skeleton at M2.** One dev brief runs Frame → Map → Make → Check end to end with a real rendered artifact, published for the owner. | VR-24. The first visible output came too late (M4). | 06 M2 |
 | D-059 | 2026-10-29 | **Opus-native execution:** programmatic tool-calling loops, batched J1 (`meta sample run`), prompt caching, per-stage budgets, and wall time and turns in the ledger. **Speed is a ship criterion** (v2-quick ≤ v1 p50). | VR-06. Speed had gone backwards and was unmeasured. | 03, J1, 05 |
 | D-060 | 2026-10-29 | **Depth where nuance is made:** D1 insider probes per region, a stronger gather model for contested regions, and R2-lite in the standard tier. **Amends D-032.** | VR-03. Every atom verified, but nothing pushed toward insider knowledge. | D1, D2, R2 |
-| D-061 | 2026-10-29 | **v1 inventory** (`11-v1-inventory.md`): every v1 element is mapped to a v2.0 atom, a v2.x port, or dropped (none). It sets a port order and a plan B if Phase A is a no-go. **"Works best with Opus 5.5"** may be claimed only if Opus beats Sonnet and Haiku on M1 and M8. v1 stays the default install until v2.0 passes. M9 (human input) and M10 (speed) added. A1 takes the reasoning sequence as input. | VR-00, 23, 14, 07. | 11, 05, A1 |
+| D-061 | 2026-10-29 | **v1 inventory** (`11-suite.md`): every v1 element is mapped to a v2.0 atom, a v2.x port, or dropped (none). It sets a port order and a plan B if Phase A is a no-go. **"Works best with Opus 5.5"** may be claimed only if Opus beats Sonnet and Haiku on M1 and M8. v1 stays the default install until v2.0 passes. M9 (human input) and M10 (speed) added. A1 takes the reasoning sequence as input. | VR-00, 23, 14, 07. | 11, 05, A1 |
 
 ## Owner decisions on the open trade-offs (2026-10-29)
 
 | ID | Date | Decision | Why | Consequence |
 |---|---|---|---|---|
-| D-062 | 2026-10-29 | **Owner approved the port order in [v1 inventory](11-v1-inventory.md):** meta-lens first. Then review, prompting and mvp in v2.1, and design, planning, craft, compound and context in v2.2. v1 stays the default install meanwhile. | Signed off by the owner (VR-00 deviation accepted). | 11 |
+| D-062 | 2026-10-29 | **Owner approved the port order in [suite map](11-suite.md):** meta-lens first. Then review, prompting and mvp in v2.1, and design, planning, craft, compound and context in v2.2. v1 stays the default install meanwhile. | Signed off by the owner (VR-00 deviation accepted). | 11 |
 | D-063 | 2026-10-29 | **Owner chose: cross-run learning (playbook loading and domain memory) arrives in v2.1, after proof.** Only rules that pass a with/without test are used. In-run stage-boundary adaptation (D-057) stays in v2.0. | Signed off by the owner (VR-10/12 phasing accepted). | S2, parking lot |
 | D-064 | 2026-10-29 | **Owner chose depth as the default.** Standard tier is the default run, and the quick tier is one tap away. The speed criterion (D-059) still applies. | Signed off by the owner. | O1 default tier, I1 |
+
+## Owner correction: v2.0 is a new suite (2026-10-29)
+
+| ID | Date | Decision | Why | Consequence |
+|---|---|---|---|---|
+| D-065 | 2026-10-29 | **Supersedes D-014 and D-062. v2.0 is a whole new suite.** `meta-lens` is the front door, and all nine v1 skills are rebuilt on the shared kernel and lanes, each as a thin recipe with at most 2 own atoms. The atom budget is **34** (25 core + 9 specialist). The port order becomes the build order inside M4b. Each specialist has a per-skill v1 comparison and a per-skill v1 fallback. | Owner: "I want a new suite, the new skill was just temporary" (VR-27). | 11 suite map, 04, 05, 06 M4b |
+| D-066 | 2026-10-29 | **Amends D-064. Two modes for every skill: deep (default) and `--fast`.** Fast loads only L0 and the core op (lighter skill weight through progressive disclosure), uses k = 1, at most 3 regions, one review pass, no G4 and no R2. Deep scales with scope, up to full deep research. The speed criterion is measured on `--fast`. | Owner: "make deep default and --fast as a flag", like Sonnet vs Opus (VR-29). | 03 modes, 05, I1 |
+| D-067 | 2026-10-29 | **Artifact rubric** ([12](12-artifact-rubric.md)). Its minimum bar (Level 2) is derived from the owner's recent top artifacts: visuals, colour, layering, mobile readiness, and more. Level 3 is "beyond what the owner imagined." Machine-checkable dimensions run as checks, and judged dimensions feed M8. | Owner request (VR-28). | A2, R1, M8, DS1 |
 

@@ -29,9 +29,9 @@ Any later change is logged as a decision and flagged in the report.
 | Arm | Definition |
 |---|---|
 | **v1** | meta-suite 1.2.0 `meta-research` (decompose → cross-verify → cite), its native output |
-| **v2** | `meta-lens`, standard tier |
+| **v2** | `meta-lens`, deep mode (default) |
 | **v2−lens** | v2 with L1, L3's interface discipline, L4, G4 and **all three G3 layers** off (see below) |
-| **v2-quick** | v2 at quick tier; a secondary row that roughly matches v1's cost |
+| **v2-fast** | v2 with `--fast` (D-066) |
 | **v2-adaptive** | v2 with stage-boundary adaptation **on** (D-057); every other arm freezes it |
 | **v1-mvp** | meta-suite 1.2.0 `meta-mvp`, native artifact. Used **only for M8**, so v2's artifact is compared with v1's most visible output |
 | **baseline** | same model, same tools, plain request |
@@ -113,13 +113,29 @@ only.
 2. **M2:** v2 is preferred over v1 in at least 60% of comparisons.
 3. **Lens:** v2 − v2−lens on M1 is greater than 0, with a pooled CI that excludes 0.
 4. **No regression:** no model shows v2 more than 5 points below v1 on M1.
-5. **Speed:** v2-quick p50 wall time ≤ v1's. v2 standard p50 ≤ `eval.wall_multiplier_max` × v1's (committed at M0).
+5. **Speed:** v2-fast p50 wall time ≤ v1's. v2 deep p50 ≤ `eval.wall_multiplier_max` × v1's (committed at M0).
 6. **Artifact:** v2 ≥ v1-mvp and ≥ v1 on M8 (pooled), with SMEs agreeing in direction.
 7. **Cost:** v2's median dollars per run is at most `eval.cost_multiplier_max` × v1's (the ceiling
    is 3×; the exact value is set from Phase A and committed before Phase B). M1 points per dollar
-   for v2-quick is also reported against v1.
+   for v2-fast is also reported against v1.
 8. **SME:** v2 beats v1 on M3 in a paired sign test. If fewer than 2 SMEs per domain could be
    recruited, M3 is reported as a non-blocking signal, but only with the owner's explicit sign-off, logged as a decision.
+
+## Specialist skills: per-skill comparison (D-065)
+
+Each of the nine rebuilt skills is compared with **its own v1 version**:
+- **Tasks:** 3 sealed dev-independent tasks per skill.
+- **Runs:** Opus and Sonnet, 2 seeds, deep and fast modes.
+- **Metrics:** blind cross-family pairwise preference (M2-style); the skill's own gates (for
+  example, P2 sibling pass rate, PL2 defects, the CR1 every-item-checkable rule); M8 for skills
+  that produce artifacts (meta-design, meta-mvp); M10 speed.
+
+**Per-skill ship rule:**
+- v2 is preferred over v1 in ≥ 55% of comparisons, and no skill gate fails.
+- `--fast` p50 ≤ v1's.
+
+A skill that misses ships as its v1 inside the v2 suite, as the per-skill plan B in
+[suite map](11-suite.md).
 
 ## The "works best with Opus 5.5" claim (VR-23)
 

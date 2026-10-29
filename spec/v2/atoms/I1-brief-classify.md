@@ -15,6 +15,8 @@ question type(s), which decides which lens operators run.
   as `unsupported_type`. The artifact must also state the mapping as an assumption.
 - The classification is a J1 `judge` task, k samples (config: `tiers.<tier>.k`). Any disagreement
   is recorded in `assumptions[]`.
+- **Routing (front door).** I1 also decides whether the request is really a research question or a specialist task: a meta-prompt, plan, design, bundle, review, craft standard, compounding map or context strategy. If it is specialist work, it routes there ([suite map](../11-suite.md)) and records the routing as an assumption the user can override.
+- **Mode.** Deep is the default. `--fast` or "quick" selects fast mode (D-066).
 - I1 also extracts:
   - `targets[]`: the subjects for L1
   - `views[2]`: the two sides for L4

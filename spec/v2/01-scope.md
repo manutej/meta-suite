@@ -2,10 +2,10 @@
 
 ## In v2.0
 
-- **One new pipeline skill, `meta-lens`** (D-036). It turns a rough query into a verified research
-  view or artifact through five lanes: **Frame → Map → See → Make → Check** (D-037). The user
+- **`meta-lens`, the suite's front door** (D-036, D-065). It turns a rough query into a verified
+  research view or artifact, or routes it to the right specialist, through five lanes: **Frame → Map → See → Make → Check** (D-037). The user
   only types a question; the question type is inferred (I1), and the lanes run on their own.
-- **Three question types.** A brief can carry one or two of them; with two, the operator sets are
+- **Three research question types** (for the meta-lens and meta-research lanes; the specialists add their own task types). A brief can carry one or two of them; with two, the operator sets are
   combined.
 
   | Type | Asks | Core operators |
@@ -14,7 +14,9 @@
   | `compare` | X vs Y, or view A vs view B | naturality + pullback (+ glue along interfaces) |
   | `synthesize` | What does the field add up to? | glue + pullback |
 
-- **The 25 atoms** in the [atom index](04-atoms.md), and nothing else.
+- **The whole new suite** ([suite map](11-suite.md)): `meta-lens` plus the nine rebuilt skills, on **34 atoms** (25 core + 9 specialist) in the [atom index](04-atoms.md), and nothing else.
+- **Two modes for every skill:** deep (default) and `--fast` (D-066).
+- **An artifact rubric** whose minimum bar is the owner's recent work ([rubric](12-artifact-rubric.md), D-067).
 - **A shared Go kernel**, shipped as a single static `meta` binary for 5 platforms. It owns schemas,
   gates, judgment sampling, the ledger and the loop controller. It holds no model credentials.
 - **Degraded mode** when the binary can't run: every gate is reported `unchecked`, and no verdict is
@@ -26,7 +28,6 @@
 
 ## Not in v2.0
 
-- **Porting the other v1 skills.** Every v1 element is mapped in the [v1 inventory](11-v1-inventory.md), with a port order and a plan B. v1 stays the default install until v2.0 passes its eval.
 - **v2 in the non-Claude bundles** (`dist/` for ChatGPT, Grok and plain-prompt hosts).
 - **Product and service layers:** Stitch integration, watch mode and alerting, a hosted service, a
   public API.
@@ -47,7 +48,7 @@
 | `tradeoff` question type + adjunction operator (beyond the intake round trip) | not needed to prove the lens | v2.1 |
 | Minimal conflicting sets; three-way conflicts among **free-text** claims (linear relational cycles are in scope via G3 layer 2, D-044) | exponential judgment cost | v2.1 |
 | `analogy` question type + functor operator | not needed to prove the lens | v2.2 |
-| Port the v1 skills onto the kernel; v2 in non-Claude bundles | only after v2.0 passes eval | v2.x |
+| v2 in non-Claude bundles | the binary can't run there | v2.x |
 | `meta-score` | source unverified | v2.x |
 | Watch mode: re-run on a cadence, alert on changed facts | belongs with Stitch | v3 |
 | Harness/middleware API for any agent | product layer | v3 |
@@ -55,7 +56,7 @@
 
 ## Change control
 
-- **Atom budget = 25.** `meta check` enforces it from M1 (D-052): it checks that the atom files, the index rows and
+- **Atom budget = 34.** `meta check` enforces it from M1 (D-052): it checks that the atom files, the index rows and
   the README all agree. Adding an atom requires a decision entry that removes, merges or defers
   another.
 - **Every atom diff cites a D-### entry.** `meta check` enforces this from M1.

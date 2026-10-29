@@ -39,3 +39,7 @@ truth for fidelity reviews.
 | VR-24 | Complete what we actually set out to do, without missing the forest for the trees. | 12th |
 | VR-25 | Name `meta-lens`, with clear lanes and functionality. | 9th–10th |
 | VR-26 | Industry-facing articles about the approach (for example, defining an entity by its relations). This is a separate track. | 3rd |
+| VR-27 | **v2.0 is a new suite.** The single new skill was only temporary. All skills are rebuilt. | 13th |
+| VR-28 | **A rubric for "stunning."** Use the owner's recent top artifacts (visuals, colours, layering, mobile readiness, …) as the minimum bar, but aim for results beyond what the owner could have imagined. | 13th |
+| VR-29 | **Deep by default, `--fast` as a flag.** Fast is a light path with lower skill weight (deeper layers via progressive disclosure); deep research and deep-scope questions go deep. Like Sonnet vs Opus. | 13th |
+
