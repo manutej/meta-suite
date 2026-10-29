@@ -138,18 +138,27 @@ The capability matrix is resolved in the M0 spike:
 
 | Capability | Claude Code | Claude app (uploaded skill) | Cowork | non-Claude hosts |
 |---|---|---|---|---|
-| exec binary | expected | **to verify** (exec bit, sandbox) | expected | no |
+| exec binary | **verified** in the cloud sandbox (M0 spike), including the noexec fallback | **to verify** with `meta-probe` | expected | no |
 | subagents (blind contexts) | yes | to verify | yes | varies |
 | network for gather | yes | yes | yes | varies |
-| headless browser (G7) | to verify | to verify | to verify | no |
+| headless browser (G7) | **verified**: Chrome for Testing + Playwright in the cloud sandbox | to verify (`meta-probe` step 6) | to verify | no |
 | cross-family judge | via eval harness only | no | no | — |
+| eval harness | `claude --bare -p … --output-format json`. Tokens are taken from `modelUsage` (top-level `usage` excludes subagents); dollars are estimates unless reconciled | — | — | — |
 
 **Degraded mode:**
 - **Binary missing or not executable:** the run is labelled `kernel=absent`. Every gate is reported
   `unchecked` in the artifact and the ledger. **The model never simulates a gate verdict.**
 - **No subagents:** the blind attestation is recorded as `blind=false`.
-- **Platform builds:** v2 ships binaries for linux-amd64, linux-arm64, darwin-arm64, darwin-amd64
-  and windows-amd64. Step 0 detects the architecture and restores the exec bit.
+- **Platform builds:** v2 ships static binaries for linux-amd64, linux-arm64, darwin-arm64,
+  darwin-amd64 and windows-amd64. M0 measured them at about 3.2 MB each, about 6.7 MB zipped for all
+  five.
+- **Invocation is always `sh bin/meta …`**, never `./bin/meta`. Python's zip extraction strips the
+  exec bit, and the launcher restores it.
+- **Noexec fallback.** If the skill folder is mounted noexec, the launcher copies the binary to
+  `$TMPDIR` and runs it from there. This was verified on a noexec tmpfs.
+- **Windows without a POSIX shell** gets a `meta.cmd` launcher.
+- **Deterministic output.** Every kernel command sorts its output (for example, errors by instance
+  path, then keyword) so the same input gives byte-identical output.
 - **Distribution:** v2 is excluded from the non-Claude bundles in `dist/` until v2.x.
 
 ## Repository layout (v2 additions)

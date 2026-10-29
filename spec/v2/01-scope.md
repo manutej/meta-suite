@@ -54,9 +54,9 @@
 
 ## Change control
 
-- **Atom budget = 25.** CI enforces it from M1: it checks that the atom files, the index rows and
+- **Atom budget = 25.** `meta check` enforces it from M1 (D-052): it checks that the atom files, the index rows and
   the README all agree. Adding an atom requires a decision entry that removes, merges or defers
   another.
-- **Every atom diff cites a D-### entry.** CI enforces this from M1.
+- **Every atom diff cites a D-### entry.** `meta check` enforces this from M1.
 - **Parking-lot items enter scope only through a decision**, and only after M5.
 - **"While we're at it" changes are rejected by default.**

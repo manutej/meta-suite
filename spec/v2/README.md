@@ -21,7 +21,7 @@ to the reader.
 
 ## Scope fence (anti-creep)
 
-- **v2.0 is exactly the 25 atoms** in the [atom index](04-atoms.md). From M1, CI checks that this
+- **v2.0 is exactly the 25 atoms** in the [atom index](04-atoms.md). From M1, `meta check` verifies that this
   count matches across files.
 - **A new atom enters only through a [decision](09-decisions.md)** that names what it displaces.
 - **Everything else is in the [parking lot](01-scope.md#parking-lot)**, with a target version.
