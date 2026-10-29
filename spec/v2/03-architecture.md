@@ -125,6 +125,7 @@ Where a surface exposes no usage data, the run records call counts and is labell
 | `meta ledger append \| show <run_dir>` | S1 |
 | `meta playbook propose \| list` | S2 |
 | `meta loop next <run_dir>` | O1 |
+| `meta sheaf analyze <in.json> --out <report.json>` | the standalone gluing check (D-048): the same engine as G3 layers 1–3, usable on any JSON sheaf without running the pipeline |
 
 **Concurrency:**
 - Each gather agent appends to its own shard, `claims/<agent>.jsonl`.
@@ -157,7 +158,7 @@ The capability matrix is resolved in the M0 spike:
 kernel/                       Go module: cmd/meta, internal/{schema,gates,ledger,loop,sample,graph,sheaf}
   schemas/*.json              core types (versioned)
   config/defaults.toml        every threshold, tier value, rule table and canonical-unit table (hashed per run)
-  internal/sheaf/             Go port of the sheaf-core graph subset (D-038); CI parity vs golden reports
+  internal/sheaf/             Go port of the sheaf-core graph subset, MIT (D-038, D-047); CI parity vs golden reports
   testdata/sheaf/             golden fixtures + oracle reports (`frontier-sheaf/v1`)
 skills/meta-lens/
   SKILL.md                    L0 trailhead, ≤500 words; step 0 = kernel probe
