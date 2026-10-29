@@ -9,7 +9,7 @@ whose nuance makes domain experts lean in:
 - the contested facts, named as contested
 - the facts that rest on only one source, marked as such
 
-Every claim is sourced and every structural check ran as code. The run needs less human input than a
+Every claim is sourced. Structural checks run as code, and semantic judgments are sampled and recorded (J1), so every verdict is auditable. The run needs less human input than a
 traditional harness, and its cost is capped and measured. Second-order effects are a v2.1 goal
 (composition operator, see D-031).
 
@@ -50,14 +50,17 @@ Evidence is in [evidence](07-evidence.md).
 
 | Horizon | Shape |
 |---|---|
-| **v2.0** | One new end-to-end pipeline skill on a shared Go kernel. It ships alongside the v1 skills and is measured against v1. |
-| **v2.x** | The v1 skills are ported onto the kernel as specialists behind `meta-lens`, which becomes the front door. More question types and operators come in from the parking lot. |
-| **v3** | A harness and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
+| **v2.0** | **A new suite**: `meta-lens` as the front door plus the nine skills rebuilt on one shared Go kernel and shared lanes. Every skill has a deep mode (default) and `--fast`. Each skill is measured against its v1 version. v2.0 ships the `meta` CLI as an **agent-callable harness core**: any agent can call its gates, ledger and sheaf check. A stable public API/SDK is v3. |
+| **v2.x** | Cross-run learning and the domain memory bank (v2.1, D-063). **Watch and alerts** (milestone M7, D-074): re-run on a cadence, detect changed facts and gate results, notify the user. More question types and operators come in from the parking lot. |
+| **v3** | A stable public API/SDK and middleware layer any agent can call: intake→spec, lens operators, gates, alerts. It composes with the Stitch decomposition/composition infrastructure as the reasoning layer above it. |
 
 ## Success, defined
 
-v2.0 succeeds when the pre-registered evaluation in [eval](05-eval.md) shows four things:
+v2.0 succeeds when the pre-registered evaluation in [eval](05-eval.md) shows seven things:
 1. v2 beats v1 on expert-relevant recall and analysis.
 2. Removing the lens measurably hurts (so the lens is proven, not assumed).
 3. No model in the matrix regresses.
-4. Cost is at or below v1's.
+4. Cost stays within the pre-registered ceiling over v1's.
+5. Artifacts meet the [rubric](12-artifact-rubric.md)'s minimum bar and are at least as good as v1's best artifacts.
+6. `--fast` is no slower than v1.
+7. Each specialist skill is at least as good as its v1 version.

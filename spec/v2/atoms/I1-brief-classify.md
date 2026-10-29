@@ -13,12 +13,16 @@ question type(s), which decides which lens operators run.
   the operators are the union of both sets.
 - **Unsupported types** (path, tradeoff, analogy) map to the nearest supported type and are logged
   as `unsupported_type`. The artifact must also state the mapping as an assumption.
-- The classification is a J1 `judge` task, k samples (config: `tiers.<tier>.k`). Any disagreement
+- The classification is a J1 `judge` task, k samples (config: `modes.<mode>.k`). Any disagreement
   is recorded in `assumptions[]`.
+- **Routing (front door).** I1 also decides whether the request is really a research question or a specialist task: a meta-prompt, plan, design, bundle, review, craft standard, compounding map or context strategy. If it is specialist work, it routes there ([suite map](../11-suite.md)) and records the routing as an assumption the user can override.
+- **Mode.** Deep is the default. `--fast` or "quick" selects fast mode (D-066).
 - I1 also extracts:
   - `targets[]`: the subjects for L1
   - `views[2]`: the two sides for L4
-  - `vocab_allowlist[]`: needed only when the brief is itself about formal methods (see G6)
+  - `vocab_allowlist[]`: terms the brief's own domain uses in a plain sense (for example "harmonic" in
+    a music brief), taken from the Spec's domain vocabulary, each with its reason; or the formal terms
+    of a brief that is itself about formal methods (see G6)
 - When to ask the user is decided by the single ask rule in [O1](O1-loop-controller.md). I1 only
   flags candidate assumptions with their stakes.
 

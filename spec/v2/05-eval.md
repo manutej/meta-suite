@@ -29,9 +29,11 @@ Any later change is logged as a decision and flagged in the report.
 | Arm | Definition |
 |---|---|
 | **v1** | meta-suite 1.2.0 `meta-research` (decompose → cross-verify → cite), its native output |
-| **v2** | `meta-lens`, standard tier |
+| **v2** | `meta-lens`, deep mode (default), with stage-boundary adaptation **on**: the product as shipped (D-070) |
+| **v2-frozen** | v2 with adaptation frozen (ablation: the adaptation effect) |
 | **v2−lens** | v2 with L1, L3's interface discipline, L4, G4 and **all three G3 layers** off (see below) |
-| **v2-quick** | v2 at quick tier; a secondary row that roughly matches v1's cost |
+| **v2-fast** | v2 with `--fast` (D-066) |
+| **v1-mvp** | meta-suite 1.2.0 `meta-mvp`, native artifact. Used **only for M8**, so v2's artifact is compared with v1's most visible output |
 | **baseline** | same model, same tools, plain request |
 
 **What v2−lens keeps and loses:**
@@ -57,9 +59,14 @@ The two contrasts:
 
 | Phase | Models | Arms | Briefs × seeds |
 |---|---|---|---|
-| A · pilot | Opus 5.5 | all 5 | 4 (one per domain, from the eval set's first draw) × 3 |
-| B · full | Opus 5.5, Sonnet 5.5 | all 5 | 12 × 3, or more if the power calculation requires it (below) |
-| C · portability | Haiku 5.5 (+ an open-weight model only if Q11 resolves) | v1, v2 | 12 × 1 |
+| A · pilot | Opus 5.5 | v1, v2, v2-frozen, v2−lens, v2-fast, baseline; v1-mvp (M8 only) | 4 (one per domain, from the eval set's first draw) × 3 |
+| B · full | Opus 5.5 | v1, v2, v2−lens, v2-fast, baseline; v1-mvp at 1 seed (M8 only) | 12 × 3, or more if the power calculation requires it (below) |
+| B · full | Sonnet 5.5 | v1, v2, v2-fast | 12 × 3 |
+| C · portability | Haiku 5.5 (+ an open-weight model only if it passes the pre-registered smoke test, D-051) | v1, v2 | 12 × 1 |
+
+**Run budget.** Phase A ≈ 84 runs; Phase B ≈ 288 + 12 (v1-mvp); Phase C ≈ 24; per-skill ≈ 48 deep
+(8 skills × 3 tasks × v1/v2) + 24 fast speed runs. **Total ≈ 480 runs, target ≤ ~550.** A power-driven
+Phase B extension is costed and logged as a decision before it runs.
 
 **Harness.** Every arm runs headless on the same Claude agent harness, with the same tools and the
 `meta` binary present. Usage comes from API logs.
@@ -80,12 +87,18 @@ The two contrasts:
 | M5 | Contested-fact precision | The share of G3 obstructions a judge and an SME confirm as genuinely contested, reported **separately** for numeric-layer obstructions (layers 1–2) and judgment-layer obstructions (pairwise + layer 3) |
 | M6 | Cost | Dollars, tokens and wall time per run, from usage logs only. M1 points per dollar are also reported. |
 | M7 | Stability | Between-seed variance of M1 and M2 |
+| M8 | **Artifact first look** (VR-02) | **Rendered artifacts, not stripped**, blind to arm, scored with the [rubric](12-artifact-rubric.md)'s 60-second protocol and dimensions (D-069): judges and SMEs rate the judged dimensions and the two yes/no questions; `meta rubric` supplies the machine dimensions beside them, never blended. Compared against v1-mvp and v1's native artifacts. |
+| M9 | Human input per run (VR-14) | Count of clarifying questions, interventions and retries a user needed, logged by O1 |
+| M10 | Speed (VR-06) | p50 and p90 wall time and turns per run, from harness logs |
+| M11 | Context tokens loaded per run (VR-12, Q4) | Skill and reference tokens loaded into context per run, v2 vs v1, from harness logs. Tests the progressive-disclosure claim. |
 
 ## Rubrics
 
 **Authorship:**
 - Drafted by an agent from a **different model family from every arm's producer model**, working
-  from independent sources.
+  from independent sources, if Q5's non-Claude judge passes its smoke test. Otherwise the drafter and
+  judges are labelled **same-family, different-tier**, reported as a limitation, and never called
+  cross-family. The same rule applies to every "cross-family" judge below.
 - SMEs validate a sample of items for the named domains and **every item** for the held-out domain.
 - SME-authored items are scored and reported separately as well.
 
@@ -99,8 +112,8 @@ only.
 - **Power.** A power calculation using Phase A variance is committed before Phase B. If power for
   criterion 1 is below 0.8, Phase B grows to at least 24 briefs at 2 seeds, still drawn by the
   sealed procedure.
-- **Criterion 3** is a pooled test across Opus and Sonnet. Per-model results are reported alongside
-  it.
+- **Criterion 3** is tested on Opus, the only model that runs v2−lens in Phase B (D-073). Criteria 1
+  and 2 are pooled across Opus and Sonnet, with per-model results reported alongside.
 
 ## Ship criteria for v2.0 (all must hold)
 
@@ -108,11 +121,46 @@ only.
 2. **M2:** v2 is preferred over v1 in at least 60% of comparisons.
 3. **Lens:** v2 − v2−lens on M1 is greater than 0, with a pooled CI that excludes 0.
 4. **No regression:** no model shows v2 more than 5 points below v1 on M1.
-5. **Cost:** v2's median dollars per run is at most `eval.cost_multiplier_max` × v1's (the ceiling
+5. **Speed:** v2-fast p50 wall time ≤ v1's. v2 deep p50 ≤ `eval.wall_multiplier_max` × v1's (committed at M0).
+6. **Artifact (absolute and relative):** every applicable rubric dimension is ≥ L2 on ≥ 90% of v2
+   artifacts (machine and judged), **and** v2 ≥ v1-mvp and ≥ v1 on M8 (pooled), with SMEs agreeing in
+   direction.
+7. **Cost:** v2's median dollars per run is at most `eval.cost_multiplier_max` × v1's (the ceiling
    is 3×; the exact value is set from Phase A and committed before Phase B). M1 points per dollar
-   for v2-quick is also reported against v1.
-6. **SME:** v2 beats v1 on M3 in a paired sign test. If fewer than 2 SMEs per domain could be
-   recruited, M3 is reported as a non-blocking signal, and that downgrade is logged as a decision.
+   for v2-fast is also reported against v1.
+8. **SME:** v2 beats v1 on M3 in a paired sign test. If fewer than 2 SMEs per domain could be
+   recruited, the fallback pre-registered for that domain at M0 applies (for example a practitioner
+   panel from public sources), and M3 becomes a non-blocking signal only with the owner's explicit
+   sign-off, logged as a decision.
+9. **Human input:** v2's median human interventions per run (M9) ≤ v1's.
+
+Criteria are measured on `v2`, the product default with adaptation on (D-070).
+
+## Specialist skills: per-skill comparison (D-065, D-073)
+
+The **8 specialists** are compared with their own v1 versions. meta-research is excluded: it is a
+rebuilt alias of meta-lens in brief form, covered by the main eval (D-072).
+- **Tasks:** 3 sealed tasks per skill, dev-independent, added to the M0 sealing list.
+- **Runs:** Opus, 1 seed, deep mode. `--fast` is measured for speed (M10) only.
+- **Metrics:** blind pairwise preference (M2-style); the skill's own gates (for example, P2 sibling
+  pass rate, PL2 defects, the CR1 every-item-checkable rule); M8 for skills that produce artifacts
+  (meta-design, meta-mvp).
+- **SME fallback** is pre-registered per skill, as for domains; waiving it needs the owner's sign-off.
+
+**Decision rule:**
+- **Suite claim:** a pooled test across the 8 skills. v2 is preferred over v1, with a
+  cluster-bootstrap CI that excludes 50%.
+- **Per skill (non-inferiority):** v2 ships if its own gates pass, its preference is ≥ 50%, and its
+  `--fast` p50 ≤ v1's.
+
+A skill that misses ships as its v1 inside the v2 suite, as the per-skill plan B in
+[suite map](11-suite.md).
+
+## The "works best with Opus 5.5" claim (VR-23)
+
+- **v1 stays the default install** until v2.0 meets every ship criterion.
+- "Works best with Opus 5.5" may be said only if v2 on Opus beats v2 on Sonnet **and** on Haiku on M1 and M8, with pooled CIs that exclude 0.
+- Otherwise, the framing states the measured per-tier results ("strongest on X, good on Y"). No claim goes beyond the data.
 
 ## Outputs
 

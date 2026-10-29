@@ -6,12 +6,11 @@ unstructured answer would not contain.
 **Internal construct:** —
 
 **In:** the artifact's findings and a plain baseline answer to the same `Brief`. The baseline uses
-the same model, with no lens, no gather and the quick budget.
+the same model, with no lens, no gather and the `fast` mode budget.
 **Out:** `DeltaReport`
 
 **Contract**
-- **Runs only in the deep tier and in eval** (config: `tiers.<tier>.r2`). This keeps standard runs
-  affordable.
+- **Per mode** (config: `modes.<mode>.r2`; values in the [modes table](../03-architecture.md#modes-deep-default-and---fast-d-066)): off in `fast`; R2-lite in `deep_narrow` (D-060: `review.r2.lite_max_findings` sampled findings, one baseline); full in `deep_broad` and in eval.
 - **Fresh baseline every run.** The baseline is never cached across briefs.
 - **Eligible findings.** Only these kinds count:
   - `verified`

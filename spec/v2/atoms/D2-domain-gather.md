@@ -16,7 +16,7 @@
 - **Every claim names its source.**
   - A locator (URL or document reference). No long quotes.
   - An `independence_key`: the publisher or origin.
-- **Model tier.** Configurable (`roles.gather`). The default is a fast, cheap model; judges use a
+- **Model tier.** Configurable (`roles.gather`). Regions that D1 flags as contested, or that a review sends back, use `roles.gather_contested`, a stronger model by default. The default for other regions is a fast, cheap model; judges use a
   top-tier model.
 - **Gather is not synthesis.** No summarising; synthesis happens in L3.
 - **Targeted re-gather.** L1, R1 or R2 can trigger a re-gather of a single region. Re-entry to D2

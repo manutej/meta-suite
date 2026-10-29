@@ -10,9 +10,10 @@ declared verdict enum) or `answer` (produce a typed short answer, for example a 
 **Out:** `Judgment[]` and an aggregate verdict or answer set
 
 **Contract**
+- **Batched (Opus-native, D-059).** `meta sample run` takes n tasks × k samples in one call. One subagent executes the batch in a **programmatic tool-calling loop** and records the results in bulk, so there is no chat round-trip per judgment. Stable prompt prefixes come first, so caching applies.
 - **Issue.** `meta sample issue` writes k task files. Each records the prompt hash, the role (from
-  the run's model map) and the producer model. k defaults to the tier value (config:
-  `tiers.<tier>.k`) and is always odd.
+  the run's model map) and the producer model. k defaults to the mode value (config:
+  `modes.<mode>.k`) and is always odd.
 - **Execute.** The host model, or a subagent, executes each task in a context that has no access to
   the material being judged beyond what the task contains. It records the result with
   `meta sample record`.

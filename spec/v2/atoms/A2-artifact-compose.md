@@ -23,6 +23,9 @@ skeleton from L3
 - **Assumptions are shown,** including unsupported-type mappings and residual drift.
 - **"How this was checked"** is a plain-language section (P12) built only from the actual gate
   reports. It includes `unchecked` predicates and `kernel=absent` when they apply.
+- **Artifact bar (D-056, D-069).** [Rubric](../12-artifact-rubric.md) Level 2 on every applicable dimension (D1–D10; N/A per form as the rubric lists), checked by `meta rubric` and R1's rendered review before "done". Exemplars are the owner's own artifacts, read locally and never committed (P13).
+- **L3 pass (deep mode).** After L2 is met, one R1-driven pass targets the dimensions where L3 is reachable.
+- **Reusable takeaways.** For meta-research and meta-review, a user-facing section lists the knowledge atoms and lessons the run produced.
 - **Rendering** uses the host artifact type or the existing design skills, with the user's or
   host's design system. Nothing visual is hardcoded.
 

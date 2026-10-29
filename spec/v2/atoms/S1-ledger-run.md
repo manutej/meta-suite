@@ -14,14 +14,14 @@
   - `kernel` flag (present or absent)
   - model map
   - `config_hash`, `schema_version`, `playbook_hash`
-  - seed and tier
+  - seed and mode
   - `usage`, with its source (`api`, `harness` or `estimated`)
   - wall time per stage
   - every gate verdict, judgment and edit script
   - blind attestations
   - the internal-view flag
 - **Append-only, under a file lock.** A correction is a new event.
-- **Runs stay in the user's workspace.** They are never committed. CI checks that `runs/` is
+- **Runs stay in the user's workspace.** They are never committed. `meta check` verifies that `runs/` is
   gitignored (P13).
 
 **Check:** G1 on every event.
