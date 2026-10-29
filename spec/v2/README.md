@@ -1,6 +1,6 @@
 # meta-suite v2 — specification
 
-**Status:** DRAFT v0.2 (after review round 1) · branch `v2` · v1 baseline = commit `8cdbf73`
+**Status:** DRAFT v0.3 (after review rounds 1–2) · branch `v2` · v1 baseline = commit `8cdbf73`
 (v1.2.0, untouched on `main`)
 
 **Skill:** `meta-lens`. Five lanes run in order: **Frame → Map → See → Make → Check**.
@@ -33,4 +33,5 @@ to the reader.
 |---|---|
 | v0.1 | Drafted from the design conversation of 2026-10-29. |
 | v0.2 | Blind review round 1: two independent critics, one on scope and coherence, one on feasibility and eval validity. All P1 findings were applied, recorded as D-017 to D-035. |
-| next | Optional review round 2, then freeze as **spec 1.0** at M0 exit. |
+| v0.3 | Round 2: an independent audit against the working sheaf-core repo (70/70 tests, toy proof, Go port parity 11/11). G3 gets three real sheaf layers. L3 coherence, the D1 covering condition and Claim units were added (D-038 to D-046). |
+| next | Fold in the M0 spike results, then freeze as **spec 1.0** at M0 exit. |

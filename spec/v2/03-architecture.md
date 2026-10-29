@@ -24,8 +24,8 @@
 
 | Kind | Atoms | Verdict |
 |---|---|---|
-| Deterministic | G1, G2, G6 | Pure computation, reproducible from run files alone. |
-| Kernel-aggregated | G3, G4, G5, R2 | Computed over recorded LLM judgments. Reproducible given the judgment files. |
+| Deterministic | G1, G2, G6, G3 layers 1–2 (numeric sheaf, relational cycles) | Pure computation, reproducible from run files alone. |
+| Kernel-aggregated | G3 pairwise + layer 3 (judgment balance), G4, G5, R2 | Computed over recorded LLM judgments. Reproducible given the judgment files. |
 
 **Canonical format:** every typed object is **JSON** (validated by G1). XML is only a rendering of a
 contract inside prompts.
@@ -93,13 +93,14 @@ Where a surface exposes no usage data, the run records call counts and is labell
 |---|---|
 | `Brief` | `raw`, `question_types[1..2]`, `objective`, `audience`, `constraints[]`, `targets[]` (L1 subjects), `views?[2]` (L4), `medium?`, `stakes`, `attachments[]`, `assumptions[]`, `vocab_allowlist[]` |
 | `Spec` | `objective`, `slots[]` (name, type, required, origin ∈ {stated, inferred, default}), `constraints[]` (+origin), `success_criteria[]` (each → a finding kind or gate), `hash` |
-| `Cover` | `tree` (nodes: id, question, answer_type, children[]), `regions[]` (id, scope, node_ids[]), `overlaps[]` (region pair, shared node/object ids), `relation_vocab[]` |
-| `Claim` | `id` (kernel ULID), `subject`, `relation`, `object`, `value?`, `source` (locator, retrieved_at, independence_key), `region`, `stage_token` (kernel-issued: run, region, agent, model, prompt_hash) |
+| `Cover` | `universe[]`, `tree` (nodes: id, question, answer_type, children[]), `regions[]` (id, element ids ⊆ universe), computed `overlaps[]` and `triple_overlaps[]`, `relation_vocab[]` (each: name, `value_type` ∈ {qualitative, numeric, relative}, unit dimension?) |
+| `Claim` | `id` (kernel ULID), `subject`, `relation`, `object`, `value?`, `value_type`, `unit?` (normalized by the kernel to the canonical unit in config), `as_of?`, `source` (locator, retrieved_at, independence_key), `region`, `stage_token` (kernel-issued: run, region, agent, model, prompt_hash) |
 | `RegionGraph` / `DomainGraph` | `objects[]` (id, kind, labels), `morphisms[]` (id, src, dst, relation_type, claim_ids[]), `shape_metrics` (hub_concentration, longest_chain, two_sidedness, temporal_density) |
 | `Interface` | `regions[2]`, `identified_objects[]`, `identified_relations[]`, `declared_by` |
-| `ConflictEdge` | `claim_a`, `claim_b`, `block_key`, `judgment_ids[]`, `verdict` |
+| `ConflictEdge` | `claim_a`, `claim_b`, `block_key`, `judgment_ids[]`, `votes` (per verdict), `verdict` |
+| `G3Report` | per key/component: `h0`, `discord` (per edge, per region), `harmonic_share` + `harmonic_null`, `balance` (balanced/frustrated + section), `near_zero_ambiguous`, `judged_pairs`, `candidate_pairs` |
 | `Finding` | `id`, `kind` ∈ {verified, single_source, exception, tension, obstruction, profile_trait, coarse_model, uncertain}, `sides?[2]` (each: label, claim_ids[]), `evidence[]` (claim ids), `region?`, `confidence` ∈ {settled, single_source, contested, uncertain}, `plain_text` |
-| `Judgment` | `id`, `task` (judge or answer), `prompt_hash`, `model`, `temperature`, `producer_model`, `output`, `blind` |
+| `Judgment` | `id`, `task` (judge or answer), `prompt_hash`, `model`, `temperature`, `producer_model`, `output`, `blind` (aggregates expose vote counts, not only the majority) |
 | `DriftReport` | `fields[]` (name, match, judgment_ids[]), `drift`, `verdict` |
 | `DeltaReport` | `baseline_hash`, `delta_finding_ids[]`, `count`, `verdict` |
 | `ArtifactPlan` | `form`, `layout`, `host_type?`, `rule_id`, `rationale` |
@@ -153,9 +154,11 @@ The capability matrix is resolved in the M0 spike:
 ## Repository layout (v2 additions)
 
 ```
-kernel/                       Go module: cmd/meta, internal/{schema,gates,ledger,loop,sample,graph}
+kernel/                       Go module: cmd/meta, internal/{schema,gates,ledger,loop,sample,graph,sheaf}
   schemas/*.json              core types (versioned)
-  config/defaults.toml        every threshold, tier value and rule table (hashed per run)
+  config/defaults.toml        every threshold, tier value, rule table and canonical-unit table (hashed per run)
+  internal/sheaf/             Go port of the sheaf-core graph subset (D-038); CI parity vs golden reports
+  testdata/sheaf/             golden fixtures + oracle reports (`frontier-sheaf/v1`)
 skills/meta-lens/
   SKILL.md                    L0 trailhead, ≤500 words; step 0 = kernel probe
   index.md                    L1: question types → operators → files

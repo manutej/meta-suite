@@ -30,7 +30,7 @@ Any later change is logged as a decision and flagged in the report.
 |---|---|
 | **v1** | meta-suite 1.2.0 `meta-research` (decompose → cross-verify → cite), its native output |
 | **v2** | `meta-lens`, standard tier |
-| **v2−lens** | v2 with L1, L3's interface discipline, L4, G3 and G4 off (see below) |
+| **v2−lens** | v2 with L1, L3's interface discipline, L4, G4 and **all three G3 layers** off (see below) |
 | **v2-quick** | v2 at quick tier; a secondary row that roughly matches v1's cost |
 | **baseline** | same model, same tools, plain request |
 
@@ -77,7 +77,7 @@ The two contrasts:
 | M2 | Blind pairwise preference | Cross-family judge, position-swapped, on normalized text: v2 vs v1, and v2 vs v2−lens |
 | M3 | SME panel | At least 2 SMEs per domain, blind to arm. They score depth, correctness, and "did I learn something?" |
 | M4 | Operadic consistency | From G4. Its correlation with M1 decides whether G4 is promoted. |
-| M5 | Contested-fact precision | The share of G3 obstructions a judge and an SME confirm as genuinely contested |
+| M5 | Contested-fact precision | The share of G3 obstructions a judge and an SME confirm as genuinely contested, reported **separately** for numeric-layer obstructions (layers 1–2) and judgment-layer obstructions (pairwise + layer 3) |
 | M6 | Cost | Dollars, tokens and wall time per run, from usage logs only. M1 points per dollar are also reported. |
 | M7 | Stability | Between-seed variance of M1 and M2 |
 

@@ -29,6 +29,7 @@ in their own papers are treated as hypotheses until the eval reproduces them.
 | E22 | Anthropic — [Effective context engineering for AI agents](https://anthropic.com/engineering/effective-context-engineering-for-ai-agents) (2025) | guidance | right altitude, sub-agents, minimal high-signal tokens |
 | E23 | Anthropic — [Equipping agents with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (2025) | guidance | progressive disclosure; descriptions drive triggering |
 | E24 | Opsahl-Ong et al. — *MIPROv2*, [arXiv:2406.11695](https://arxiv.org/abs/2406.11695) | EMNLP 2024 | optimize instructions and examples jointly (v2.x) |
+| E26 | manutej/sheaf-core (private; Rust): the test oracle for G3. Independent review on 2026-10-29: workspace tests 70/70 passing; Python↔Rust parity worst error 4.67e-16; toy proof — a planted inconsistent region was pinpointed (energy 0 → 108, residual concentrated on the planted region); a cycle shift localized to its cycle; a frustrated judgment set gave H⁰ = 0; a 265-line Go/gonum port matched 11/11 fixtures (worst error 2.4e-12) | internal, tested | G3 layers, D-038 parity plan |
 | E25 | Suzgun et al. — *Dynamic Cheatsheet*, [arXiv:2504.07952](https://arxiv.org/abs/2504.07952) | preprint | persistent memory (residue, parked); risk that wrong entries persist, hence no promotion in v2.0 |
 
 **Searched and not found:** the gluing construction attributed to Grant & Wang (CWRU), which

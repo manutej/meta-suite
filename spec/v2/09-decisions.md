@@ -51,3 +51,21 @@ Every P1 finding was accepted. The P2 and P3 findings were accepted except where
 | D-035 | 2026-10-29 | **Supersedes D-015.** Thresholds, briefs and rubrics freeze at **M0** as the hashed config plus `evals/sealed/`. | Pre-registration was dated inconsistently across the spec. | 05, 06 |
 | D-036 | 2026-10-29 | **The pipeline skill is named `meta-lens`.** `meta-atlas` and `meta-forge` were rejected. | The name says what sets the skill apart (how it sees). The rejected names collide with existing skills (`/atlas`, the Forge plugins) and emphasize the output instead. | Q2 closed |
 | D-037 | 2026-10-29 | **Five user-facing lanes inside the one skill: Frame → Map → See → Make → Check.** The lanes are stages, not separate skills. The user picks only the question type. When the v1 skills are ported (v2.x), they become specialists behind `meta-lens` as the front door. | Keeps the plugin simple to use, and lets the internal structure be explained in plain words. | 03 lane column, 04 lane map |
+
+## Review round 2: sheaf-core integration audit (2026-10-29)
+
+An independent agent, given the sheaf-core repo and the v0.2 spec, reviewed G3/L3/D1 against working,
+tested sheaf code.
+
+| ID | Date | Decision | Why | Consequence |
+|---|---|---|---|---|
+| D-038 | 2026-10-29 | **The Go kernel embeds a port of the sheaf-core graph subset**: δ⁰ with per-edge maps, components, per-component eigen cut, H⁰/H¹ by counting, energy/discord, Hodge split, Gaussian null, relative H⁰ + dense harmonic extension, and optionally δ¹ on triangles. It is tested in CI against golden reports from sheaf-core. Rust is only the oracle and is never shipped. **Committing the port is gated on Q12.** | One binary per platform, no version drift, and the Go prototype already matched 11/11 within 2.4e-12. Refines D-003. | `kernel/internal/sheaf`, `testdata/sheaf`, roadmap M1 |
+| D-039 | 2026-10-29 | **G3 gets three sheaf layers**: numeric key (deterministic), relational cycle (deterministic, Hodge harmonic share), and judgment balance (aggregated, reusing J1 votes). Free-text claims stay on pairwise judgments, and embedding stalks are banned. | Real computation wherever the claims have linear structure, and honesty where they don't. | G3, 03 G3Report |
+| D-040 | 2026-10-29 | **The two sides of an obstruction come from the layer-3 balance section.** A frustrated component becomes an obstruction with no sides, tagged contested. | Conflict components are not two-sided: A–B and B–C pull in C even when A and C agree. | G3, Finding |
+| D-041 | 2026-10-29 | **L3 merge checks coherence with union-find** against J1 "distinct" constraints, and refuses closures that join objects judged distinct. | Colimits over 3+ regions merge transitively. | L3 |
+| D-042 | 2026-10-29 | **The Cover declares a universe and must satisfy the covering condition.** Overlaps and triple overlaps are computed, not declared, and adjacency means a non-empty overlap. | "Open cover" was empty language, and "adjacent" was defined in terms of overlaps. | D1, Cover |
+| D-043 | 2026-10-29 | **Claims carry `value_type`, `unit` and `as_of`, and the kernel normalizes units.** Units live in the data, never in the restriction maps. | No numeric layer is possible without it. Unit factors inside the maps produced a spurious "not unique" result in the toy. | Claim, D1 vocab |
+| D-044 | 2026-10-29 | **Amends D-025.** Linear relational cycle conflicts (3+ claims) are **in scope** through G3 layer 2. Three-way conflicts among free-text claims stay parked. | Layer 2 brings them back cheaply. | scope parking lot |
+| D-045 | 2026-10-29 | G3 reports `judged_pairs / candidate_pairs`, samples stratified by key when capped, and drops "locality" as a separate axiom: for claim sets it reduces to entity resolution, which is D3's job. D1's tree is called a decomposition tree, and G4 measures its composition. L4 states that the functor condition is unchecked in v2.0. | Undefined denominator, sampling bias, and terms the math didn't support. | G3, D1, L4 |
+| D-046 | 2026-10-29 | The v2−lens arm switches off **all three G3 layers**. M5 reports numeric and judgment obstructions separately. | Ablation hygiene. | eval |
+

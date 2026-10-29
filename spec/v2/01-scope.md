@@ -31,7 +31,7 @@
 - **Product and service layers:** Stitch integration, watch mode and alerting, a hosted service, a
   public API.
 - **Swapping prompts mid-stage.** Promoting playbook entries or loading them into context.
-- **Rust.** New question types (`path`, `tradeoff`, `analogy`, `monitor`).
+- **Rust in the shipped kernel.** Rust is used only as the test oracle (sheaf-core, D-038). New question types (`path`, `tradeoff`, `analogy`, `monitor`).
 - **Custom UI** beyond the host's artifact types and the existing design skills.
 - **`meta-score` integration**, until its source is verified.
 - **Articles and marketing collateral.** These are a separate track that uses this spec as input.
@@ -44,7 +44,7 @@
 | Domain residue (formerly atom S3): saved domain graph reused as a prior | creates dependence between eval runs | v2.1 |
 | Playbook promotion and loading (S2 levels 3–4) | needs ablations at eval scale | v2.1 |
 | `tradeoff` question type + adjunction operator (beyond the intake round trip) | not needed to prove the lens | v2.1 |
-| Minimal conflicting sets, and conflicts visible only among 3+ claims | exponential judgment cost | v2.1 |
+| Minimal conflicting sets; three-way conflicts among **free-text** claims (linear relational cycles are in scope via G3 layer 2, D-044) | exponential judgment cost | v2.1 |
 | `analogy` question type + functor operator | not needed to prove the lens | v2.2 |
 | Port the v1 skills onto the kernel; v2 in non-Claude bundles | only after v2.0 passes eval | v2.x |
 | `meta-score` | source unverified | v2.x |
