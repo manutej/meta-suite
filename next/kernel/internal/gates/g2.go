@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/manutej/meta-suite/next/kernel/internal/claims"
+	"github.com/manutej/meta-suite/next/kernel/internal/findings"
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
 	"github.com/manutej/meta-suite/next/kernel/internal/ledger"
 	"github.com/manutej/meta-suite/next/kernel/internal/model"
@@ -95,7 +96,8 @@ func G2Inputs(r *runs.Run) []string {
 //
 // D-081: claim text fields matching any injection pattern (config gates.g2.injection_patterns) are listed
 // as injection_suspect warnings. Warnings never change the verdict; they are for a reviewer to look at.
-func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G2Report, error) {
+func G2(r *runs.Run, fp findings.Params, injection []string) (*G2Report, error) {
+	minIndependent, strip := fp.MinIndependent, fp.StripPrefixes
 	rep := &G2Report{Gate: "G2", Problems: []Problem{}, Warnings: []Warning{}, Inputs: []string{}}
 	pats := make([]*regexp.Regexp, 0, len(injection))
 	for _, p := range injection {
@@ -355,6 +357,11 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				}
 			}
 		}
+		// D-097: findings.jsonl and conflicts.json must be exactly what `meta findings verify` computes from
+		// claims.jsonl (minus retractions) with this config: a hand edit cannot fake a verified finding.
+		if p := editedFindings(r, fp, lines); p != nil {
+			add(*p)
+		}
 		// D-097: every live claim is primary evidence in exactly one finding; otherwise the findings predate
 		// the claims (a merge after `findings verify`).
 		ids := make([]string, 0, len(byID))
@@ -416,6 +423,80 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 		}
 	}
 	return rep, nil
+}
+
+// editedFindings recomputes findings and conflicts with the same code path as `meta findings verify` and
+// returns a problem naming the first finding (or conflict) whose content differs, or nil.
+func editedFindings(r *runs.Run, fp findings.Params, lines []fsx.Line) *Problem {
+	live, err := claims.Load(r)
+	if err != nil {
+		return &Problem{Check: "findings_independent_and_sourced", File: runs.ClaimsFile, Detail: "cannot recompute findings: " + err.Error()}
+	}
+	want, wantConf := findings.Verify(live, fp)
+	canon := func(v any) string { b, _ := fsx.Compact(v); return string(b) }
+	wantBy := map[string]string{}
+	for _, f := range want {
+		wantBy[f.ID] = canon(f)
+	}
+	gotBy := map[string]string{}
+	for _, l := range lines {
+		var f model.Finding
+		if json.Unmarshal(l.Raw, &f) != nil || f.ID == "" {
+			f.ID = fmt.Sprintf("line %d", l.N)
+		}
+		if _, dup := gotBy[f.ID]; dup {
+			f.ID += fmt.Sprintf(" (again at line %d)", l.N)
+		}
+		gotBy[f.ID] = canon(f)
+	}
+	all := map[string]bool{}
+	for id := range wantBy {
+		all[id] = true
+	}
+	for id := range gotBy {
+		all[id] = true
+	}
+	ids := make([]string, 0, len(all))
+	for id := range all {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		if wantBy[id] != gotBy[id] {
+			return &Problem{Check: "findings_independent_and_sourced", File: runs.FindingsFile, ID: id,
+				Detail: "findings were edited after `meta findings verify` (or are stale): " + id + " differs from the recomputed finding; run `meta findings verify`"}
+		}
+	}
+	var gotConf findings.Conflicts
+	if err := r.ReadJSONFile(runs.ConflictsFile, &gotConf); err != nil {
+		return &Problem{Check: "findings_independent_and_sourced", File: runs.ConflictsFile, Detail: "conflicts.json is missing or unreadable: run `meta findings verify`"}
+	}
+	wc, gc := map[string]string{}, map[string]string{}
+	for _, c := range wantConf.Conflicts {
+		wc[c.ID] = canon(c)
+	}
+	for _, c := range gotConf.Conflicts {
+		gc[c.ID] = canon(c)
+	}
+	cids := map[string]bool{}
+	for id := range wc {
+		cids[id] = true
+	}
+	for id := range gc {
+		cids[id] = true
+	}
+	ordered := make([]string, 0, len(cids))
+	for id := range cids {
+		ordered = append(ordered, id)
+	}
+	sort.Strings(ordered)
+	for _, id := range ordered {
+		if wc[id] != gc[id] || len(wantConf.Conflicts) != len(gotConf.Conflicts) {
+			return &Problem{Check: "findings_independent_and_sourced", File: runs.ConflictsFile, ID: id,
+				Detail: "conflicts were edited after `meta findings verify` (or are stale): " + id + " differs from the recomputed record; run `meta findings verify`"}
+		}
+	}
+	return nil
 }
 
 func sortedIDs(m map[string]model.Retraction) []string {

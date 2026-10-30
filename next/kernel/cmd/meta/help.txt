@@ -203,7 +203,9 @@ a kernel-issued, unedited token for its region; claims.jsonl equals the shards; 
 existing claims of its region; no object outside a morphism; every claim is in its region graph;
 every finding's evidence and supporting claims exist; every live claim is primary evidence in exactly
 one finding (otherwise the findings are stale: run `meta findings verify`); a verified finding really
-has >= min_independent distinct publishers across evidence and supporting; a tension has a claim on each side.
+has >= min_independent distinct publishers across evidence and supporting; findings.jsonl and
+conflicts.json equal what `meta findings verify` computes now from claims.jsonl (minus retractions)
+with this config, so a hand-edited finding or conflict fails ("edited after `meta findings verify`"); a tension has a claim on each side.
 Also (D-081) warnings: claim text matching config gates.g2.injection_patterns is listed as
 injection_suspect. Warnings do not change the verdict; review them and drop claims that carry
 instructions rather than facts.

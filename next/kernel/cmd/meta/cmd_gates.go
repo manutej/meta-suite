@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/manutej/meta-suite/next/kernel/internal/findings"
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
 	"github.com/manutej/meta-suite/next/kernel/internal/gates"
 	"github.com/manutej/meta-suite/next/kernel/internal/kerr"
@@ -24,7 +25,9 @@ func cmdGateG2(e *env, args []string) int {
 	if err != nil {
 		return e.fail(err)
 	}
-	rep, err := gates.G2(r, e.cfg.Lens.Pullback.MinIndependent, e.cfg.Independence.StripPrefixes, e.cfg.Gates.G2.InjectionPatterns)
+	fp := findings.Params{MinIndependent: e.cfg.Lens.Pullback.MinIndependent, NumericRelTol: e.cfg.Lens.Pullback.NumericRelTol,
+		StripPrefixes: e.cfg.Independence.StripPrefixes, AsOfWindow: e.cfg.Lens.Pullback.AsOfWindow}
+	rep, err := gates.G2(r, fp, e.cfg.Gates.G2.InjectionPatterns)
 	if err != nil {
 		return e.failRun(r, "gate G2", err)
 	}

@@ -477,3 +477,61 @@ func TestEditStageFitsTarget(t *testing.T) {
 		}
 	}
 }
+
+// D-097 (round 3): G2 recomputes findings and conflicts; a hand-edited verified finding or conflict fails.
+func TestG2RefusesEditedFindingsAndConflicts(t *testing.T) {
+	dir := newRun(t, "deep", true)
+	tok := token(t, dir, "D2", "region-a", "gather-a")
+	add := func(org, pub, asOf string) {
+		in := strings.Replace(numClaim("headcount", 100, "count"), `"value_type"`, `"as_of":"`+asOf+`","value_type"`, 1)
+		in = strings.ReplaceAll(strings.ReplaceAll(in, "Org Alpha", org), "a.example", pub)
+		must(t, in, "claim add", dir, "--token", tok)
+	}
+	add("Org Alpha", "a.example", "2026-05")
+	add("Org Beta", "b.example", "2026-06")
+	must(t, "", "claims merge", dir)
+	must(t, "", "graph build", dir)
+	must(t, "", "interface merge", dir, "--plain")
+	must(t, "", "findings verify", dir)
+	must(t, "", "gate G2", dir)
+
+	// Forge: Org Beta's June claim as supporting on Org Alpha's May finding, marked verified.
+	fpath := filepath.Join(dir, "findings.jsonl")
+	orig, _ := os.ReadFile(fpath)
+	fs := readJSONL(t, fpath)
+	var beta string
+	for _, f := range fs {
+		if f["key"].(map[string]any)["subject"] == "org beta" {
+			beta = f["evidence"].([]any)[0].(string)
+		}
+	}
+	var lines []string
+	forged := ""
+	for _, f := range fs {
+		if f["key"].(map[string]any)["subject"] == "org alpha" {
+			f["supporting"] = []any{beta}
+			f["kind"], f["confidence"] = "verified", "settled"
+			f["independence_keys"] = []any{"a.example", "b.example"}
+			forged = f["id"].(string)
+		}
+		b, _ := json.Marshal(f)
+		lines = append(lines, string(b))
+	}
+	os.WriteFile(fpath, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+	r := meta(t, "", "gate G2", dir)
+	if r.code != 1 || !strings.Contains(r.stdout, "findings were edited after `meta findings verify`") || !strings.Contains(r.stdout, forged) {
+		t.Fatalf("forged verified finding passed G2: %+v", r)
+	}
+	os.WriteFile(fpath, orig, 0o644)
+	must(t, "", "gate G2", dir)
+
+	// Forge: drop the disagreement from the synthetic e2e scenario's conflicts.json.
+	dir = pipeline(t)
+	must(t, "", "interface merge", dir, "--plain")
+	must(t, "", "findings verify", dir)
+	must(t, "", "gate G2", dir)
+	os.WriteFile(filepath.Join(dir, "conflicts.json"), []byte(`{"conflicts":[]}`), 0o644)
+	if r := meta(t, "", "gate G2", dir); r.code != 1 || !strings.Contains(r.stdout, "conflicts were edited after `meta findings verify`") {
+		t.Fatalf("emptied conflicts.json passed G2: %+v", r)
+	}
+}
