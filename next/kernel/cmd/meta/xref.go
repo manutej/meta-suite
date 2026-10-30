@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
 	runs "github.com/manutej/meta-suite/next/kernel/internal/rundir"
@@ -133,14 +134,19 @@ func crossCheck(r *runs.Run, typ string, doc []byte) ([]schema.Error, *Xref) {
 		info.Against, info.Skipped = ids.against(runs.FindingsFile, runs.SectionMapFile, runs.ConflictsFile, runs.ClaimsFile, runs.CoverFile, runs.ArtifactPage)
 		var es struct {
 			Edits []struct {
-				TargetID  string `json:"target_id"`
-				Rationale string `json:"rationale"`
+				TargetStage string `json:"target_stage"`
+				TargetID    string `json:"target_id"`
+				Rationale   string `json:"rationale"`
 			} `json:"edits"`
 		}
 		json.Unmarshal(doc, &es)
 		for i, e := range es.Edits {
-			if !ids.known(e.TargetID) {
+			kinds := ids.kinds(e.TargetID)
+			if len(kinds) == 0 {
 				bad(fmt.Sprintf("/edits/%d/target_id", i), fmt.Sprintf("%q is not a finding, section, conflict, claim, region, sub-question or page element id in this run", e.TargetID))
+			} else if allowed := stagesFor(kinds); !allowed[e.TargetStage] {
+				bad(fmt.Sprintf("/edits/%d/target_stage", i), fmt.Sprintf("target_stage %s does not fit a %s id; one of %s (page wording goes to A2)",
+					e.TargetStage, strings.Join(kinds, " or "), strings.Join(sortedMapKeys(allowed), ", ")))
 			}
 			for _, c := range uniq(citedIDRe.FindAllString(e.Rationale, -1)) {
 				if !ids.findings[c] && !ids.conflicts[c] {
@@ -200,10 +206,46 @@ func crossCheck(r *runs.Run, typ string, doc []byte) ([]schema.Error, *Xref) {
 	return errs, info
 }
 
-// known: an id an edit may target. Page element ids ("f-<finding>", "s-<section>") count, as do the bare ids.
-func (x *runIDs) known(id string) bool {
-	return x.findings[id] || x.sections[id] || x.conflicts[id] || x.claims[id] || x.regions[id] || x.nodes[id] || x.page[id] ||
-		(len(id) > 2 && id[:2] == "f-" && x.findings[id[2:]]) || (len(id) > 2 && id[:2] == "s-" && x.sections[id[2:]])
+// targetStages maps the kind of id an edit targets to the stages that can change it (D-097, index.md's stage
+// table): page elements and sections are page work (A1, A2); a finding can be reworded (A2), re-gathered (D2),
+// relabelled (D3), split (L3) or retracted from (L2); a claim is re-gathered, relabelled or retracted; a
+// region or sub-question belongs to the split (D1) or to gathering; a sub-question also to the spec (I2).
+var targetStages = map[string][]string{
+	"page element": {"A1", "A2"},
+	"section":      {"A1", "A2"},
+	"finding":      {"A2", "A1", "D2", "D3", "L3", "L2"},
+	"conflict":     {"A2", "D2", "L3", "L2"},
+	"claim":        {"D2", "D3", "L2"},
+	"region":       {"D1", "D2"},
+	"sub-question": {"I2", "D1", "D2"},
+}
+
+// kinds lists what an id is in this run (an id can be several: a page element "f-<finding>" is both).
+func (x *runIDs) kinds(id string) []string {
+	var k []string
+	add := func(ok bool, kind string) {
+		if ok {
+			k = append(k, kind)
+		}
+	}
+	add(x.page[id], "page element")
+	add(x.sections[id] || (len(id) > 2 && id[:2] == "s-" && x.sections[id[2:]]), "section")
+	add(x.findings[id] || (len(id) > 2 && id[:2] == "f-" && x.findings[id[2:]]), "finding")
+	add(x.conflicts[id], "conflict")
+	add(x.claims[id], "claim")
+	add(x.regions[id], "region")
+	add(x.nodes[id], "sub-question")
+	return k
+}
+
+func stagesFor(kinds []string) map[string]bool {
+	out := map[string]bool{}
+	for _, k := range kinds {
+		for _, s := range targetStages[k] {
+			out[s] = true
+		}
+	}
+	return out
 }
 
 func uniq(s []string) []string {

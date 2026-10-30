@@ -95,3 +95,18 @@ func TestDeterministic(t *testing.T) {
 }
 
 func itoa(i int) string { return strconv.Itoa(i) }
+
+// D-097: text inside <internal>…</internal> is skipped in every file type; the same words outside it still hit.
+func TestInternalBlocksSkipped(t *testing.T) {
+	rep := scan(t, map[string]string{
+		"op.md":     "Plain words.\n<!-- <internal>A pullback over the\nsheaf of claims.</internal> -->\nA morphism here.",
+		"page.html": "<p>Fine.</p><internal>colimit</internal><p>A functor.</p>",
+	}, nil)
+	got := []string{}
+	for _, h := range rep.Hits {
+		got = append(got, h.File+":"+h.Term+"@"+itoa(h.Line))
+	}
+	if strings.Join(got, " ") != "op.md:morphism@4 page.html:functor@1" {
+		t.Fatalf("hits %v", got)
+	}
+}

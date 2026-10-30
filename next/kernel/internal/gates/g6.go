@@ -89,10 +89,10 @@ func G6(files []string, read func(string) ([]byte, error), c G6Config, allow []A
 			return nil, err
 		}
 		rep.Files = append(rep.Files, f)
-		text := b
+		text := MaskInternal(b)
 		ext := strings.ToLower(filepath.Ext(f))
 		if ext == ".html" || ext == ".htm" || ext == ".svg" {
-			text = MaskHTML(b)
+			text = MaskHTML(text)
 		}
 		lineStarts := []int{0}
 		for i, ch := range b {
@@ -178,6 +178,26 @@ var (
 	attrRe    = regexp.MustCompile(`(?is)\b(alt|title|aria-label|placeholder|content)\s*=\s*("[^"]*"|'[^']*')`)
 	jsonType  = regexp.MustCompile(`(?i)type\s*=\s*["']?application/(ld\+)?json`)
 )
+
+var internalRe = regexp.MustCompile(`(?is)<internal\b[^>]*>.*?</internal\s*>`)
+
+// MaskInternal blanks every <internal>…</internal> block (D-097): text marked internal is for the model and
+// maintainers, never shown to a reader, so G6 skips it in any file. Offsets and newlines are kept.
+func MaskInternal(b []byte) []byte {
+	locs := internalRe.FindAllIndex(b, -1)
+	if len(locs) == 0 {
+		return b
+	}
+	out := append([]byte(nil), b...)
+	for _, l := range locs {
+		for i := l[0]; i < l[1]; i++ {
+			if out[i] != '\n' {
+				out[i] = ' '
+			}
+		}
+	}
+	return out
+}
 
 // MaskHTML blanks everything in an HTML document a reader does not see, keeping byte offsets and newlines.
 func MaskHTML(b []byte) []byte {

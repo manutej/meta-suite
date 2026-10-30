@@ -2,7 +2,7 @@
 
 <!-- <internal>A decomposition tree of sub-questions plus a cover of a declared universe by regions.
 Overlaps and triple overlaps are computed by the kernel, never declared; they become the cell complex
-for the gluing gate in a later slice.</internal> -->
+for the gluing gate in a later slice. Cap key: modes.<mode>.max_regions.</internal> -->
 
 ```xml
 <contract op="D1">
@@ -48,12 +48,13 @@ relation **carries a value** or not; the kernel does not enforce it, gatherers f
 - **Counts:** a numeric relation with `unit_dimension: "count"` ("9 of 27 member states": value 9,
   the denominator in the object or a second claim). Never encode a count as a derived percentage.
 - **Shares and rates:** `unit_dimension: "ratio"`, unit `%`.
-- **Money:** `unit_dimension: "currency"`; unit is an ISO code (`EUR`, `USD`), value in base units.
-  Codes are never converted.
+- **Money:** `unit_dimension: "currency"`; every claim needs a unit, an ISO 4217 code (`EUR`,
+  `USD`), with the value in base units. Codes are never converted.
 - **Dates:** a fact *about* a date (applies from, published on) puts the ISO date (`YYYY-MM-DD`) in
   the value. A fact that *holds as of* a date (a status, a count, "none so far") carries `as_of`:
-  claims verify each other only inside one as_of month, so the same words dated August and October
-  stay two findings.
+  claims verify each other only for the same period (`meta findings verify --help`), so the same words
+  dated August and October stay two findings, and a different value in a later month is shown as a
+  change.
 - **Positions:** `position_on` with values `supports | opposes | mixed`, for stakeholder views; a
   two-sided question also needs the role or option each side picks as a value-carrying relation.
 - Keep one fallback (`states`, object = a short factual sentence, no value) and expect it to be

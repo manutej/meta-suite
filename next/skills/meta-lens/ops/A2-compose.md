@@ -26,7 +26,8 @@ rendered only from kernel output (P12). G6 enforces that no internal construct r
 2. **Section map** in `plan.json`'s order: each section an `id`, a `tag`, the `finding_ids` it rests
    on. Tags **index** findings, they do not split them: a finding sits in its reasoning-order `main`
    section and may also be listed in a `contested`, `single_source` or `uncertain` index section.
-   `contested` covers every `conflicts.json` entry and every "kept apart" label; `uncertain` the
+   `contested` covers every `disagreement` in `conflicts.json` and every "kept apart" label; a
+   `changed_over_time` record sits in its reasoning-order section as a dated change; `uncertain` the
    unsettled or unanswered leaves in `coverage.json`. A section with no finding ids is cut, except
    `how_checked` and `assumptions`. `meta validate "$RUN/section_map.json"` (checks every id).
 3. **Verdict** from verified findings only: one or two sentences with the key number. Nothing

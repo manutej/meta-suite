@@ -198,39 +198,54 @@ func checkVocab(c *model.Claim, v Vocab) *Rejection {
 // Normalize converts a numeric or relative claim's value to its dimension's canonical unit. The dimension is
 // the vocabulary's unit_dimension when it names a configured dimension, otherwise the dimension whose table
 // holds the claim's unit. A unit that belongs to a different dimension than the vocabulary declares is
-// rejected. Code-only dimensions (config unit_codes, e.g. currency) are recognised and never converted; a
-// relation declared in one must use a listed code. It returns known=false for a unit in no table (kept as
-// given, Normalized nil); a canonical unit such as "%" is known and left unchanged (D-087).
+// rejected. It returns known=false for a unit in no table (kept as given, Normalized nil); a canonical unit
+// such as "%" is known and left unchanged (D-087).
+//
+// Code-only dimensions (config unit_codes, e.g. currency: any three-letter code, D-097) are never converted.
+// A relation declared in one needs a unit, upper-cased to its code form ("eur" -> "EUR"); a code-shaped unit
+// on a relation of another dimension is rejected.
 func Normalize(c *model.Claim, cfg *config.Config, v Vocab) (bool, *Rejection) {
-	if c.Unit == "" || (c.ValueType != "numeric" && c.ValueType != "relative") {
+	if c.ValueType != "numeric" && c.ValueType != "relative" {
+		return true, nil
+	}
+	declared := v[c.Relation].UnitDimension
+	if uc, ok := cfg.UnitCodes[declared]; ok {
+		up := strings.ToUpper(strings.TrimSpace(c.Unit))
+		switch {
+		case up == "":
+			return false, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/unit_codes/" + declared,
+				Message: fmt.Sprintf("relation %q is declared as %s: unit is required, a code such as EUR", c.Relation, declared)}}}
+		case uc.Match(up):
+			c.Unit = up
+			return true, nil
+		}
+		if d := tableDim(cfg, c.Unit); d != "" {
+			return true, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/units",
+				Message: fmt.Sprintf("unit %q measures %s, but relation %q is declared as %s", c.Unit, d, c.Relation, declared)}}}
+		}
+		return false, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/unit_codes/" + declared,
+			Message: fmt.Sprintf("relation %q is declared as %s: unit %q is not a code of it (pattern %s, list %q); use a code such as EUR, amount in base units", c.Relation, declared, c.Unit, uc.Pattern, uc.List)}}}
+	}
+	if c.Unit == "" {
 		return true, nil
 	}
 	val, isNum := c.Value.(float64)
 	if !isNum {
 		return true, nil
 	}
-	declared := v[c.Relation].UnitDimension
-	found, coded := "", false
-	for _, d := range sortedDims(cfg) {
-		if _, ok := cfg.Units[d].Factors[c.Unit]; ok {
-			found = d
-			break
+	found, coded := tableDim(cfg, c.Unit), false
+	if found == "" {
+		for _, d := range sortedDims(cfg) {
+			if uc, ok := cfg.UnitCodes[d]; ok && uc.Match(c.Unit) {
+				found, coded = d, true
+				break
+			}
 		}
-		if uc, ok := cfg.UnitCodes[d]; ok && containsStr(uc.Codes, c.Unit) {
-			found, coded = d, true
-			break
-		}
-	}
-	if uc, ok := cfg.UnitCodes[declared]; ok && found == "" {
-		return false, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/unit_codes/" + declared,
-			Message: fmt.Sprintf("relation %q is declared as %s: unit must be one of %v (amounts in base units, never converted)", c.Relation, declared, uc.Codes)}}}
 	}
 	if found == "" {
 		return false, nil
 	}
-	_, inUnits := cfg.Units[declared]
-	_, inCodes := cfg.UnitCodes[declared]
-	if (inUnits || inCodes) && declared != found {
+	if _, inUnits := cfg.Units[declared]; inUnits && declared != found {
 		return true, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/units",
 			Message: fmt.Sprintf("unit %q measures %s, but relation %q is declared as %s", c.Unit, found, c.Relation, declared)}}}
 	}
@@ -247,25 +262,28 @@ func Normalize(c *model.Claim, cfg *config.Config, v Vocab) (bool, *Rejection) {
 	return true, nil
 }
 
-func sortedDims(cfg *config.Config) []string {
-	dims := make([]string, 0, len(cfg.Units)+len(cfg.UnitCodes))
+// tableDim returns the convertible dimension whose factor table holds unit (case-sensitive), or "".
+func tableDim(cfg *config.Config, unit string) string {
+	dims := make([]string, 0, len(cfg.Units))
 	for d := range cfg.Units {
 		dims = append(dims, d)
 	}
+	sort.Strings(dims)
+	for _, d := range dims {
+		if _, ok := cfg.Units[d].Factors[unit]; ok {
+			return d
+		}
+	}
+	return ""
+}
+
+func sortedDims(cfg *config.Config) []string {
+	dims := make([]string, 0, len(cfg.UnitCodes))
 	for d := range cfg.UnitCodes {
 		dims = append(dims, d)
 	}
 	sort.Strings(dims)
 	return dims
-}
-
-func containsStr(list []string, s string) bool {
-	for _, x := range list {
-		if x == s {
-			return true
-		}
-	}
-	return false
 }
 
 // LineError locates a bad line in a shard.
@@ -439,33 +457,35 @@ func Retracted(r *runs.Run) (map[string]model.Retraction, error) {
 	return out, nil
 }
 
-// Retract appends a tombstone for claim id (D-087). The claim must be in a shard and not already retracted.
-// Nothing is deleted: shards stay append-only, and merge, graph, findings, G2 and report skip the claim.
-func Retract(r *runs.Run, id, reason, stage string) (*model.Retraction, error) {
+// Retract appends a tombstone for claim id (D-087). The claim must be in a shard. Retracting it again with
+// the same reason is a no-op that returns the existing tombstone and already=true (D-097); a different reason
+// is refused. Nothing is deleted: shards stay append-only, and merge, graph, findings, G2 and report skip the
+// claim.
+func Retract(r *runs.Run, id, reason, stage string) (t *model.Retraction, already bool, err error) {
 	if !ids.Valid(id) {
-		return nil, kerr.New("usage", "--id %q is not a claim id (ULID)", id)
+		return nil, false, kerr.New("usage", "--id %q is not a claim id (ULID)", id)
 	}
 	if strings.TrimSpace(reason) == "" {
-		return nil, kerr.New("usage", "--reason is required: say in one sentence why the claim is withdrawn")
+		return nil, false, kerr.New("usage", "--reason is required: say in one sentence why the claim is withdrawn")
 	}
 	all, _, _, err := ReadShards(r)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	found := false
 	for _, c := range all {
 		found = found || c.ID == id
 	}
 	if !found {
-		return nil, kerr.New("precondition", "claim %s is not in any shard of this run", id)
+		return nil, false, kerr.New("precondition", "claim %s is not in any shard of this run", id)
 	}
-	t := model.Retraction{ID: id, Reason: strings.TrimSpace(reason), At: runs.Stamp(runs.Now()), Stage: stage}
+	t = &model.Retraction{ID: id, Reason: strings.TrimSpace(reason), At: runs.Stamp(runs.Now()), Stage: stage}
 	line, err := fsx.Compact(t)
 	if err != nil {
-		return nil, kerr.Wrap("internal", err)
+		return nil, false, kerr.Wrap("internal", err)
 	}
 	if errs, err := schema.Validate("Retraction", line); err != nil || len(errs) > 0 {
-		return nil, kerr.New("kernel_fault", "retraction would not validate").With(map[string]any{"errors": errs})
+		return nil, false, kerr.New("kernel_fault", "retraction would not validate").With(map[string]any{"errors": errs})
 	}
 	path := r.Path(runs.RetractFile)
 	err = lock.With(path, func() error {
@@ -473,8 +493,12 @@ func Retract(r *runs.Run, id, reason, stage string) (*model.Retraction, error) {
 		if err != nil {
 			return err
 		}
-		if _, dup := tomb[id]; dup {
-			return kerr.New("exists", "claim %s is already retracted", id)
+		if prev, dup := tomb[id]; dup {
+			if prev.Reason == t.Reason {
+				t, already = &prev, true
+				return nil
+			}
+			return kerr.New("exists", "claim %s is already retracted, with another reason: %q", id, prev.Reason)
 		}
 		f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 		if err != nil {
@@ -487,7 +511,7 @@ func Retract(r *runs.Run, id, reason, stage string) (*model.Retraction, error) {
 		return kerr.Wrap("io", f.Close())
 	})
 	if err != nil {
-		return nil, kerr.Wrap("io", err)
+		return nil, false, kerr.Wrap("io", err)
 	}
-	return &t, nil
+	return t, already, nil
 }

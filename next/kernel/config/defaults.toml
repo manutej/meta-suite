@@ -183,11 +183,11 @@ factors = { "Wh" = 1.0, "kWh" = 1000.0, "MWh" = 1000000.0, "GWh" = 1000000000.0,
 canonical = "count"
 factors = { "count" = 1.0, "thousand" = 1000.0, "million" = 1000000.0, "billion" = 1000000000.0 }
 
-# Code-only dimensions (D-087): each code is its own canonical unit and is never converted (there is no static
-# exchange rate). A relation whose unit_dimension names one of these must use a listed code; values in two
-# codes on one key are reported as a disagreement in units the kernel cannot convert.
+# Code-only dimensions (D-087, D-097): a unit matching the pattern is its own canonical unit and is never
+# converted (there is no static exchange rate). list = "iso4217" also requires the code to be in ISO 4217 (the
+# CLDR list embedded in the kernel via golang.org/x/text/currency), so "FTE" or "KWH" is never read as money.
+# A relation whose unit_dimension names one of these needs a unit, upper-cased before matching
+# ("eur" -> "EUR"). Values in two codes on one key are a disagreement in units the kernel cannot convert.
 [unit_codes.currency]
-codes = [
-  "EUR", "USD", "GBP", "CHF", "JPY", "CNY", "CAD", "AUD", "NZD", "INR", "BRL", "MXN", "KRW", "SGD", "HKD",
-  "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "BGN", "TRY", "ZAR", "AED", "SAR", "ILS",
-]
+pattern = '^[A-Z]{3}$'
+list = "iso4217"

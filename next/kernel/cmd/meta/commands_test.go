@@ -347,9 +347,15 @@ func TestClaimsMergeRefusesForgedLines(t *testing.T) {
 // pipeline runs the scenario up to graph build and returns the run dir.
 func pipeline(t *testing.T) string {
 	t.Helper()
+	return pipelineFrom(t, readFixture(t, "claims.jsonl"))
+}
+
+// pipelineFrom adds the given {agent, region, claim} lines to a fresh deep run, then merges and builds graphs.
+func pipelineFrom(t *testing.T, claimLines []byte) string {
+	t.Helper()
 	dir := newRun(t, "deep", true)
 	tokens := map[string]string{}
-	for _, l := range strings.Split(strings.TrimSpace(string(readFixture(t, "claims.jsonl"))), "\n") {
+	for _, l := range strings.Split(strings.TrimSpace(string(claimLines)), "\n") {
 		var in struct {
 			Agent, Region string
 			Claim         json.RawMessage

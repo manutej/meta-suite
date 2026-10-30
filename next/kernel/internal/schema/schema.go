@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
 	"github.com/manutej/meta-suite/next/kernel/schemas"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
@@ -215,4 +216,21 @@ func ValidateArray(typ string, doc []byte) ([]Error, int, error) {
 	}
 	Sort(out)
 	return out, len(arr), nil
+}
+
+// SpecHash returns sha256 of the canonical JSON of a spec without its "hash" field, and the supplied hash.
+func SpecHash(doc []byte) (string, string, error) {
+	dec := json.NewDecoder(bytes.NewReader(doc))
+	dec.UseNumber()
+	var m map[string]any
+	if err := dec.Decode(&m); err != nil {
+		return "", "", err
+	}
+	supplied, _ := m["hash"].(string)
+	delete(m, "hash")
+	b, err := fsx.Compact(m)
+	if err != nil {
+		return "", "", err
+	}
+	return fsx.SHA256(b), supplied, nil
 }

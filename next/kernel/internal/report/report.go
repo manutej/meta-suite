@@ -7,6 +7,7 @@ package report
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/manutej/meta-suite/next/kernel/internal/model"
 	"github.com/manutej/meta-suite/next/kernel/internal/norm"
 	runs "github.com/manutej/meta-suite/next/kernel/internal/rundir"
+	"github.com/manutej/meta-suite/next/kernel/internal/schema"
 )
 
 // Gate is one gate's line in how_checked.json.
@@ -46,6 +48,7 @@ type Counts struct {
 	SingleSource       int            `json:"single_source"`
 	Contested          int            `json:"contested_findings"`
 	Conflicts          int            `json:"conflicts"`
+	ChangedOverTime    int            `json:"changed_over_time"`
 	SharedEntities     int            `json:"shared_entities"`
 	RegionsCombined    *bool          `json:"regions_combined"`
 	UnitConversions    int            `json:"unit_conversions"`
@@ -110,8 +113,8 @@ func Build(r *runs.Run, cfg *config.Config) (*HowChecked, error) {
 	strip := cfg.Independence.StripPrefixes
 	hc := &HowChecked{
 		RunID: r.Record.RunID, GeneratedAt: runs.Stamp(runs.Now()), Mode: r.Record.Mode, Kernel: r.Record.Kernel,
-		ConfigHash: r.Record.ConfigHash, SpecHash: r.Record.SpecHash, SchemaVersion: r.Record.SchemaVersion, MinIndependent: cfg.Lens.Pullback.MinIndependent,
-		Rule:  fmt.Sprintf("A point counts as verified only when at least %d independent publishers state it.", cfg.Lens.Pullback.MinIndependent),
+		ConfigHash: r.Record.ConfigHash, SpecHash: currentSpecHash(r), SchemaVersion: r.Record.SchemaVersion, MinIndependent: cfg.Lens.Pullback.MinIndependent,
+		Rule:  findings.Rule(cfg.Lens.Pullback.MinIndependent, cfg.Lens.Pullback.AsOfWindow),
 		Gates: []Gate{}, Summary: []string{}, Limits: []string{}, Sources: []Source{}, Retractions: []model.Retraction{},
 	}
 	c := &hc.Counts
@@ -205,7 +208,13 @@ func Build(r *runs.Run, cfg *config.Config) (*HowChecked, error) {
 		if err := r.ReadJSONFile(runs.ConflictsFile, &cf); err != nil {
 			return nil, err
 		}
-		c.Conflicts = len(cf.Conflicts)
+		for _, x := range cf.Conflicts {
+			if x.Kind == findings.KindChanged {
+				c.ChangedOverTime++
+			} else {
+				c.Conflicts++
+			}
+		}
 	}
 	if r.Exists(runs.MergedFile) {
 		var dg model.DomainGraph
@@ -262,6 +271,25 @@ func Build(r *runs.Run, cfg *config.Config) (*HowChecked, error) {
 	hc.Summary = summary(hc)
 	hc.Limits = limits(hc)
 	return hc, nil
+}
+
+// currentSpecHash is run.json's spec_hash only while spec.json still validates and hashes to it (D-097): an
+// edited or invalid spec reports no hash rather than a stale one.
+func currentSpecHash(r *runs.Run) string {
+	if r.Record.SpecHash == "" {
+		return ""
+	}
+	b, err := os.ReadFile(r.Path(runs.SpecFile))
+	if err != nil {
+		return ""
+	}
+	if errs, err := schema.Validate("Spec", b); err != nil || len(errs) > 0 {
+		return ""
+	}
+	if h, _, err := schema.SpecHash(b); err != nil || h != r.Record.SpecHash {
+		return ""
+	}
+	return r.Record.SpecHash
 }
 
 func gates(r *runs.Run, cfg *config.Config) []Gate {
@@ -349,12 +377,16 @@ func summary(hc *HowChecked) []string {
 		fmt.Sprintf("%s from %s, published by %s.", plural(c.Claims, "statement was gathered", "statements were gathered"),
 			plural(c.Sources, "source", "sources"), plural(c.IndependentSources, "independent publisher", "independent publishers")),
 		fmt.Sprintf("The question was split into %s; %d of them returned evidence.", plural(c.RegionsPlanned, "part", "parts"), c.RegionsGathered),
-		fmt.Sprintf("%s verified (%s), %s on a single source.", plural(c.Verified, "point is", "points are"),
-			strings.TrimSuffix(strings.ToLower(hc.Rule[:1])+hc.Rule[1:], "."), plural(c.SingleSource, "rests", "rest")),
+		fmt.Sprintf("%s verified and %s on a single source.", plural(c.Verified, "point is", "points are"), plural(c.SingleSource, "rests", "rest")),
+		hc.Rule,
 	}
 	if c.Conflicts > 0 {
 		s = append(s, fmt.Sprintf("%s where sources disagree; both sides are shown and no winner is picked.", plural(c.Conflicts, "point is contested", "points are contested")))
-	} else if c.Findings > 0 {
+	}
+	if c.ChangedOverTime > 0 {
+		s = append(s, fmt.Sprintf("%s over time: sources give different values for different dates, and each value is shown with its date.", plural(c.ChangedOverTime, "point changed", "points changed")))
+	}
+	if c.Conflicts == 0 && c.ChangedOverTime == 0 && c.Findings > 0 {
 		s = append(s, "No sources disagreed on the same point.")
 	}
 	s = append(s, fmt.Sprintf("Checks: %d passed, %d failed, %d not run.", hc.GatesPassed, hc.GatesFailed, hc.GatesUnchecked))

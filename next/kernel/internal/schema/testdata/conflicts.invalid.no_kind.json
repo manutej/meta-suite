@@ -1,0 +1,43 @@
+{
+  "conflicts": [
+    {
+      "id": "C-0123456789ab",
+      "key": {
+        "subject": "a",
+        "relation": "r",
+        "object": "b"
+      },
+      "reason": "x",
+      "sides": [
+        {
+          "finding_id": "F-0123456789ab",
+          "value": 1,
+          "as_of": [],
+          "claim_ids": [
+            "01M653AP3AR8PABW94M9E5J6KM"
+          ],
+          "independence_keys": [
+            "a.example"
+          ],
+          "regions": [
+            "r1"
+          ]
+        },
+        {
+          "finding_id": "F-0123456789ac",
+          "value": 2,
+          "as_of": [],
+          "claim_ids": [
+            "01M653AP3AR8PABW94M9E5J6KM"
+          ],
+          "independence_keys": [
+            "b.example"
+          ],
+          "regions": [
+            "r1"
+          ]
+        }
+      ]
+    }
+  ]
+}

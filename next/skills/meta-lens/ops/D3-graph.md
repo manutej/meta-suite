@@ -19,7 +19,8 @@ Start with `meta stage begin "$RUN" D3 …`, then `meta graph build "$RUN"` and
 
 - **Gaps.** Read the agents' replies for relation and label gaps. For each, decide: map it onto an
   existing relation or label, or accept it. Log each decision with
-  `meta ledger append --kind assumption --stage D3`. Never edit `claims.jsonl`.
+  `meta ledger append "$RUN" --kind assumption --stage D3 --note "<gap>: <decision>"`. Never edit
+  `claims.jsonl`.
 - **Near-duplicate labels.** Two labels in one region that plainly name one thing stay two entities
   in this build (exact-label merge only): log it the same way. If the pair carries the region's main
   evidence, re-gather with the label from `cover.json` (counts against the re-gather cap).

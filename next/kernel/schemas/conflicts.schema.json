@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/conflicts.schema.json",
   "title": "Conflicts",
-  "description": "conflicts.json, written by `meta findings verify`: same key (and as_of window), different values. Candidates, never resolved by the kernel (D-087). schema_version 2.0.0-alpha.1.",
+  "description": "conflicts.json, written by `meta findings verify`: same key, different values, as a disagreement (overlapping or undated periods) or a change over time (disjoint periods). Candidates, never resolved by the kernel (D-087, D-097). schema_version 2.0.0-alpha.1.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -15,6 +15,13 @@
           "id": {
             "type": "string",
             "pattern": "^C-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "enum": [
+              "disagreement",
+              "changed_over_time"
+            ],
+            "description": "disagreement: different values for overlapping (or undated) periods, both findings contested. changed_over_time: different values for disjoint periods, sides in time order (D-097)."
           },
           "key": {
             "type": "object",
@@ -38,10 +45,6 @@
               "relation",
               "object"
             ]
-          },
-          "as_of": {
-            "type": "string",
-            "minLength": 4
           },
           "reason": {
             "type": "string",
@@ -115,6 +118,7 @@
         },
         "required": [
           "id",
+          "kind",
           "key",
           "reason",
           "sides"

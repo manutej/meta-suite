@@ -137,7 +137,10 @@ func TestReplayLiveEUAIAct(t *testing.T) {
 	//     the runner's own deviation (seq 205/206);
 	//   - "harmonised standards / publication status: pending": 2025-06 vs 2026-04.
 	// So 103 → 105 findings, 73 → 71 verified, 30 → 34 single-source. Conflicts are unchanged at 3.
-	if fv["findings"].(float64) != 105 || byKind["verified"].(float64) != 71 || byKind["single_source"].(float64) != 34 || fv["conflicts"].(float64) != 3 {
+	// D-097 (containment, undated-as-any-period, UTC) changes nothing here: neither split key has an undated or
+	// a coarser claim, and the run has no same-key value change across periods (changed_over_time = 0).
+	if fv["findings"].(float64) != 105 || byKind["verified"].(float64) != 71 || byKind["single_source"].(float64) != 34 ||
+		fv["conflicts"].(float64) != 3 || fv["changed_over_time"].(float64) != 0 {
 		t.Fatalf("findings %v", fv)
 	}
 	// Every recorded finding not touched by K5 (a bracketed label) or K6 (a dated claim in its evidence) comes
@@ -199,9 +202,10 @@ func TestReplayLiveEUAIAct(t *testing.T) {
 		c["conflicts"].(float64) != 3 || c["deviations"].(float64) != 42 || c["shared_entities"].(float64) != 19 {
 		t.Fatalf("how_checked counts %v", c)
 	}
-	// K8: dated_claims counts dated content too (13 as_of claims in the recording, plus date values).
-	if c["dated_claims"].(float64) <= 13 {
-		t.Fatalf("dated_claims %v", c["dated_claims"])
+	// K8: dated_claims counts dated content: the recording's 13 as_of claims plus 53 claims with an ISO date
+	// as their value (applies_from, published_on) = 66.
+	if c["dated_claims"].(float64) != 66 || c["changed_over_time"].(float64) != 0 {
+		t.Fatalf("dated_claims %v, changed_over_time %v", c["dated_claims"], c["changed_over_time"])
 	}
 	if hc["spec_hash"] != h {
 		t.Fatalf("spec hash %v vs %v", hc["spec_hash"], h)

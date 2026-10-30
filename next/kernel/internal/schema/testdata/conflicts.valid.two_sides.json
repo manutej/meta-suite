@@ -2,12 +2,12 @@
   "conflicts": [
     {
       "id": "C-0123456789ab",
+      "kind": "changed_over_time",
       "key": {
         "subject": "duty a",
         "relation": "applies_from",
         "object": "law x"
       },
-      "as_of": "2026-08",
       "reason": "sources give different values for the same statement",
       "sides": [
         {

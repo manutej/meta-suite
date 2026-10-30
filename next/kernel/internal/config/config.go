@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 	defaults "github.com/manutej/meta-suite/next/kernel/config"
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
+	"golang.org/x/text/currency"
 )
 
 // Mode is one row of the modes table (spec/v2/03-architecture.md, Modes).
@@ -33,6 +34,30 @@ type Mode struct {
 type UnitDim struct {
 	Canonical string             `toml:"canonical" json:"canonical"`
 	Factors   map[string]float64 `toml:"factors" json:"factors"`
+}
+
+// UnitCodes is a code-only dimension (D-087, D-097): a unit matching Pattern (and, when List is "iso4217",
+// listed in ISO 4217, from the CLDR data embedded in golang.org/x/text/currency) is its own canonical unit and
+// is never converted.
+type UnitCodes struct {
+	Pattern string         `toml:"pattern" json:"pattern"`
+	List    string         `toml:"list" json:"list"`
+	re      *regexp.Regexp `toml:"-"`
+}
+
+// Match reports whether unit is a code of this dimension (case-sensitive: callers upper-case first).
+func (u UnitCodes) Match(unit string) bool {
+	if u.re == nil {
+		u.re = regexp.MustCompile(u.Pattern)
+	}
+	if !u.re.MatchString(unit) {
+		return false
+	}
+	if u.List == "iso4217" {
+		_, err := currency.ParseISO(unit)
+		return err == nil
+	}
+	return true
 }
 
 // Config is the whole configuration.
@@ -88,10 +113,8 @@ type Config struct {
 		AtomCount     int `toml:"atom_count" json:"atom_count"`
 		SkillMaxWords int `toml:"skill_max_words" json:"skill_max_words"`
 	} `toml:"check" json:"check"`
-	Units     map[string]UnitDim `toml:"units" json:"units"`
-	UnitCodes map[string]struct {
-		Codes []string `toml:"codes" json:"codes"`
-	} `toml:"unit_codes" json:"unit_codes"`
+	Units     map[string]UnitDim   `toml:"units" json:"units"`
+	UnitCodes map[string]UnitCodes `toml:"unit_codes" json:"unit_codes"`
 
 	// Hash is the sha256 of the bytes loaded; Source says where they came from.
 	Hash   string `toml:"-" json:"-"`
@@ -172,9 +195,15 @@ func Parse(b []byte, source string) (*Config, error) {
 		if _, clash := c.Units[dim]; clash {
 			return nil, fmt.Errorf("config %s: unit dimension %q is in both units and unit_codes", source, dim)
 		}
-		if len(uc.Codes) == 0 {
-			return nil, fmt.Errorf("config %s: unit_codes.%s.codes is empty", source, dim)
+		re, err := regexp.Compile(uc.Pattern)
+		if err != nil || uc.Pattern == "" {
+			return nil, fmt.Errorf("config %s: unit_codes.%s.pattern must be a non-empty RE2 pattern", source, dim)
 		}
+		if uc.List != "" && uc.List != "iso4217" {
+			return nil, fmt.Errorf("config %s: unit_codes.%s.list must be \"iso4217\" or empty", source, dim)
+		}
+		uc.re = re
+		c.UnitCodes[dim] = uc
 	}
 	if c.Lens.Pullback.MinIndependent < 1 {
 		return nil, fmt.Errorf("config %s: lens.pullback.min_independent must be >= 1", source)

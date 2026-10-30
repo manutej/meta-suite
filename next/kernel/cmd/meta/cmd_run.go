@@ -235,19 +235,27 @@ func cmdClaimRetract(e *env, args []string) int {
 	if s := f.vals["stage"]; s != "" && !contains(stage.Stages, s) {
 		return e.failRun(r, "claim retract", kerr.New("usage", "unknown --stage %q (one of %v)", s, stage.Stages))
 	}
-	t, err := claims.Retract(r, f.vals["id"], f.vals["reason"], f.vals["stage"])
+	t, already, err := claims.Retract(r, f.vals["id"], f.vals["reason"], f.vals["stage"])
 	if err != nil {
 		return e.failRun(r, "claim retract", err)
 	}
-	if err := e.log(r, "claim retract", true, map[string]any{"id": t.ID, "reason": t.Reason, "stage": t.Stage}); err != nil {
+	data := map[string]any{"id": t.ID, "reason": t.Reason, "stage": t.Stage}
+	if already {
+		data["already_retracted"] = true
+	}
+	if err := e.log(r, "claim retract", true, data); err != nil {
 		return e.fail(err)
 	}
 	tomb, err := claims.Retracted(r)
 	if err != nil {
 		return e.fail(err)
 	}
-	return e.out(map[string]any{"retracted": t, "retractions": len(tomb),
-		"next": "run `meta claims merge`, then graph build, interface merge, findings verify, gate G2 and report again"}, 0)
+	out := map[string]any{"retracted": t, "retractions": len(tomb),
+		"next": "run `meta claims merge`, then graph build, interface merge, findings verify, gate G2 and report again"}
+	if already {
+		out["note"] = "already retracted with this reason; nothing was added"
+	}
+	return e.out(out, 0)
 }
 
 func cmdClaimsMerge(e *env, args []string) int {

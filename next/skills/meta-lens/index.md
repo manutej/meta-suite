@@ -87,9 +87,8 @@ goes to A2 even if the reviewer named an earlier stage. D2 is re-entered at most
 `loop.d2_reentry_max` times per run. Review passes stop at `modes.<mode>.review_passes`.
 
 **Caps** (region count, review passes, re-gather limit, independent-source minimum) come from
-`meta config show --mode <mode>`; the config hash is in `run.json`.
-<!-- <internal>Keys: modes.<mode>.max_regions, modes.<mode>.review_passes, loop.d2_reentry_max,
-lens.pullback.min_independent, lens.pullback.as_of_window.</internal> --> `<mode>` is `fast`, or
+`meta config show --mode <mode>` (never quoted on the page); the config hash is in `run.json`. Each op names the key it reads.
+`<mode>` is `fast`, or
 `deep_narrow` / `deep_broad` per the scope I2 set with `meta run scope`. If the kernel is absent, use
 the spec's fast-mode defaults (3 regions, 1 review pass, 1 re-gather, 2 independent sources) and say
 so under Known limits.

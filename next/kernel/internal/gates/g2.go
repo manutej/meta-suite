@@ -10,6 +10,7 @@ import (
 
 	"github.com/manutej/meta-suite/next/kernel/internal/claims"
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
+	"github.com/manutej/meta-suite/next/kernel/internal/ledger"
 	"github.com/manutej/meta-suite/next/kernel/internal/model"
 	"github.com/manutej/meta-suite/next/kernel/internal/norm"
 	runs "github.com/manutej/meta-suite/next/kernel/internal/rundir"
@@ -141,9 +142,28 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				byID[c.ID] = c
 			}
 		}
-		for id := range tomb {
+		// D-097: a tombstone counts only with its ledger record: an ok `claim retract` event for that id and
+		// reason. A hand-written line in retractions.jsonl has none.
+		recorded := map[string]bool{}
+		if len(tomb) > 0 {
+			evs, err := ledger.Events(r)
+			if err != nil {
+				return nil, err
+			}
+			for _, ev := range evs {
+				id, _ := ev.Data["id"].(string)
+				reason, _ := ev.Data["reason"].(string)
+				if ev.Command == "claim retract" && ev.OK && id != "" {
+					recorded[id+"\x00"+reason] = true
+				}
+			}
+		}
+		for _, id := range sortedIDs(tomb) {
 			if !inShard[id] {
 				add(Problem{Check: claimCheck.Name, File: runs.RetractFile, ID: id, Detail: "retracts a claim that is in no shard"})
+			}
+			if !recorded[id+"\x00"+tomb[id].Reason] {
+				add(Problem{Check: claimCheck.Name, File: runs.RetractFile, ID: id, Detail: "retraction has no matching ledger event: write retractions only with `meta claim retract`"})
 			}
 		}
 		claimCheck.Checked = len(shardClaims) + len(bad)
@@ -282,6 +302,7 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 		if err != nil {
 			return nil, err
 		}
+		inFindings := map[string]int{} // claim id -> findings citing it
 		for _, l := range lines {
 			findCheck.Checked++
 			rep.Counts.Findings++
@@ -294,6 +315,7 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 			ks := map[string]bool{}
 			for _, cid := range f.Evidence {
 				c, ok := byID[cid]
+				inFindings[cid]++
 				if gone(cid) {
 					add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID, Detail: "evidence references retracted claim " + cid + ": re-run `meta findings verify`"})
 					continue
@@ -317,6 +339,21 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 						add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID, Detail: "unsourced side " + s.Label})
 					}
 				}
+			}
+		}
+		// D-097: every live claim is evidence in exactly one finding; otherwise the findings predate the
+		// claims (a merge after `findings verify`).
+		ids := make([]string, 0, len(byID))
+		for id := range byID {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+		for _, id := range ids {
+			switch n := inFindings[id]; {
+			case n == 0:
+				add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: id, Detail: "claim is in no finding: findings are stale: run `meta findings verify`"})
+			case n > 1:
+				add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: id, Detail: fmt.Sprintf("claim is evidence in %d findings; each claim belongs to exactly one: run `meta findings verify`", n)})
 			}
 		}
 	}
@@ -365,6 +402,15 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 		}
 	}
 	return rep, nil
+}
+
+func sortedIDs(m map[string]model.Retraction) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // injectionScan checks each claim's text fields against the patterns, in claim-id then field order.

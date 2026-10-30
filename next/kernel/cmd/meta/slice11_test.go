@@ -62,15 +62,34 @@ func TestUnitsCanonicalAndCurrency(t *testing.T) {
 		t.Errorf("bp must still convert to %%: %v", out)
 	}
 	for _, c := range []struct{ rel, unit, want string }{
-		{"max_fine", "€", "unit must be one of"},  // a currency relation needs a listed code
-		{"max_fine", "%", "measures ratio"},       // a ratio unit on a currency relation
-		{"share", "EUR", "measures currency"},     // a currency code on a ratio relation
-		{"headcount", "EUR", "measures currency"}, // ... or on a count relation
+		{"max_fine", "€", "is not a code of it"},   // a currency relation needs an ISO 4217 code
+		{"max_fine", "ABC", "is not a code of it"}, // code-shaped, but not in ISO 4217
+		{"max_fine", "%", "measures ratio"},        // a ratio unit on a currency relation
+		{"share", "EUR", "measures currency"},      // a currency code on a ratio relation
+		{"headcount", "EUR", "measures currency"},  // ... or on a count relation
 	} {
 		r := meta(t, numClaim(c.rel, 1, c.unit), "claim add", dir, "--token", tok)
 		if r.code != 1 || !strings.Contains(r.stdout, c.want) {
 			t.Errorf("%s %s: want rejection %q, got %+v", c.rel, c.unit, c.want, r)
 		}
+	}
+	// D-097: no unit at all on a currency relation is refused.
+	noUnit := strings.Replace(numClaim("max_fine", 5, "EUR"), `"unit":"EUR",`, "", 1)
+	if r := meta(t, noUnit, "claim add", dir, "--token", tok); r.code != 1 || !strings.Contains(r.stdout, "unit is required") {
+		t.Errorf("currency claim without a unit: %+v", r)
+	}
+	// D-097: lower-case codes are upper-cased; a code-shaped non-currency unit ("FTE") on a count relation is
+	// an unknown unit (noted), not money.
+	must(t, numClaim("max_fine", 7, "eur"), "claim add", dir, "--token", tok)
+	if out := must(t, numClaim("headcount", 3, "FTE"), "claim add", dir, "--token", tok).json(t); out["notes"] == nil {
+		t.Errorf("FTE must be noted as an unknown unit: %v", out)
+	}
+	stored := false
+	for _, c := range readJSONL(t, filepath.Join(dir, "claims", "gather-a.jsonl")) {
+		stored = stored || (c["value"] == 7.0 && c["unit"] == "EUR")
+	}
+	if !stored {
+		t.Error("eur was not stored as EUR")
 	}
 	// A unit in no table is still kept as given, with a note.
 	if out := must(t, numClaim("share", 3, "widgets"), "claim add", dir, "--token", tok).json(t); out["notes"] == nil {
@@ -250,4 +269,190 @@ func TestValidateCrossRefs(t *testing.T) {
 		t.Fatalf("section map with an unknown finding: %+v", r)
 	}
 	must(t, "", "validate", filepath.Join(dir, "conflicts.json"))
+}
+
+// ---- D-097: review fixes ----
+
+func findingsByLabel(t *testing.T, dir string) map[string]string {
+	t.Helper()
+	got := map[string]string{}
+	for _, f := range readJSONL(t, filepath.Join(dir, "findings.jsonl")) {
+		k := f["key"].(map[string]any)
+		label := k["subject"].(string) + "|" + k["relation"].(string) + "|" + k["object"].(string)
+		if v, ok := f["value"].(float64); ok {
+			label += "=" + jsonNum(v)
+		}
+		got[label] = f["kind"].(string) + "/" + f["confidence"].(string)
+	}
+	return got
+}
+
+// P2-3: the original e2e scenario (2025 vs 2026 headcounts, undated claims corroborating dated ones) gives its
+// intended outcome under the D-097 rules.
+func TestAsOfScenario(t *testing.T) {
+	b, err := os.ReadFile("testdata/synthetic/e2e-asof/claims.jsonl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := pipelineFrom(t, b)
+	must(t, "", "interface merge", dir, "--plain")
+	fv := must(t, "", "findings verify", dir).json(t)
+	if fv["conflicts"].(float64) != 1 || fv["changed_over_time"].(float64) != 0 {
+		t.Fatalf("findings verify %v", fv)
+	}
+	want := map[string]string{
+		"org alpha|located_in|city one":       "verified/settled",
+		"org alpha|has_part|unit delta":       "single_source/single_source",
+		"org alpha|headcount|org alpha=12000": "verified/contested",
+		"org alpha|headcount|org alpha=15000": "single_source/contested",
+		"org beta|has_part|unit gamma":        "single_source/single_source",
+	}
+	got := findingsByLabel(t, dir)
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("%s = %q, want %q (all %v)", k, got[k], v, got)
+		}
+	}
+	if len(got) != len(want) {
+		t.Errorf("findings %v", got)
+	}
+	must(t, "", "gate G2", dir)
+	must(t, "", "validate", filepath.Join(dir, "conflicts.json"))
+}
+
+// P1-1: a change over time is recorded, counted and said; how_checked never claims no disagreement then, and
+// its rule names the window.
+func TestChangeOverTimeReported(t *testing.T) {
+	dir := newRun(t, "deep", true)
+	tok := token(t, dir, "D2", "region-a", "gather-a")
+	for _, c := range []struct {
+		v         float64
+		pub, asOf string
+	}{{100, "a.example", "2026-05-31"}, {900, "b.example", "2026-06-01"}} {
+		in := strings.Replace(numClaim("headcount", c.v, "count"), `"value_type"`, `"as_of":"`+c.asOf+`","value_type"`, 1)
+		in = strings.ReplaceAll(in, "a.example", c.pub)
+		must(t, in, "claim add", dir, "--token", tok)
+	}
+	must(t, "", "claims merge", dir)
+	must(t, "", "graph build", dir)
+	must(t, "", "interface merge", dir, "--plain")
+	fv := must(t, "", "findings verify", dir).json(t)
+	if fv["conflicts"].(float64) != 0 || fv["changed_over_time"].(float64) != 1 || !strings.Contains(fv["rule"].(string), "calendar month") {
+		t.Fatalf("%v", fv)
+	}
+	var cf struct {
+		Conflicts []struct {
+			Kind  string `json:"kind"`
+			Sides []struct {
+				Value float64 `json:"value"`
+			} `json:"sides"`
+		} `json:"conflicts"`
+	}
+	readJSON(t, filepath.Join(dir, "conflicts.json"), &cf)
+	if len(cf.Conflicts) != 1 || cf.Conflicts[0].Kind != "changed_over_time" || cf.Conflicts[0].Sides[0].Value != 100 || cf.Conflicts[0].Sides[1].Value != 900 {
+		t.Fatalf("conflicts.json %+v", cf)
+	}
+	must(t, "", "gate G2", dir)
+	hc := must(t, "", "report", dir).json(t)
+	text := jsonStr(hc["summary"])
+	if hc["counts"].(map[string]any)["changed_over_time"].(float64) != 1 || strings.Contains(text, "No sources disagreed") ||
+		!strings.Contains(text, "changed over time") || !strings.Contains(hc["rule"].(string), "calendar month") || hc["rule"] != fv["rule"] {
+		t.Fatalf("how_checked %v / %v", hc["summary"], hc["rule"])
+	}
+}
+
+// P1-2: G2 refuses findings that predate the claims.
+func TestG2StaleFindings(t *testing.T) {
+	dir := pipeline(t)
+	must(t, "", "interface merge", dir, "--plain")
+	must(t, "", "findings verify", dir)
+	must(t, "", "gate G2", dir)
+	tok := token(t, dir, "D2", "region-c", "gather-late")
+	must(t, strings.Replace(claimA, "Org Alpha", "Org Late", 1), "claim add", dir, "--token", tok)
+	must(t, "", "claims merge", dir)
+	must(t, "", "graph build", dir)
+	must(t, "", "interface merge", dir, "--plain")
+	r := meta(t, "", "gate G2", dir) // findings verify skipped
+	if r.code != 1 || r.json(t)["verdict"] != "fail" || !strings.Contains(r.stdout, "findings are stale") {
+		t.Fatalf("stale findings must fail G2: %+v", r)
+	}
+	must(t, "", "findings verify", dir)
+	must(t, "", "gate G2", dir)
+}
+
+// P2-4: retraction is idempotent for the same reason, and a hand-written tombstone fails G2.
+func TestRetractIdempotentAndLedgerBound(t *testing.T) {
+	dir := pipeline(t)
+	ids := readJSONL(t, filepath.Join(dir, "claims.jsonl"))
+	id, other := ids[0]["id"].(string), ids[1]["id"].(string)
+	must(t, "", "claim retract", dir, "--id", id, "--reason", "Misread date.")
+	again := must(t, "", "claim retract", dir, "--id", id, "--reason", "Misread date.").json(t)
+	if again["note"] == nil || again["retractions"].(float64) != 1 || len(readJSONL(t, filepath.Join(dir, "retractions.jsonl"))) != 1 {
+		t.Fatalf("idempotent retract: %v", again)
+	}
+	must(t, "", "claims merge", dir)
+	must(t, "", "graph build", dir)
+	must(t, "", "interface merge", dir, "--plain")
+	must(t, "", "findings verify", dir)
+	must(t, "", "gate G2", dir)
+	// A tombstone written by hand for a real claim has no ledger event.
+	f, _ := os.OpenFile(filepath.Join(dir, "retractions.jsonl"), os.O_APPEND|os.O_WRONLY, 0o644)
+	f.WriteString(`{"id":"` + other + `","reason":"by hand","at":"2026-10-30T01:00:00.000Z"}` + "\n")
+	f.Close()
+	must(t, "", "claims merge", dir)
+	must(t, "", "graph build", dir)
+	must(t, "", "interface merge", dir, "--plain")
+	must(t, "", "findings verify", dir)
+	if r := meta(t, "", "gate G2", dir); r.code != 1 || !strings.Contains(r.stdout, "no matching ledger event") {
+		t.Fatalf("hand-written tombstone: %+v", r)
+	}
+}
+
+// P2-6: an invalid spec.json clears the recorded hash; an edited spec drops it from the report.
+func TestSpecHashCleared(t *testing.T) {
+	dir := newRun(t, "deep", true)
+	sp := filepath.Join(dir, "spec.json")
+	os.WriteFile(sp, readFixture(t, "spec.json"), 0o644)
+	must(t, "", "validate", sp)
+	var spec map[string]any
+	json.Unmarshal(readFixture(t, "spec.json"), &spec)
+	spec["objective"] = "An edited objective."
+	b, _ := json.Marshal(spec)
+	os.WriteFile(sp, b, 0o644)
+	if hc := must(t, "", "report", dir).json(t); hc["spec_hash"] != nil {
+		t.Fatalf("edited spec: report keeps a stale hash %v", hc["spec_hash"])
+	}
+	os.WriteFile(sp, []byte(`{"objective":""}`), 0o644)
+	if r := meta(t, "", "validate", sp); r.code != 1 {
+		t.Fatalf("%+v", r)
+	}
+	var rec map[string]any
+	readJSON(t, filepath.Join(dir, "run.json"), &rec)
+	if _, ok := rec["spec_hash"]; ok {
+		t.Fatalf("invalid spec: run.json keeps spec_hash %v", rec["spec_hash"])
+	}
+}
+
+// P3-11: an edit's target_stage must fit what its target is.
+func TestEditStageFitsTarget(t *testing.T) {
+	dir := pipeline(t)
+	must(t, "", "interface merge", dir, "--plain")
+	must(t, "", "findings verify", dir)
+	fid := readJSONL(t, filepath.Join(dir, "findings.jsonl"))[0]["id"].(string)
+	os.WriteFile(filepath.Join(dir, "artifact", "index.html"), []byte(`<p id="lede">x</p>`), 0o644)
+	es := filepath.Join(dir, "review", "edits.1.json")
+	write := func(stage, target string) res {
+		os.WriteFile(es, []byte(`{"edits":[{"target_stage":"`+stage+`","target_id":"`+target+`","op":"rewrite","rationale":"x","priority":"P2"}],"reviewer_model":"m","blind":true}`), 0o644)
+		return meta(t, "", "validate", es)
+	}
+	for _, ok := range [][2]string{{"A2", "lede"}, {"A2", fid}, {"D2", fid}, {"D1", "region-a"}, {"I2", "q-size"}} {
+		if r := write(ok[0], ok[1]); r.code != 0 {
+			t.Errorf("%v must pass: %s", ok, r.stdout)
+		}
+	}
+	for _, bad := range [][2]string{{"D3", "lede"}, {"I1", fid}, {"A2", "region-a"}, {"R1", "q-size"}} {
+		if r := write(bad[0], bad[1]); r.code != 1 || !strings.Contains(r.stdout, "/edits/0/target_stage") {
+			t.Errorf("%v must be refused: %+v", bad, r)
+		}
+	}
 }

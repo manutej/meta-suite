@@ -305,26 +305,24 @@ func cmdFindingsVerify(e *env, args []string) int {
 	if err := writeTyped(r, runs.ConflictsFile, "Conflicts", conf); err != nil {
 		return e.failRun(r, "findings verify", err)
 	}
-	s := findings.Summary{Claims: len(all), Findings: len(fs), ByKind: map[string]int{}, Conflicts: len(conf.Conflicts),
-		FindingsFile: runs.FindingsFile, ConflictFile: runs.ConflictsFile}
+	s := findings.Summary{Claims: len(all), Findings: len(fs), ByKind: map[string]int{}, FindingsFile: runs.FindingsFile, ConflictFile: runs.ConflictsFile}
+	for _, c := range conf.Conflicts {
+		if c.Kind == findings.KindChanged {
+			s.Changes++
+		} else {
+			s.Conflicts++
+		}
+	}
 	keys := map[model.Key]bool{}
 	for _, fd := range fs {
 		s.ByKind[fd.Kind]++
 		keys[*fd.Key] = true
 	}
 	s.Keys = len(keys)
-	s.Rule = ruleText(p.MinIndependent, p.AsOfWindow)
-	if err := e.log(r, "findings verify", true, map[string]any{"findings": s.Findings, "by_kind": s.ByKind, "conflicts": s.Conflicts,
+	s.Rule = findings.Rule(p.MinIndependent, p.AsOfWindow)
+	if err := e.log(r, "findings verify", true, map[string]any{"findings": s.Findings, "by_kind": s.ByKind, "conflicts": s.Conflicts, "changed_over_time": s.Changes,
 		"min_independent": p.MinIndependent, "numeric_rel_tol": p.NumericRelTol, "as_of_window": p.AsOfWindow}); err != nil {
 		return e.fail(err)
 	}
 	return e.out(s, 0)
-}
-
-func ruleText(n int, window string) string {
-	s := "verified = at least " + itoa(n) + " distinct independence keys agree on subject, relation, object and value"
-	if window != "none" && window != "" {
-		s += " within one as_of " + window
-	}
-	return s + "; otherwise single_source"
 }

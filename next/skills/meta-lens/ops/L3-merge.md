@@ -20,8 +20,8 @@ Start with `meta stage begin "$RUN" L3 …`; then `meta interface merge "$RUN" -
 
 For each candidate: do both regions mean the same thing by this label? A pair that plainly does not
 (same word, different meaning) cannot be kept apart by this build's plain merge, so:
-log it (`meta ledger append --kind assumption --stage L3 --note "kept apart: <label>, <a> vs <b>,
-<reason>"`), add a plain sentence for the reader to `$RUN/assumptions.md` ("'Provider' means the model
+log it (`meta ledger append "$RUN" --kind assumption --stage L3 --note "kept apart: <label>, <a> vs
+<b>, <reason>"`), add a plain sentence for the reader to `$RUN/assumptions.md` ("'Provider' means the model
 maker in one part of this research and the app maker in another."), and A2 labels any finding resting
 on it **Contested**.
 

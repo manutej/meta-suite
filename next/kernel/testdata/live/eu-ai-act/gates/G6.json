@@ -2,7 +2,7 @@
   "gate": "G6",
   "verdict": "pass",
   "files": [
-    "/home/claude/slice1-run/runs/01M651YMAFM8EPYHJ0AB13C2WQ/artifact/index.html"
+    "artifact/index.html"
   ],
   "hits": [],
   "allowed": [],

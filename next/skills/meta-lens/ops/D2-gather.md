@@ -1,7 +1,7 @@
 # D2 · gather evidence, one agent per region (core op)
 
 <!-- <internal>Local sections: each claim holds only for its region and its source. No synthesis here;
-the only merge is L3.</internal> -->
+the only merge is L3. Cap key: loop.d2_reentry_max.</internal> -->
 
 ```xml
 <contract op="D2">
@@ -18,7 +18,8 @@ the only merge is L3.</internal> -->
 1. Per region `r`: write the brief below, filled, to `$RUN/prompts/D2-<r>.md`, then
    `meta stage begin "$RUN" D2 --region <r> --agent gather-<r> --model <id> --prompt-file …`.
    Strongest available model for regions with `contested: true` in `cover.json`, a fast model for the
-   rest; log the choice with `meta ledger append --kind assumption --stage D2`.
+   rest; log the choice with
+   `meta ledger append "$RUN" --kind assumption --stage D2 --note "<model per region, and why>"`.
 2. Run **all regions in parallel**, one agent each with web search and its token.
    **No subagent tool on this host:** run the regions one after another in the main thread, each
    under its own token, and add "The parts of the research were gathered one after another by the

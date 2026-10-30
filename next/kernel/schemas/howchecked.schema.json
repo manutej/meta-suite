@@ -105,6 +105,10 @@
           "type": "integer",
           "minimum": 0
         },
+        "changed_over_time": {
+          "type": "integer",
+          "minimum": 0
+        },
         "shared_entities": {
           "type": "integer",
           "minimum": 0
@@ -152,6 +156,7 @@
         "single_source",
         "contested_findings",
         "conflicts",
+        "changed_over_time",
         "shared_entities",
         "regions_combined",
         "unit_conversions",

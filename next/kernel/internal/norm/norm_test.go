@@ -76,10 +76,35 @@ func TestIsDateAndWindow(t *testing.T) {
 		}
 	}
 	cases := [][3]string{{"2026-08-02", "month", "2026-08"}, {"2026-08-02", "day", "2026-08-02"}, {"2026-08-02", "year", "2026"},
-		{"2026-08-02", "none", ""}, {"", "month", ""}, {"2026", "month", "2026"}}
+		{"2026-08-02", "none", ""}, {"", "month", ""}, {"2026", "month", "2026"},
+		// D-097: timestamps are normalized to UTC before windowing.
+		{"2026-01-31T23:00-05:00", "month", "2026-02"}, {"2026-02-01T04:00Z", "month", "2026-02"},
+		{"2026-01-31T23:00-05:00", "day", "2026-02-01"}, {"2026-12-31T22:00:00-03:00", "year", "2027"},
+		{"2026-05-31 10:00", "day", "2026-05-31"}}
 	for _, c := range cases {
 		if got := Window(c[0], c[1]); got != c[2] {
 			t.Errorf("Window(%q,%q) = %q, want %q", c[0], c[1], got, c[2])
+		}
+	}
+}
+
+func TestWindowsOverlapAndHull(t *testing.T) {
+	for _, c := range []struct {
+		a, b string
+		want bool
+	}{{"2026", "2026-03", true}, {"2026-03", "2026", true}, {"2026-05", "2026-06", false}, {"", "2026-06", true},
+		{"2026-05", "2026-05", true}, {"2025", "2026-01", false}, {"2026-05-31", "2026-06-01", false}} {
+		if got := WindowsOverlap(c.a, c.b); got != c.want {
+			t.Errorf("WindowsOverlap(%q,%q) = %v", c.a, c.b, got)
+		}
+	}
+	for _, c := range []struct {
+		in   []string
+		want string
+	}{{nil, ""}, {[]string{"", ""}, ""}, {[]string{"2026-03"}, "2026-03"}, {[]string{"2026", "2026-03"}, "2026"},
+		{[]string{"2026-03", "2026-05", ""}, "2026"}, {[]string{"2026-03-01", "2026-03-09"}, "2026-03"}, {[]string{"2025-06", "2026-04"}, "2025-06/2026-04"}} {
+		if got := WindowHull(c.in); got != c.want {
+			t.Errorf("WindowHull(%v) = %q, want %q", c.in, got, c.want)
 		}
 	}
 }

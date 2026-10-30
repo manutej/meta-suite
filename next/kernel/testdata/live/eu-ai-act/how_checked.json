@@ -305,7 +305,7 @@
       "seq": 261,
       "at": "2026-10-30T00:33:44.057Z",
       "stage": "A2",
-      "note": "A2 writes the page to $RUN/artifact/index.html; caller asked for /home/claude/slice1-run/artifact.html. Built at the op path and copied. Owner: none (caller override)."
+      "note": "A2 writes the page to $RUN/artifact/index.html; caller asked for artifact.html. Built at the op path and copied. Owner: none (caller override)."
     },
     {
       "seq": 263,

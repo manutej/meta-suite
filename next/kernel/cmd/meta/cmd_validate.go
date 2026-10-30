@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,7 +140,7 @@ func cmdValidate(e *env, args []string) int {
 		}
 		res.Errors, res.Records = append(res.Errors, errs...), 1
 		if len(errs) == 0 && canon == "Spec" {
-			h, supplied, err := specHash(doc)
+			h, supplied, err := schema.SpecHash(doc)
 			if err != nil {
 				return e.fail(kerr.Wrap("internal", err))
 			}
@@ -194,11 +192,20 @@ func cmdValidate(e *env, args []string) int {
 		data := map[string]any{"file": rel, "type": canon, "valid": res.Valid, "records": res.Records, "errors": len(res.Errors), "sha256": fsx.SHA256(doc)}
 		if res.Hash != "" {
 			data["spec_hash"] = res.Hash
-			if res.Valid && rel == runs.SpecFile {
-				if err := r.Update(func(rec *model.RunRecord) error { rec.SpecHash = res.Hash; return nil }); err != nil {
-					return e.fail(err)
-				}
+		}
+		if rel == runs.SpecFile && canon == "Spec" {
+			// D-097: run.json carries the hash of a spec that validates, and nothing for one that does not.
+			h := ""
+			if res.Valid {
+				h = res.Hash
+			}
+			if err := r.Update(func(rec *model.RunRecord) error { rec.SpecHash = h; return nil }); err != nil {
+				return e.fail(err)
+			}
+			if h != "" {
 				data["spec_hash_recorded"] = runs.RunFile
+			} else {
+				data["spec_hash_cleared"] = runs.RunFile
 			}
 		}
 		if err := e.log(r, "validate", res.Valid, data); err != nil {
@@ -209,21 +216,4 @@ func cmdValidate(e *env, args []string) int {
 		return e.out(res, kerr.ExitVerdict)
 	}
 	return e.out(res, 0)
-}
-
-// specHash returns sha256 of the canonical JSON of a spec without its "hash" field, and the supplied hash.
-func specHash(doc []byte) (string, string, error) {
-	dec := json.NewDecoder(bytes.NewReader(doc))
-	dec.UseNumber()
-	var m map[string]any
-	if err := dec.Decode(&m); err != nil {
-		return "", "", err
-	}
-	supplied, _ := m["hash"].(string)
-	delete(m, "hash")
-	b, err := fsx.Compact(m)
-	if err != nil {
-		return "", "", err
-	}
-	return fsx.SHA256(b), supplied, nil
 }

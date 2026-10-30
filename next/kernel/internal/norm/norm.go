@@ -5,7 +5,9 @@ package norm
 import (
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"golang.org/x/text/unicode/norm"
@@ -127,19 +129,88 @@ var isoDate = regexp.MustCompile(`^\d{4}-\d{2}(-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\
 // "2026-08-02T10:00Z"). A bare year is not a date here: it is too easily a count or an article number.
 func IsDate(s string) bool { return isoDate.MatchString(strings.TrimSpace(s)) }
 
-// Window truncates an as_of value to the configured agreement window (lens.pullback.as_of_window): "year"
-// keeps YYYY, "month" YYYY-MM, "day" YYYY-MM-DD; "none" or an empty as_of gives "". An as_of coarser than the
-// window keeps its own precision ("2026" stays "2026" under "month").
+// Window maps an as_of value to its agreement window (lens.pullback.as_of_window, D-087/D-097). A timestamp
+// with an offset is first converted to UTC ("2026-01-31T23:00-05:00" is 2026-02-01 UTC); a timestamp without
+// one is read as UTC. The result is the UTC calendar period truncated to "year" (YYYY), "month" (YYYY-MM) or
+// "day" (YYYY-MM-DD); an as_of coarser than the window keeps its own precision ("2026" stays "2026" under
+// "month"). "none", an empty or an unparseable as_of gives "": undated, compatible with every window.
 func Window(asOf, window string) string {
 	asOf = strings.TrimSpace(asOf)
 	n := map[string]int{"year": 4, "month": 7, "day": 10}[window]
 	if asOf == "" || n == 0 {
 		return ""
 	}
+	if len(asOf) > 10 { // a timestamp: normalize to UTC first
+		if t, ok := parseStamp(asOf); ok {
+			asOf = t.UTC().Format("2006-01-02")
+		} else {
+			asOf = asOf[:10]
+		}
+	}
 	if len(asOf) < n {
 		return asOf
 	}
 	return asOf[:n]
+}
+
+var stampLayouts = []string{
+	"2006-01-02T15:04:05.999999999Z07:00", "2006-01-02T15:04:05Z07:00", "2006-01-02T15:04Z07:00",
+	"2006-01-02T15:04:05.999999999Z0700", "2006-01-02T15:04:05Z0700", "2006-01-02T15:04Z0700",
+	"2006-01-02T15:04:05.999999999", "2006-01-02T15:04:05", "2006-01-02T15:04",
+}
+
+func parseStamp(s string) (time.Time, bool) {
+	s = strings.Replace(s, " ", "T", 1)
+	for _, l := range stampLayouts {
+		if t, err := time.Parse(l, s); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
+}
+
+// WindowsOverlap reports whether two windows (from Window) can describe the same moment: either is undated,
+// or one contains the other ("2026" contains "2026-03"). Calendar windows either nest or are disjoint.
+func WindowsOverlap(a, b string) bool {
+	if a == "" || b == "" {
+		return true
+	}
+	if len(a) > len(b) {
+		a, b = b, a
+	}
+	return strings.HasPrefix(b, a)
+}
+
+// WindowHull is the narrowest window containing every given (non-empty) window: their longest common
+// calendar prefix (YYYY-MM-DD, YYYY-MM or YYYY). Windows in different years give an ISO 8601 interval
+// "<earliest>/<latest>". No windows give "".
+func WindowHull(ws []string) string {
+	var dated []string
+	for _, w := range ws {
+		if w != "" {
+			dated = append(dated, w)
+		}
+	}
+	if len(dated) == 0 {
+		return ""
+	}
+	sort.Strings(dated)
+	for _, n := range []int{10, 7, 4} {
+		if len(dated[0]) < n {
+			continue
+		}
+		prefix, ok := dated[0][:n], true
+		for _, w := range dated {
+			if len(w) < n || w[:n] != prefix {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			return prefix
+		}
+	}
+	return dated[0] + "/" + dated[len(dated)-1]
 }
 
 // IndependenceKey normalizes a publisher key: a URL becomes its host; then lower case, trimmed, trailing dots

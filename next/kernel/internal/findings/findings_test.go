@@ -104,8 +104,9 @@ func TestAsOfWindows(t *testing.T) {
 		c("08", "Org", "located_in", "City", nil, "", "b.example", "r1"),
 	}
 	fs, conf := Verify(claims, pm)
-	if len(conf.Conflicts) != 0 {
-		t.Fatalf("values in different windows are not a conflict: %+v", conf)
+	// D-097: different values in disjoint windows are a change over time, recorded, never a disagreement.
+	if len(conf.Conflicts) != 1 || conf.Conflicts[0].Kind != KindChanged || conf.Conflicts[0].Sides[0].Value != "pending" {
+		t.Fatalf("want one changed_over_time record (pending, then published): %+v", conf)
 	}
 	byWindow := map[string]string{}
 	for _, f := range fs {
@@ -130,5 +131,68 @@ func TestAsOfWindows(t *testing.T) {
 	und2, _ := Verify(claims[6:], off)
 	if und1[0].ID != und2[0].ID {
 		t.Fatal("undated finding id changed with the window setting")
+	}
+}
+
+// D-097: the reviewer's repro cases (as_of_window = month). None may hide a disagreement.
+func TestAsOfReviewCases(t *testing.T) {
+	pm := p
+	pm.AsOfWindow = "month"
+	hc := func(id string, v float64, key, asOf string) model.Claim {
+		cl := c(id, "Org", "headcount", "Org", v, "count", key, "r1")
+		cl.AsOf = asOf
+		return cl
+	}
+	kinds := func(conf Conflicts) map[string]int {
+		m := map[string]int{}
+		for _, x := range conf.Conflicts {
+			m[x.Kind]++
+		}
+		return m
+	}
+	// 1. a dated value vs a different undated value: the undated claim overlaps every window -> disagreement.
+	fs, conf := Verify([]model.Claim{hc("01", 100, "a.example", "2026-05"), hc("02", 900, "b.example", "")}, pm)
+	if k := kinds(conf); k[KindDisagreement] != 1 || len(fs) != 2 || fs[0].Confidence != "contested" || fs[1].Confidence != "contested" {
+		t.Errorf("case 1: %v %+v", k, fs)
+	}
+	// 2. different values on either side of a month boundary -> a recorded change over time.
+	fs, conf = Verify([]model.Claim{hc("01", 100, "a.example", "2026-05-31"), hc("02", 900, "b.example", "2026-06-01")}, pm)
+	if k := kinds(conf); k[KindChanged] != 1 || k[KindDisagreement] != 0 || len(conf.Conflicts[0].Sides) != 2 || conf.Conflicts[0].Sides[0].Value != 100.0 {
+		t.Errorf("case 2: %+v", conf)
+	}
+	// 3. the same fact as of 2026 and as of 2026-03: containment -> one verified finding.
+	fs, conf = Verify([]model.Claim{hc("01", 100, "a.example", "2026"), hc("02", 100, "b.example", "2026-03")}, pm)
+	if len(fs) != 1 || fs[0].Kind != "verified" || fs[0].AsOf != "2026" || len(conf.Conflicts) != 0 {
+		t.Errorf("case 3: %+v %+v", fs, conf)
+	}
+	// 4. the same instant written with two offsets -> one window -> one verified finding.
+	fs, conf = Verify([]model.Claim{hc("01", 100, "a.example", "2026-01-31T23:00-05:00"), hc("02", 100, "b.example", "2026-02-01T04:00Z")}, pm)
+	if len(fs) != 1 || fs[0].Kind != "verified" || fs[0].AsOf != "2026-02" {
+		t.Errorf("case 4: %+v", fs)
+	}
+	// 4b. the same instant with different values is a disagreement, not two months.
+	_, conf = Verify([]model.Claim{hc("01", 100, "a.example", "2026-01-31T23:00-05:00"), hc("02", 900, "b.example", "2026-02-01T04:00Z")}, pm)
+	if k := kinds(conf); k[KindDisagreement] != 1 {
+		t.Errorf("case 4b: %v", k)
+	}
+	// 5. an undated claim corroborates a dated one with the same value.
+	fs, _ = Verify([]model.Claim{hc("01", 100, "a.example", "2026-05"), hc("02", 100, "b.example", "")}, pm)
+	if len(fs) != 1 || fs[0].Kind != "verified" || fs[0].AsOf != "2026-05" {
+		t.Errorf("case 5: %+v", fs)
+	}
+	// Every claim is in exactly one finding.
+	all := []model.Claim{hc("01", 100, "a.example", "2026"), hc("02", 100, "b.example", "2026-03"), hc("03", 100, "c.example", "2026-05"),
+		hc("04", 900, "d.example", ""), hc("05", 100, "e.example", "2027-01")}
+	fs, _ = Verify(all, pm)
+	seen := map[string]int{}
+	for _, f := range fs {
+		for _, e := range f.Evidence {
+			seen[e]++
+		}
+	}
+	for _, cl := range all {
+		if seen[cl.ID] != 1 {
+			t.Errorf("claim %s is in %d findings", cl.ID, seen[cl.ID])
+		}
 	}
 }

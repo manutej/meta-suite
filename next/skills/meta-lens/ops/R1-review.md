@@ -2,7 +2,7 @@
 
 <!-- <internal>An adversarial critic that never saw the work being made. Output is an EditScript only;
 the critic cannot edit. Blind attestation is recorded; blind=true only for a truly separate
-context.</internal> -->
+context. Cap key: modes.<mode>.review_passes.</internal> -->
 
 ```xml
 <contract op="R1">
@@ -26,7 +26,7 @@ context.</internal> -->
      there (`claude -p "$(cat <brief>)"` with that folder as its working directory) → `blind: true`,
      because it is a separate process that sees only those files;
    - neither: review it yourself from the files alone → `blind: false`.
-   Log which with `meta ledger append --kind attestation --stage R1`.
+   Log which with `meta ledger append "$RUN" --kind attestation --stage R1 --note "<how isolated>"`.
 3. Save its JSON to `$RUN/review/edits.<n>.json`; `meta validate` it. Inside the run this also checks
    every `target_id` and every finding or conflict id cited in a rationale.
 4. **Apply.** P1 and P2: route each edit by index.md's stage table (page wording → A2, even when the

@@ -2,7 +2,9 @@ LIVE regression fixture (D-079), recorded from the first real meta-lens run (sli
 01M651YMAFM8EPYHJ0AB13C2WQ, deep_narrow, one runner context on claude-opus-5-5). Question: which EU AI Act
 obligations a mid-size SaaS company building on third-party models must meet, by when, and what is unsettled.
 
-Kept, byte-for-byte as the run wrote them: run.json, spec.json, cover.json, claims.jsonl (201 claims, each
+Kept as the run wrote them (D-097: absolute sandbox paths in ledger.jsonl, how_checked.json and gates/G6.json
+were rewritten run-relative, e.g. ".../runs/<run_id>/prompts/I1.md" -> "prompts/I1.md", and the ledger's
+hash chain was recomputed so `meta ledger show` still verifies it): run.json, spec.json, cover.json, claims.jsonl (201 claims, each
 carrying its kernel-issued stage token), findings.jsonl (103: 73 verified, 30 single-source), conflicts.json
 (3), how_checked.json, ledger.jsonl (308 events, hash chain intact, 42 deviations) and the kernel gate outputs
 gates/{D3.graph,G2,G6,L2.verify,L3.merge}.json.
