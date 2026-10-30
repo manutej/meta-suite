@@ -97,15 +97,17 @@ type group struct {
 	claims []model.Claim
 }
 
-// comp is one time component of a value group: one finding.
+// comp is one time slice of a value group: the claims that state the value for exactly one window (their
+// primary evidence), plus the coarser or undated claims of the same value that contain that window
+// (supporting). One finding.
 type comp struct {
-	group   int
-	value   any
-	unit    string
-	claims  []model.Claim
-	windows []string // per claim, aligned with claims
-	asOf    string   // hull
-	finding model.Finding
+	group      int
+	value      any
+	unit       string
+	claims     []model.Claim // primary: window == asOf
+	supporting []model.Claim // same value, window strictly contains asOf (or undated)
+	asOf       string
+	finding    model.Finding
 }
 
 // Rule is the agreement rule in plain words; `findings verify` and how_checked.json both state it (D-097).
@@ -137,7 +139,7 @@ func Verify(claims []model.Claim, p Params) ([]model.Finding, Conflicts) {
 		sort.Slice(cs, func(i, j int) bool { return cs[i].ID < cs[j].ID })
 		var comps []*comp
 		for gi, g := range groupValues(cs, p.NumericRelTol) {
-			comps = append(comps, timeComponents(gi, g, p.AsOfWindow)...)
+			comps = append(comps, timeSlices(gi, g, p.AsOfWindow)...)
 		}
 		// Pairwise relations between components of different values.
 		n := len(comps)
@@ -168,52 +170,38 @@ func Verify(claims []model.Claim, p Params) ([]model.Finding, Conflicts) {
 	return out, conf
 }
 
-// timeComponents splits a value group into components connected by window compatibility.
-func timeComponents(gi int, g group, window string) []*comp {
+// timeSlices splits a value group into one slice per distinct window (D-097). Every claim is primary
+// evidence in the slice of its own window. A coarser or undated claim also supports each finer slice its window
+// contains, without joining it: claims in two specific, disjoint windows never verify each other, and a
+// slice's evidence plus supporting claims always mutually overlap (calendar windows nest).
+func timeSlices(gi int, g group, window string) []*comp {
+	byWindow := map[string]*comp{}
+	var order []*comp
 	ws := make([]string, len(g.claims))
-	for i, c := range g.claims {
+	for i, c := range g.claims { // claims are sorted by id, so slices come out in a stable order
 		ws[i] = norm.Window(c.AsOf, window)
+		if byWindow[ws[i]] == nil {
+			byWindow[ws[i]] = &comp{group: gi, unit: g.unit, asOf: ws[i]}
+			order = append(order, byWindow[ws[i]])
+		}
+		byWindow[ws[i]].claims = append(byWindow[ws[i]].claims, c)
 	}
-	uf := newUF(len(g.claims))
-	for i := range g.claims {
-		for j := i + 1; j < len(g.claims); j++ {
-			if norm.WindowsOverlap(ws[i], ws[j]) {
-				uf.union(i, j)
+	for _, sl := range order {
+		for i, c := range g.claims {
+			if ws[i] != sl.asOf && len(ws[i]) < len(sl.asOf) && norm.WindowsOverlap(ws[i], sl.asOf) {
+				sl.supporting = append(sl.supporting, c)
 			}
 		}
-	}
-	byRoot := map[int]*comp{}
-	var order []*comp
-	for i, c := range g.claims { // claims are sorted by id, so components come out in a stable order
-		r := uf.find(i)
-		if byRoot[r] == nil {
-			byRoot[r] = &comp{group: gi, unit: g.unit}
-			order = append(order, byRoot[r])
-		}
-		byRoot[r].claims = append(byRoot[r].claims, c)
-		byRoot[r].windows = append(byRoot[r].windows, ws[i])
-	}
-	for _, c := range order {
-		c.asOf = norm.WindowHull(c.windows)
-		c.value = g.value
+		sl.value = g.value
 		if _, isNum := g.value.(float64); isNum && len(order) > 1 {
-			c.value = representative(c.claims)
+			sl.value = representative(sl.claims)
 		}
 	}
 	sort.SliceStable(order, func(i, j int) bool { return order[i].asOf < order[j].asOf })
 	return order
 }
 
-func overlaps(a, b *comp) bool {
-	for _, x := range a.windows {
-		for _, y := range b.windows {
-			if norm.WindowsOverlap(x, y) {
-				return true
-			}
-		}
-	}
-	return false
-}
+func overlaps(a, b *comp) bool { return norm.WindowsOverlap(a.asOf, b.asOf) }
 
 // records emits one conflicts.json record per connected set of related components.
 func records(k model.Key, comps []*comp, uf *uf, member []bool, kind string) []Conflict {
@@ -300,6 +288,12 @@ func makeFinding(k model.Key, c *comp, p Params, contested bool) model.Finding {
 		regs[cl.Region] = true
 	}
 	sort.Strings(ev)
+	var sup []string
+	for _, cl := range c.supporting { // supporting claims count as publishers, deduplicated by key
+		sup = append(sup, cl.ID)
+		ikeys[norm.IndependenceKey(cl.Source.IndependenceKey, p.StripPrefixes)] = true
+	}
+	sort.Strings(sup)
 	kl, rl := sortedKeys(ikeys), sortedKeys(regs)
 	kind, confidence := "single_source", "single_source"
 	if len(kl) >= p.MinIndependent {
@@ -316,6 +310,7 @@ func makeFinding(k model.Key, c *comp, p Params, contested bool) model.Finding {
 		ID:               "F-" + fsx.SHA256([]byte(idBase + "\x00" + valueString(c.value) + "\x00" + c.unit))[:12],
 		Kind:             kind,
 		Evidence:         ev,
+		Supporting:       sup,
 		Regions:          rl,
 		Confidence:       confidence,
 		Key:              &model.Key{Subject: k.Subject, Relation: k.Relation, Object: k.Object},

@@ -108,9 +108,10 @@ Gotchas:
   - numeric claims need a number value; "1.2 km" as a string is rejected. Units in no table are kept as
     given and listed in notes; a canonical unit ("%", "m", "s") is accepted as is.
   - Money: a relation whose unit_dimension is "currency" needs a unit: an ISO 4217 code (EUR, USD, ...;
-    config unit_codes.currency; lower case is upper-cased) and the amount in base units (35000000, not
-    35 with "million"). Codes are never converted; two currencies on one key are a disagreement the
-    kernel cannot convert. An ISO code on a relation of another dimension is rejected.
+    not metals, funds, XTS or XXX: config unit_codes.currency.exclude) and the amount in base units
+    (35000000, not 35 with "million"). Codes are upper-cased on any relation ("eur" -> "EUR") and never
+    converted; two currencies on one key are a disagreement the kernel cannot convert. A code on a
+    relation of a convertible dimension (ratio, count, ...) is rejected.
   - Use the plainest standard label for subjects and objects, the same way every time: entities merge
     only on exact normalized labels (case, spacing, outer punctuation and full-width forms ignored;
     brackets are kept when balanced: "Duty (Article 50)" stays "duty (article 50)"). When cover.json
@@ -123,8 +124,9 @@ verify, G2 and report skip the claim from then on. Use it when a claim misstates
 recorded fact is not what the page says); never to drop an inconvenient but well-sourced claim.
 Args: <run_dir> --id <claim id> --reason "one sentence" [--stage <stage doing the retracting>]
 Output: {retracted{id, reason, at, stage?}, retractions, next, note?}. Retracting again with the same
-reason is a no-op (exit 0, note "already retracted"); G2 accepts a tombstone only with its ok
-`claim retract` ledger event, so never write retractions.jsonl by hand.
+reason is a no-op (exit 0, note "already retracted"). G2 accepts a tombstone only with the ok
+`claim retract` event that created it (a later "already retracted" call does not count), so never write
+retractions.jsonl by hand.
 Exit 2 kinds: usage (bad id, empty reason), precondition (id in no shard), exists (already retracted
 with another reason).
 Gotchas: run `meta claims merge` and every step after it again; until then G2 fails on the stale merge.
@@ -176,12 +178,15 @@ median member), never an average.
 Time: each claim's as_of becomes a window (lens.pullback.as_of_window: the UTC calendar day, month or
 year; timestamps are converted to UTC first; "none" ignores as_of). Windows are compatible when one
 contains the other ("2026" contains "2026-03"); an undated claim is compatible with every window.
-Each value group splits into time components of compatible claims; each component is one finding:
-verified when at least lens.pullback.min_independent distinct publishers (independence keys) support
-it, single_source otherwise. Its as_of is the span of its claims' windows. Every claim is in exactly
-one finding.
+Each value group splits into one slice per window; each slice is one finding whose evidence is the
+claims stated for exactly that window and whose as_of is that window (never a widened one). A coarser
+or undated claim of the same value is listed under "supporting" in every finer slice it contains, and
+is primary evidence only in its own slice: two disjoint windows never verify each other. A slice is
+verified when its evidence plus supporting claims carry at least lens.pullback.min_independent
+distinct publishers (independence keys), single_source otherwise. Every claim is primary evidence in
+exactly one finding.
 Across values on one key, conflicts.json records (Conflicts, with a kind):
-  disagreement       different values whose windows are compatible (or undated): both findings get
+  disagreement       different values whose slice windows are compatible (or undated): both findings get
                      confidence "contested"; the kernel never picks a winner.
   changed_over_time  different values for disjoint windows: a change, each value with its period, in
                      time order. Not contested, never dropped; the page shows it as a change.
@@ -196,15 +201,15 @@ but never change a finding's kind, confidence or evidence.
 Provenance gate. Checks: every claim validates, has a locator and an independence_key, and carries
 a kernel-issued, unedited token for its region; claims.jsonl equals the shards; every morphism cites
 existing claims of its region; no object outside a morphism; every claim is in its region graph;
-every finding's evidence exists; every live claim is evidence in exactly one finding (otherwise the
-findings are stale: run `meta findings verify`); a verified finding really has >= min_independent
-distinct publishers; a tension has a claim on each side.
+every finding's evidence and supporting claims exist; every live claim is primary evidence in exactly
+one finding (otherwise the findings are stale: run `meta findings verify`); a verified finding really
+has >= min_independent distinct publishers across evidence and supporting; a tension has a claim on each side.
 Also (D-081) warnings: claim text matching config gates.g2.injection_patterns is listed as
 injection_suspect. Warnings do not change the verdict; review them and drop claims that carry
 instructions rather than facts.
 Args: <run_dir>
 Retracted claims must stay valid in their shards but appear in no merge, graph or evidence, and each
-tombstone needs its ok `claim retract` ledger event.
+tombstone needs the ok `claim retract` ledger event that created it (same id, reason and time).
 Output: {gate, verdict, complete, checks[], problems[], warnings[], counts, inputs}.
 Verdicts: fail (any check failed) | unchecked (no claims yet) | incomplete (no failure, but a part
 whose files do not exist yet was unchecked, complete=false: e.g. right after D2, before graph build
@@ -217,7 +222,8 @@ files change afterwards, so run G2 again after any change.
 Vocabulary gate: no internal formal terms reach the reader. Scans user-facing files for the stems,
 tokens and phrases in config gates.g6. HTML is scanned on what a reader sees (text, alt, title,
 aria-label, placeholder, content attributes and JSON data blocks); markup, CSS and scripts are skipped.
-Text inside <internal>…</internal> is skipped in every file type: it is for maintainers, never shown.
+Text inside <internal>…</internal> is skipped only in a skill's own Markdown (SKILL.md, index.md,
+ops/*.md); in HTML it is skipped only inside a comment, because a browser shows a bare element's text.
 Args:
   <file>...           files to scan (not directories).
   --run <run_dir>     use the brief's vocab_allowlist and record the verdict in that run. Default:

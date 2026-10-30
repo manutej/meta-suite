@@ -64,6 +64,11 @@ func TestUnitsCanonicalAndCurrency(t *testing.T) {
 	for _, c := range []struct{ rel, unit, want string }{
 		{"max_fine", "€", "is not a code of it"},   // a currency relation needs an ISO 4217 code
 		{"max_fine", "ABC", "is not a code of it"}, // code-shaped, but not in ISO 4217
+		{"max_fine", "XXX", "is not a code of it"}, // D-097: ISO "no currency" code
+		{"max_fine", "XTS", "is not a code of it"}, // testing code
+		{"max_fine", "xau", "is not a code of it"}, // gold, not money
+		{"max_fine", "CLF", "is not a code of it"}, // a fund code
+		{"share", "eur", "measures currency"},      // lower case is read as the code on any relation
 		{"max_fine", "%", "measures ratio"},        // a ratio unit on a currency relation
 		{"share", "EUR", "measures currency"},      // a currency code on a ratio relation
 		{"headcount", "EUR", "measures currency"},  // ... or on a count relation
@@ -282,13 +287,19 @@ func findingsByLabel(t *testing.T, dir string) map[string]string {
 		if v, ok := f["value"].(float64); ok {
 			label += "=" + jsonNum(v)
 		}
+		if a, ok := f["as_of"].(string); ok {
+			label += "@" + a
+		}
 		got[label] = f["kind"].(string) + "/" + f["confidence"].(string)
 	}
 	return got
 }
 
-// P2-3: the original e2e scenario (2025 vs 2026 headcounts, undated claims corroborating dated ones) gives its
-// intended outcome under the D-097 rules.
+// P2-3: the original e2e scenario (2025 vs 2026 headcounts, undated claims corroborating dated ones) under the
+// D-097 rules. Its first intent holds: undated claims corroborate dated ones (located_in 2026 and headcount
+// 12000 in January 2026 are verified), and the undated 12000 disagrees with 15000 in 2025. N1 changes one part
+// on purpose: the January 2026 12000 and the 2025 15000 are disjoint periods, so that pair is a change over time,
+// not a dispute, and each undated claim keeps its own single-source finding instead of widening a dated one.
 func TestAsOfScenario(t *testing.T) {
 	b, err := os.ReadFile("testdata/synthetic/e2e-asof/claims.jsonl")
 	if err != nil {
@@ -297,15 +308,17 @@ func TestAsOfScenario(t *testing.T) {
 	dir := pipelineFrom(t, b)
 	must(t, "", "interface merge", dir, "--plain")
 	fv := must(t, "", "findings verify", dir).json(t)
-	if fv["conflicts"].(float64) != 1 || fv["changed_over_time"].(float64) != 0 {
+	if fv["conflicts"].(float64) != 1 || fv["changed_over_time"].(float64) != 1 {
 		t.Fatalf("findings verify %v", fv)
 	}
 	want := map[string]string{
-		"org alpha|located_in|city one":       "verified/settled",
-		"org alpha|has_part|unit delta":       "single_source/single_source",
-		"org alpha|headcount|org alpha=12000": "verified/contested",
-		"org alpha|headcount|org alpha=15000": "single_source/contested",
-		"org beta|has_part|unit gamma":        "single_source/single_source",
+		"org alpha|located_in|city one@2026":          "verified/settled", // a.example + undated b.example supporting
+		"org alpha|located_in|city one":               "single_source/single_source",
+		"org alpha|has_part|unit delta":               "single_source/single_source",
+		"org alpha|headcount|org alpha=12000@2026-01": "verified/settled", // a.example + undated c.example supporting
+		"org alpha|headcount|org alpha=12000":         "single_source/contested",
+		"org alpha|headcount|org alpha=15000@2025":    "single_source/contested",
+		"org beta|has_part|unit gamma":                "single_source/single_source",
 	}
 	got := findingsByLabel(t, dir)
 	for k, v := range want {
@@ -405,6 +418,14 @@ func TestRetractIdempotentAndLedgerBound(t *testing.T) {
 	must(t, "", "findings verify", dir)
 	if r := meta(t, "", "gate G2", dir); r.code != 1 || !strings.Contains(r.stdout, "no matching ledger event") {
 		t.Fatalf("hand-written tombstone: %+v", r)
+	}
+	// A later `claim retract` with the same id and reason only says "already retracted"; it does not
+	// legitimise the hand-written line (the match is the event that created the tombstone).
+	if j := must(t, "", "claim retract", dir, "--id", other, "--reason", "by hand").json(t); j["note"] == nil {
+		t.Fatalf("%v", j)
+	}
+	if r := meta(t, "", "gate G2", dir); r.code != 1 || !strings.Contains(r.stdout, "no matching ledger event") {
+		t.Fatalf("hand-written tombstone after a repeat retract: %+v", r)
 	}
 }
 

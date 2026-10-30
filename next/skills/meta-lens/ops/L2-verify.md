@@ -25,8 +25,10 @@ agreement rule, including the as_of window).
   the page with both values and their sources; never pick a winner or average. `changed_over_time`:
   the page shows the change, each value with its date, oldest first; it is not a dispute, but it is
   never left out and never summed up as "sources agree".
-- **Dated findings.** A finding's `as_of` is the period its sources cover; the page says "as of …".
-  An undated source counts for any period, so it can confirm a dated one or disagree with it.
+- **Dated findings.** A finding's `as_of` is the one period its evidence states; the page says "as of
+  …". An undated or year-level source appears under `supporting` in each finer finding it fits: it can
+  confirm a dated finding or disagree with it, and it keeps its own undated finding. Show supporting
+  sources in the evidence drawer as "also consistent".
 - **Bad claims.** A finding that rests on a claim its source does not support: retract the claim
   (`meta claim retract "$RUN" --id … --reason … --stage L2`), then re-run merge, graph build,
   interface merge and findings verify. The page never quietly drops a finding.

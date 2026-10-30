@@ -160,9 +160,15 @@ func TestAsOfReviewCases(t *testing.T) {
 	if k := kinds(conf); k[KindChanged] != 1 || k[KindDisagreement] != 0 || len(conf.Conflicts[0].Sides) != 2 || conf.Conflicts[0].Sides[0].Value != 100.0 {
 		t.Errorf("case 2: %+v", conf)
 	}
-	// 3. the same fact as of 2026 and as of 2026-03: containment -> one verified finding.
+	// 3. the same fact as of 2026 and as of 2026-03: the year claim supports the March slice (verified, as
+	// of 2026-03) and keeps its own single-source finding at its own window; no widened window.
 	fs, conf = Verify([]model.Claim{hc("01", 100, "a.example", "2026"), hc("02", 100, "b.example", "2026-03")}, pm)
-	if len(fs) != 1 || fs[0].Kind != "verified" || fs[0].AsOf != "2026" || len(conf.Conflicts) != 0 {
+	byAsOf := map[string]model.Finding{}
+	for _, f := range fs {
+		byAsOf[f.AsOf] = f
+	}
+	if len(fs) != 2 || byAsOf["2026-03"].Kind != "verified" || len(byAsOf["2026-03"].Supporting) != 1 ||
+		byAsOf["2026"].Kind != "single_source" || len(conf.Conflicts) != 0 {
 		t.Errorf("case 3: %+v %+v", fs, conf)
 	}
 	// 4. the same instant written with two offsets -> one window -> one verified finding.
@@ -175,12 +181,12 @@ func TestAsOfReviewCases(t *testing.T) {
 	if k := kinds(conf); k[KindDisagreement] != 1 {
 		t.Errorf("case 4b: %v", k)
 	}
-	// 5. an undated claim corroborates a dated one with the same value.
+	// 5. an undated claim supports a dated one with the same value (and keeps its own undated finding).
 	fs, _ = Verify([]model.Claim{hc("01", 100, "a.example", "2026-05"), hc("02", 100, "b.example", "")}, pm)
-	if len(fs) != 1 || fs[0].Kind != "verified" || fs[0].AsOf != "2026-05" {
+	if len(fs) != 2 || fs[1].Kind != "verified" || fs[1].AsOf != "2026-05" || fs[1].Supporting[0] != "02" || fs[0].AsOf != "" || fs[0].Kind != "single_source" {
 		t.Errorf("case 5: %+v", fs)
 	}
-	// Every claim is in exactly one finding.
+	// Every claim is primary evidence in exactly one finding.
 	all := []model.Claim{hc("01", 100, "a.example", "2026"), hc("02", 100, "b.example", "2026-03"), hc("03", 100, "c.example", "2026-05"),
 		hc("04", 900, "d.example", ""), hc("05", 100, "e.example", "2027-01")}
 	fs, _ = Verify(all, pm)
@@ -195,4 +201,52 @@ func TestAsOfReviewCases(t *testing.T) {
 			t.Errorf("claim %s is in %d findings", cl.ID, seen[cl.ID])
 		}
 	}
+}
+
+// D-097 (N1): an undated claim supports each month it fits without chaining the months together.
+func TestUndatedDoesNotChainMonths(t *testing.T) {
+	pm := p
+	pm.AsOfWindow = "month"
+	hc := func(id, key, asOf string) model.Claim {
+		cl := c(id, "Org", "headcount", "Org", 100.0, "count", key, "r1")
+		cl.AsOf = asOf
+		return cl
+	}
+	fs, conf := Verify([]model.Claim{hc("01", "a.example", "2026-05"), hc("02", "b.example", "2026-06"), hc("03", "c.example", "")}, pm)
+	byAsOf := map[string]model.Finding{}
+	for _, f := range fs {
+		byAsOf[f.AsOf] = f
+	}
+	may, june, und := byAsOf["2026-05"], byAsOf["2026-06"], byAsOf[""]
+	if len(fs) != 3 || len(conf.Conflicts) != 0 {
+		t.Fatalf("want three findings (May, June, undated), no records: %+v %+v", fs, conf)
+	}
+	if _, wide := byAsOf["2026"]; wide {
+		t.Fatal("a widened 2026 finding was made")
+	}
+	if may.Kind != "verified" || join(may.Evidence) != "01" || join(may.Supporting) != "03" {
+		t.Errorf("May: %+v", may)
+	}
+	if june.Kind != "verified" || join(june.Evidence) != "02" || join(june.Supporting) != "03" {
+		t.Errorf("June: %+v", june)
+	}
+	if und.Kind != "single_source" || join(und.Evidence) != "03" || len(und.Supporting) != 0 {
+		t.Errorf("undated: %+v", und)
+	}
+	// The two months never verify each other: without the undated claim each is single-source.
+	fs, _ = Verify([]model.Claim{hc("01", "a.example", "2026-05"), hc("02", "b.example", "2026-06")}, pm)
+	if len(fs) != 2 || fs[0].Kind != "single_source" || fs[1].Kind != "single_source" {
+		t.Errorf("two months alone: %+v", fs)
+	}
+}
+
+func join(s []string) string {
+	out := ""
+	for i, x := range s {
+		if i > 0 {
+			out += ","
+		}
+		out += x
+	}
+	return out
 }

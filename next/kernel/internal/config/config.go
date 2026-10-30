@@ -42,6 +42,7 @@ type UnitDim struct {
 type UnitCodes struct {
 	Pattern string         `toml:"pattern" json:"pattern"`
 	List    string         `toml:"list" json:"list"`
+	Exclude []string       `toml:"exclude" json:"exclude"`
 	re      *regexp.Regexp `toml:"-"`
 }
 
@@ -52,6 +53,11 @@ func (u UnitCodes) Match(unit string) bool {
 	}
 	if !u.re.MatchString(unit) {
 		return false
+	}
+	for _, x := range u.Exclude {
+		if x == unit {
+			return false
+		}
 	}
 	if u.List == "iso4217" {
 		_, err := currency.ParseISO(unit)

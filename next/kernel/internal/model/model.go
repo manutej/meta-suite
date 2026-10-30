@@ -128,6 +128,7 @@ type Finding struct {
 	Kind             string   `json:"kind"`
 	Sides            []Side   `json:"sides,omitempty"`
 	Evidence         []string `json:"evidence"`
+	Supporting       []string `json:"supporting,omitempty"`
 	Region           string   `json:"region,omitempty"`
 	Regions          []string `json:"regions,omitempty"`
 	Confidence       string   `json:"confidence"`

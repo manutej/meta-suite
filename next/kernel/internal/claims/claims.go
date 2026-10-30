@@ -201,9 +201,9 @@ func checkVocab(c *model.Claim, v Vocab) *Rejection {
 // rejected. It returns known=false for a unit in no table (kept as given, Normalized nil); a canonical unit
 // such as "%" is known and left unchanged (D-087).
 //
-// Code-only dimensions (config unit_codes, e.g. currency: any three-letter code, D-097) are never converted.
-// A relation declared in one needs a unit, upper-cased to its code form ("eur" -> "EUR"); a code-shaped unit
-// on a relation of another dimension is rejected.
+// Code-only dimensions (config unit_codes, e.g. currency: ISO 4217 minus config's exclude list, D-097) are
+// never converted. Codes are upper-cased on any relation ("eur" -> "EUR"). A relation declared in a code
+// dimension needs a unit; a code on a relation of a convertible dimension is rejected.
 func Normalize(c *model.Claim, cfg *config.Config, v Vocab) (bool, *Rejection) {
 	if c.ValueType != "numeric" && c.ValueType != "relative" {
 		return true, nil
@@ -235,9 +235,11 @@ func Normalize(c *model.Claim, cfg *config.Config, v Vocab) (bool, *Rejection) {
 	}
 	found, coded := tableDim(cfg, c.Unit), false
 	if found == "" {
+		up := strings.ToUpper(strings.TrimSpace(c.Unit))
 		for _, d := range sortedDims(cfg) {
-			if uc, ok := cfg.UnitCodes[d]; ok && uc.Match(c.Unit) {
+			if uc, ok := cfg.UnitCodes[d]; ok && uc.Match(up) {
 				found, coded = d, true
+				c.Unit = up // "eur" groups with "EUR" on any relation
 				break
 			}
 		}

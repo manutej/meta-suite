@@ -96,17 +96,21 @@ func TestDeterministic(t *testing.T) {
 
 func itoa(i int) string { return strconv.Itoa(i) }
 
-// D-097: text inside <internal>…</internal> is skipped in every file type; the same words outside it still hit.
+// D-097: <internal> blocks are skipped only in skill Markdown and, in HTML, only inside a comment; a bare
+// <internal> element in HTML renders, and other Markdown is a reader's file.
 func TestInternalBlocksSkipped(t *testing.T) {
 	rep := scan(t, map[string]string{
-		"op.md":     "Plain words.\n<!-- <internal>A pullback over the\nsheaf of claims.</internal> -->\nA morphism here.",
-		"page.html": "<p>Fine.</p><internal>colimit</internal><p>A functor.</p>",
+		"skills/x/ops/D1.md": "Plain words.\n<!-- <internal>A pullback over the\nsheaf of claims.</internal> -->\nA morphism here.",
+		"skills/x/SKILL.md":  "<internal>operad</internal> fine",
+		"run/assumptions.md": "<internal>cochain</internal>",
+		"page.html":          "<p>visible</p><internal>colimit</internal><p>A functor.</p>",
+		"commented.html":     "<p>ok</p><!-- <internal>adjunction</internal> --><p>fine</p>",
 	}, nil)
 	got := []string{}
 	for _, h := range rep.Hits {
 		got = append(got, h.File+":"+h.Term+"@"+itoa(h.Line))
 	}
-	if strings.Join(got, " ") != "op.md:morphism@4 page.html:functor@1" {
+	if strings.Join(got, " ") != "page.html:colimit@1 page.html:functor@1 run/assumptions.md:cochain@1 skills/x/ops/D1.md:morphism@4" {
 		t.Fatalf("hits %v", got)
 	}
 }

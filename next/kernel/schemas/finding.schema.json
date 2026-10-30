@@ -58,6 +58,15 @@
       "minItems": 1,
       "uniqueItems": true
     },
+    "supporting": {
+      "type": "array",
+      "description": "Claims that support this finding without being its primary evidence: same value, a coarser or undated as_of that contains this finding's window (D-097). Counted toward independent publishers, deduplicated by independence key. Each claim is primary evidence in exactly one finding.",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+      },
+      "uniqueItems": true
+    },
     "region": {
       "type": "string",
       "minLength": 1

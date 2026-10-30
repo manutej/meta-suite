@@ -89,10 +89,12 @@ func G6(files []string, read func(string) ([]byte, error), c G6Config, allow []A
 			return nil, err
 		}
 		rep.Files = append(rep.Files, f)
-		text := MaskInternal(b)
+		text := b
 		ext := strings.ToLower(filepath.Ext(f))
 		if ext == ".html" || ext == ".htm" || ext == ".svg" {
-			text = MaskHTML(text)
+			text = MaskHTML(b) // an <internal> block inside an HTML comment is masked with the comment
+		} else if SkillDoc(f) {
+			text = MaskInternal(b)
 		}
 		lineStarts := []int{0}
 		for i, ch := range b {
@@ -181,8 +183,19 @@ var (
 
 var internalRe = regexp.MustCompile(`(?is)<internal\b[^>]*>.*?</internal\s*>`)
 
-// MaskInternal blanks every <internal>…</internal> block (D-097): text marked internal is for the model and
-// maintainers, never shown to a reader, so G6 skips it in any file. Offsets and newlines are kept.
+// SkillDoc reports whether path is a skill's own Markdown (SKILL.md, index.md, ops/*.md), the only files whose
+// <internal>…</internal> blocks G6 skips (D-097). Anywhere else, and in HTML outside a comment, a reader
+// sees that text, so it is scanned.
+func SkillDoc(path string) bool {
+	base := filepath.Base(path)
+	if base == "SKILL.md" || base == "index.md" {
+		return true
+	}
+	return strings.EqualFold(filepath.Ext(base), ".md") && filepath.Base(filepath.Dir(path)) == "ops"
+}
+
+// MaskInternal blanks every <internal>…</internal> block, keeping offsets and newlines. G6 applies it to
+// skill Markdown only (SkillDoc).
 func MaskInternal(b []byte) []byte {
 	locs := internalRe.FindAllIndex(b, -1)
 	if len(locs) == 0 {

@@ -239,7 +239,7 @@ func cmdClaimRetract(e *env, args []string) int {
 	if err != nil {
 		return e.failRun(r, "claim retract", err)
 	}
-	data := map[string]any{"id": t.ID, "reason": t.Reason, "stage": t.Stage}
+	data := map[string]any{"id": t.ID, "reason": t.Reason, "at": t.At, "stage": t.Stage}
 	if already {
 		data["already_retracted"] = true
 	}

@@ -2,12 +2,14 @@ LIVE regression fixture (D-079), recorded from the first real meta-lens run (sli
 01M651YMAFM8EPYHJ0AB13C2WQ, deep_narrow, one runner context on claude-opus-5-5). Question: which EU AI Act
 obligations a mid-size SaaS company building on third-party models must meet, by when, and what is unsettled.
 
-Kept as the run wrote them (D-097: absolute sandbox paths in ledger.jsonl, how_checked.json and gates/G6.json
-were rewritten run-relative, e.g. ".../runs/<run_id>/prompts/I1.md" -> "prompts/I1.md", and the ledger's
-hash chain was recomputed so `meta ledger show` still verifies it): run.json, spec.json, cover.json, claims.jsonl (201 claims, each
-carrying its kernel-issued stage token), findings.jsonl (103: 73 verified, 30 single-source), conflicts.json
-(3), how_checked.json, ledger.jsonl (308 events, hash chain intact, 42 deviations) and the kernel gate outputs
-gates/{D3.graph,G2,G6,L2.verify,L3.merge}.json.
+Kept: run.json, spec.json, cover.json, claims.jsonl (201 claims, each carrying its kernel-issued stage
+token), findings.jsonl (103: 73 verified, 30 single-source), conflicts.json (3), how_checked.json,
+ledger.jsonl (308 events, 42 deviations) and the kernel gate outputs
+gates/{D3.graph,G2,G6,L2.verify,L3.merge}.json, as the run wrote them, with one exception.
+ledger.jsonl is byte-for-byte the original, so its hash chain proves what the run logged; its data still
+holds the run's absolute sandbox paths, which are harmless and which no test reads. The exception (D-097):
+absolute sandbox paths in how_checked.json and gates/G6.json were rewritten run-relative
+("…/runs/<run_id>/prompts/I1.md" -> "prompts/I1.md"); the replay reads neither file.
 
 Trimmed: no fetched page bodies (claims hold typed facts and locators only), no rendered HTML (artifact/),
 no screenshots, no prompts, no claim shards or token files (the replay rebuilds both from the stage tokens

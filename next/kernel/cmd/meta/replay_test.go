@@ -9,6 +9,7 @@ import (
 
 	"github.com/manutej/meta-suite/next/kernel/internal/claims"
 	"github.com/manutej/meta-suite/next/kernel/internal/config"
+	"github.com/manutej/meta-suite/next/kernel/internal/findings"
 	"github.com/manutej/meta-suite/next/kernel/internal/model"
 	runs "github.com/manutej/meta-suite/next/kernel/internal/rundir"
 )
@@ -94,6 +95,30 @@ func TestReplayLiveEUAIAct(t *testing.T) {
 	}
 	if units["%"] != 12 || units["EUR"] != 9 {
 		t.Fatalf("units %v", units)
+	}
+
+	// D-097 (N1) on live data: the run's cross-month "no fines" claims (wsgrdataadvisor.com, 2026-08;
+	// reedsmith.com, 2026-10) stay two findings even when an undated agreeing claim from a third publisher is
+	// added: it supports each month without joining them, and no widened "2026" finding appears.
+	undated := model.Claim{}
+	for _, c := range all {
+		if c.ID == "01M653AP2F2XQYBGWJB53TVMY6" {
+			undated = c
+		}
+	}
+	undated.ID, undated.AsOf = "01M659ZZZZZZZZZZZZZZZZZZZZ", ""
+	undated.Source = model.Source{Locator: "https://third.example/fines", RetrievedAt: "2026-10-30T00:00:00Z", IndependenceKey: "third.example"}
+	fs, _ := findings.Verify(append(append([]model.Claim(nil), all...), undated), findings.Params{MinIndependent: cfg.Lens.Pullback.MinIndependent,
+		NumericRelTol: cfg.Lens.Pullback.NumericRelTol, StripPrefixes: cfg.Independence.StripPrefixes, AsOfWindow: cfg.Lens.Pullback.AsOfWindow})
+	fines := map[string]model.Finding{}
+	for _, f := range fs {
+		if f.Key.Subject == "ai act fines imposed" {
+			fines[f.AsOf] = f
+		}
+	}
+	if len(fines) != 3 || fines["2026-08"].Kind != "verified" || fines["2026-10"].Kind != "verified" || fines[""].Kind != "single_source" ||
+		len(fines["2026-08"].Evidence) != 1 || len(fines["2026-10"].Evidence) != 1 {
+		t.Fatalf("no-fines split with an undated claim: %+v", fines)
 	}
 
 	// K9: the spec hash lands in run.json.

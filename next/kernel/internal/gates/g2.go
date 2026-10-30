@@ -142,8 +142,9 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				byID[c.ID] = c
 			}
 		}
-		// D-097: a tombstone counts only with its ledger record: an ok `claim retract` event for that id and
-		// reason. A hand-written line in retractions.jsonl has none.
+		// D-097: a tombstone counts only with the ledger event that created it: an ok `claim retract` event
+		// with the same id, reason and time, not a later "already retracted" call. A hand-written line in
+		// retractions.jsonl has none.
 		recorded := map[string]bool{}
 		if len(tomb) > 0 {
 			evs, err := ledger.Events(r)
@@ -153,8 +154,10 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 			for _, ev := range evs {
 				id, _ := ev.Data["id"].(string)
 				reason, _ := ev.Data["reason"].(string)
-				if ev.Command == "claim retract" && ev.OK && id != "" {
-					recorded[id+"\x00"+reason] = true
+				at, _ := ev.Data["at"].(string)
+				repeat, _ := ev.Data["already_retracted"].(bool)
+				if ev.Command == "claim retract" && ev.OK && id != "" && !repeat {
+					recorded[id+"\x00"+reason+"\x00"+at] = true
 				}
 			}
 		}
@@ -162,7 +165,7 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 			if !inShard[id] {
 				add(Problem{Check: claimCheck.Name, File: runs.RetractFile, ID: id, Detail: "retracts a claim that is in no shard"})
 			}
-			if !recorded[id+"\x00"+tomb[id].Reason] {
+			if !recorded[id+"\x00"+tomb[id].Reason+"\x00"+tomb[id].At] {
 				add(Problem{Check: claimCheck.Name, File: runs.RetractFile, ID: id, Detail: "retraction has no matching ledger event: write retractions only with `meta claim retract`"})
 			}
 		}
@@ -326,6 +329,17 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				}
 				ks[norm.IndependenceKey(c.Source.IndependenceKey, strip)] = true
 			}
+			for _, cid := range f.Supporting { // D-097: supporting claims count, but are not primary evidence
+				c, ok := byID[cid]
+				switch {
+				case gone(cid):
+					add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID, Detail: "supporting claim " + cid + " is retracted: re-run `meta findings verify`"})
+				case !ok:
+					add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID, Detail: "supporting claim " + cid + " is unknown"})
+				default:
+					ks[norm.IndependenceKey(c.Source.IndependenceKey, strip)] = true
+				}
+			}
 			if f.Kind == "verified" && len(ks) < minIndependent {
 				add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID,
 					Detail: fmt.Sprintf("verified with %d distinct independence key(s); needs %d (fake independence)", len(ks), minIndependent)})
@@ -341,8 +355,8 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				}
 			}
 		}
-		// D-097: every live claim is evidence in exactly one finding; otherwise the findings predate the
-		// claims (a merge after `findings verify`).
+		// D-097: every live claim is primary evidence in exactly one finding; otherwise the findings predate
+		// the claims (a merge after `findings verify`).
 		ids := make([]string, 0, len(byID))
 		for id := range byID {
 			ids = append(ids, id)

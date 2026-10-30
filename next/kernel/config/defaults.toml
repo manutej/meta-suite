@@ -191,3 +191,9 @@ factors = { "count" = 1.0, "thousand" = 1000.0, "million" = 1000000.0, "billion"
 [unit_codes.currency]
 pattern = '^[A-Z]{3}$'
 list = "iso4217"
+# ISO 4217 codes that are not money a price or fine is stated in: precious metals, units of account and bond
+# units, testing and "no currency" codes, and fund codes.
+exclude = [
+  "XAG", "XAU", "XPD", "XPT", "XDR", "XSU", "XUA", "XBA", "XBB", "XBC", "XBD", "XTS", "XXX",
+  "BOV", "CHE", "CHW", "CLF", "COU", "MXV", "USN", "UYI", "UYW",
+]
