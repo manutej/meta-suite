@@ -9,29 +9,28 @@ cross-region look-alikes become interface candidates for L3.</internal> -->
   <in name="claims" type="Claim[]" path="$RUN/claims.jsonl"/>
   <out name="regions" type="RegionGraph" path="$RUN/graph/regions/&lt;region&gt;.json"/>
   <out name="candidates" type="Interface[]" path="$RUN/graph/interface_candidates.json"/>
-  <out name="vocab_log" type="text" path="$RUN/assumptions.md">appended</out>
 </contract>
 ```
 
-## Procedure
+Start with `meta stage begin "$RUN" D3 …`, then `meta graph build "$RUN"` and
+`meta validate` each region file.
 
-1. `meta stage begin "$RUN" D3 --agent main --model <id> --prompt-file "$RUN/prompts/D3.md"`.
-2. **Label hygiene (before building).** Read the subagents' replies for relation gaps and the
-   claim labels in `claims.jsonl`. For each gap, decide: map it onto an existing relation, or accept
-   it as new. Log each decision as one line in `$RUN/assumptions.md`. Do not edit `claims.jsonl`; if
-   two labels in one region plainly name the same thing but differ, note it there (exact-label merge
-   only in this build).
-3. `meta graph build "$RUN"`.
-4. `meta validate "$RUN/graph/regions/<r>.json" --type RegionGraph` for each region file.
-5. Read `graph/interface_candidates.json`. Its size is the first sign of whether regions talk about
-   the same things. Zero candidates with two or more regions means the regions do not connect:
-   add the "regions share no entities" note to `$RUN/assumptions.md`; the page must say the parts were
-   researched separately.
+## Judgment (before and after the build)
+
+- **Gaps.** Read the agents' replies for relation and label gaps. For each, decide: map it onto an
+  existing relation or label, or accept it. Log each decision with
+  `meta ledger append --kind assumption --stage D3`. Never edit `claims.jsonl`.
+- **Near-duplicate labels.** Two labels in one region that plainly name one thing stay two entities
+  in this build (exact-label merge only): log it the same way. If the pair carries the region's main
+  evidence, re-gather with the label from `cover.json` (counts against the re-gather cap).
+- **Candidates.** `graph/interface_candidates.json` is the first sign of whether regions talk about the
+  same things. Zero candidates with two or more regions: add "The parts of the research share no
+  common subjects, so each was researched separately." to `$RUN/assumptions.md`.
 
 ## Kernel errors
 
 | Command | Error | Do |
 |---|---|---|
-| `graph build` | claim refused (bad relation or missing source) | The kernel names the claim. Leave it out of the graph by re-gathering that region only if it is the region's main evidence; otherwise accept the drop and note it. |
-| `graph build` | other | Retry once. Still failing: continue `kernel=absent`; group claims by region and subject yourself for A2, and mark "evidence structure" unchecked. |
-| `validate` | field path | A kernel-written file failing its own schema is a kernel fault: save the error to `$RUN/gates/D3.error.json`, mark "graph format check" unchecked, continue. |
+| `graph build` | claim refused | The kernel names it. Re-gather only if it is the region's main evidence; else accept the drop and log it. |
+| `graph build` | other | Retry once. Still failing: continue `kernel=absent`; group claims by region and subject for A2; mark "evidence structure" unchecked. |
+| `validate` | field path | A kernel file failing its own schema is a kernel fault: save to `$RUN/gates/D3.error.json`, mark "graph format check" unchecked. |

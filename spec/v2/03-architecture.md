@@ -163,13 +163,14 @@ On product surfaces (the Claude app, Claude Code, Cowork), the **host** sets mod
 | `meta palette` | palette generation and contrast audit, ported from v1's `dict_color.py` into Go (D-004); DS1 calls it |
 | `meta validate <file>` | G1 |
 | `meta claim add` (stdin JSON; returns ULID or a schema error) | D2, G1 |
+| `meta claim retract <run_dir> --id <ULID> --reason <text>` (append-only tombstone; later commands skip the claim, D-087) | D2, L2, S1 |
 | `meta stage begin <stage> [--region r]` → stage token (env) | O1 |
 | `meta sample issue \| record \| aggregate \| run` (batch) | J1 |
 | `meta gate G2\|G3\|G4\|G5\|G6\|G7 <run_dir>` | gates |
 | `meta graph build \| shape <run_dir>` | D3 |
 | `meta interface declare \| merge <run_dir>` | L3 (refuses a merge without an interface) |
 | `meta delta <run_dir>` | R2 aggregation |
-| `meta ledger append \| show <run_dir>` | S1 |
+| `meta ledger append \| show <run_dir>` (append reads stdin only with `--stdin`, D-087) | S1 |
 | `meta playbook propose \| list` | S2 |
 | `meta loop next <run_dir>` | O1 |
 | `meta sheaf analyze <in.json> --out <report.json>` | the standalone gluing check (D-048): the same engine as G3 layers 1–3, usable on any JSON sheaf without running the pipeline |

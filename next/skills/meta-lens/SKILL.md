@@ -37,22 +37,22 @@ verified.
 **Fast** loads this file plus the core ops (D1, D2, A2, R1). **Deep** opens each op file as its step
 starts. Map: [index.md](index.md).
 
-1. **Frame.** [I1](ops/I1-classify.md): brief, mode, `meta run init` → `RUN`.
-   [I2](ops/I2-expand.md) → `$RUN/spec.json`.
+1. **Frame.** [I1](ops/I1-classify.md): brief, `meta run init` → `RUN`. [I2](ops/I2-expand.md) →
+   `$RUN/spec.json`, `meta run scope` (deep).
 2. **Map.** [D1](ops/D1-cover.md) → `$RUN/cover.json`. [D2](ops/D2-gather.md): one subagent per
    region in parallel, then `meta claims merge`, `meta gate G2`. [D3](ops/D3-graph.md):
    `meta graph build`.
 3. **Combine.** [L3](ops/L3-merge.md): `meta interface merge --plain`. [L2](ops/L2-verify.md):
    `meta findings verify`.
-4. **Make.** [A1](ops/A1-select.md) → `$RUN/plan.json`. [A2](ops/A2-compose.md): `meta report`,
-   the page, `$RUN/section_map.json`, `meta gate G6` to zero hits.
-5. **Check.** [R1](ops/R1-review.md): a fresh-context reviewer returns edits. Re-run from the
-   earliest step a P1/P2 edit touches, up to the pass cap.
+4. **Make.** [A1](ops/A1-select.md) → `$RUN/plan.json`. [A2](ops/A2-compose.md): section map, page,
+   `meta gate G6` to zero hits, `meta report`, final render.
+5. **Check.** [R1](ops/R1-review.md): a fresh-context reviewer returns edits. Route each by
+   [index.md](index.md) (page wording → A2), up to the pass cap.
 6. **Record.** `meta ledger show "$RUN" > "$RUN/ledger.txt"`.
 
-Each step starts with `meta stage begin` and validates what it writes with
-`meta validate <file> --type <T>`. On a kernel error, fix the named field and retry once, then follow
-the op's error table.
+Each step starts with `meta stage begin` (I1: after `run init`) and validates what it writes with
+`meta validate <file>`; `meta <command> --help` explains each command. On a kernel error, fix the
+named field, retry once, then follow the op's error table. Log departures from an op (index.md).
 
 ## Reply
 

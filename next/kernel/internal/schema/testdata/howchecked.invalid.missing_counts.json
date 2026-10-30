@@ -1,0 +1,19 @@
+{
+  "run_id": "01M653AP3AR8PABW94M9E5J6KM",
+  "generated_at": "2026-10-30T01:00:00.000Z",
+  "mode": "fast",
+  "kernel": "present",
+  "config_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "schema_version": "x",
+  "rule": "r",
+  "min_independent": 2,
+  "gates": [],
+  "gates_passed": 0,
+  "gates_failed": 0,
+  "gates_unchecked": 0,
+  "summary": [],
+  "limits": [],
+  "deviations": [],
+  "retractions": [],
+  "sources": []
+}

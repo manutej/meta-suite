@@ -236,7 +236,7 @@ func cmdInterfaceMerge(e *env, args []string) int {
 	dated := map[string]bool{}
 	if all, err := claims.Load(r); err == nil {
 		for _, c := range all {
-			if c.AsOf != "" {
+			if graph.Dated(c) {
 				dated[c.ID] = true
 			}
 		}
@@ -288,7 +288,7 @@ func cmdFindingsVerify(e *env, args []string) int {
 		return e.failRun(r, "findings verify", err)
 	}
 	p := findings.Params{MinIndependent: e.cfg.Lens.Pullback.MinIndependent, NumericRelTol: e.cfg.Lens.Pullback.NumericRelTol,
-		StripPrefixes: e.cfg.Independence.StripPrefixes}
+		StripPrefixes: e.cfg.Independence.StripPrefixes, AsOfWindow: e.cfg.Lens.Pullback.AsOfWindow}
 	fs, conf := findings.Verify(all, p)
 	for _, fd := range fs {
 		b, _ := fsx.Compact(fd)
@@ -302,8 +302,8 @@ func cmdFindingsVerify(e *env, args []string) int {
 	if err := fsx.WriteJSONL(r.Path(runs.FindingsFile), fs); err != nil {
 		return e.failRun(r, "findings verify", kerr.Wrap("io", err))
 	}
-	if err := fsx.WriteJSON(r.Path(runs.ConflictsFile), conf); err != nil {
-		return e.failRun(r, "findings verify", kerr.Wrap("io", err))
+	if err := writeTyped(r, runs.ConflictsFile, "Conflicts", conf); err != nil {
+		return e.failRun(r, "findings verify", err)
 	}
 	s := findings.Summary{Claims: len(all), Findings: len(fs), ByKind: map[string]int{}, Conflicts: len(conf.Conflicts),
 		FindingsFile: runs.FindingsFile, ConflictFile: runs.ConflictsFile}
@@ -313,14 +313,18 @@ func cmdFindingsVerify(e *env, args []string) int {
 		keys[*fd.Key] = true
 	}
 	s.Keys = len(keys)
-	s.Rule = ruleText(p.MinIndependent)
+	s.Rule = ruleText(p.MinIndependent, p.AsOfWindow)
 	if err := e.log(r, "findings verify", true, map[string]any{"findings": s.Findings, "by_kind": s.ByKind, "conflicts": s.Conflicts,
-		"min_independent": p.MinIndependent, "numeric_rel_tol": p.NumericRelTol}); err != nil {
+		"min_independent": p.MinIndependent, "numeric_rel_tol": p.NumericRelTol, "as_of_window": p.AsOfWindow}); err != nil {
 		return e.fail(err)
 	}
 	return e.out(s, 0)
 }
 
-func ruleText(n int) string {
-	return "verified = at least " + itoa(n) + " distinct independence keys agree on subject, relation, object and value; otherwise single_source"
+func ruleText(n int, window string) string {
+	s := "verified = at least " + itoa(n) + " distinct independence keys agree on subject, relation, object and value"
+	if window != "none" && window != "" {
+		s += " within one as_of " + window
+	}
+	return s + "; otherwise single_source"
 }

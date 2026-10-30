@@ -10,6 +10,11 @@
 // (normalized) independence keys, and `single_source` otherwise. When one key has two or more value groups,
 // the disagreement is written to conflicts.json as a candidate and every finding on that key is marked
 // confidence "contested". The kernel never picks a winner or averages.
+//
+// Time (D-087): claims are grouped by key AND as_of window (lens.pullback.as_of_window; norm.Window), so
+// claims about different windows never verify each other, and a value that differs between windows is a
+// change over time, not a disagreement. Undated claims form their own window. A finding's as_of is its
+// window, and its id includes the window only when there is one (undated finding ids are unchanged).
 package findings
 
 import (
@@ -29,6 +34,7 @@ type Params struct {
 	MinIndependent int
 	NumericRelTol  float64
 	StripPrefixes  []string
+	AsOfWindow     string // day | month | year | none
 }
 
 // ConflictSide is one value group on a contested key.
@@ -46,6 +52,7 @@ type ConflictSide struct {
 type Conflict struct {
 	ID     string         `json:"id"`
 	Key    model.Key      `json:"key"`
+	AsOf   string         `json:"as_of,omitempty"`
 	Reason string         `json:"reason"`
 	Sides  []ConflictSide `json:"sides"`
 }
@@ -73,29 +80,44 @@ type group struct {
 	claims []model.Claim
 }
 
+// fibre is one grouping cell: a key inside one as_of window.
+type fibre struct {
+	key    model.Key
+	window string
+}
+
+func (f fibre) String() string {
+	s := keyString(f.key)
+	if f.window != "" {
+		s += "\x00as_of=" + f.window
+	}
+	return s
+}
+
 // Verify computes findings and conflicts from claims.
 func Verify(claims []model.Claim, p Params) ([]model.Finding, Conflicts) {
-	byKey := map[model.Key][]model.Claim{}
+	byFibre := map[fibre][]model.Claim{}
 	for _, c := range claims {
 		k := model.Key{Subject: norm.Label(c.Subject), Relation: c.Relation, Object: norm.Label(c.Object)}
-		byKey[k] = append(byKey[k], c)
+		f := fibre{key: k, window: norm.Window(c.AsOf, p.AsOfWindow)}
+		byFibre[f] = append(byFibre[f], c)
 	}
-	keys := make([]model.Key, 0, len(byKey))
-	for k := range byKey {
-		keys = append(keys, k)
+	fibres := make([]fibre, 0, len(byFibre))
+	for f := range byFibre {
+		fibres = append(fibres, f)
 	}
-	sort.Slice(keys, func(i, j int) bool { return keyString(keys[i]) < keyString(keys[j]) })
+	sort.Slice(fibres, func(i, j int) bool { return fibres[i].String() < fibres[j].String() })
 
 	var out []model.Finding
 	conf := Conflicts{Conflicts: []Conflict{}}
-	for _, k := range keys {
-		cs := byKey[k]
+	for _, fb := range fibres {
+		cs := byFibre[fb]
 		sort.Slice(cs, func(i, j int) bool { return cs[i].ID < cs[j].ID })
 		groups := groupValues(cs, p.NumericRelTol)
 		contested := len(groups) > 1
 		var sides []ConflictSide
 		for _, g := range groups {
-			f := makeFinding(k, g, p, contested)
+			f := makeFinding(fb, g, p, contested)
 			out = append(out, f)
 			if contested {
 				sides = append(sides, ConflictSide{FindingID: f.ID, Value: g.value, Unit: g.unit, AsOf: asOfs(g.claims),
@@ -111,14 +133,16 @@ func Verify(claims []model.Claim, p Params) ([]model.Finding, Conflicts) {
 			if len(units) > 1 {
 				reason = "sources give values in different units that the kernel cannot convert"
 			}
-			conf.Conflicts = append(conf.Conflicts, Conflict{ID: "C-" + fsx.SHA256([]byte(keyString(k)))[:12], Key: k, Reason: reason, Sides: sides})
+			conf.Conflicts = append(conf.Conflicts, Conflict{ID: "C-" + fsx.SHA256([]byte(fb.String()))[:12], Key: fb.key, AsOf: fb.window,
+				Reason: reason, Sides: sides})
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out, conf
 }
 
-func makeFinding(k model.Key, g group, p Params, contested bool) model.Finding {
+func makeFinding(fb fibre, g group, p Params, contested bool) model.Finding {
+	k := fb.key
 	ev := make([]string, 0, len(g.claims))
 	ikeys, regs := map[string]bool{}, map[string]bool{}
 	for _, c := range g.claims {
@@ -136,7 +160,7 @@ func makeFinding(k model.Key, g group, p Params, contested bool) model.Finding {
 		confidence = "contested"
 	}
 	f := model.Finding{
-		ID:               "F-" + fsx.SHA256([]byte(keyString(k) + "\x00" + valueString(g.value) + "\x00" + g.unit))[:12],
+		ID:               "F-" + fsx.SHA256([]byte(fb.String() + "\x00" + valueString(g.value) + "\x00" + g.unit))[:12],
 		Kind:             kind,
 		Evidence:         ev,
 		Regions:          rl,
@@ -144,17 +168,18 @@ func makeFinding(k model.Key, g group, p Params, contested bool) model.Finding {
 		Key:              &model.Key{Subject: k.Subject, Relation: k.Relation, Object: k.Object},
 		Value:            g.value,
 		Unit:             g.unit,
+		AsOf:             fb.window,
 		IndependenceKeys: kl,
 	}
 	if len(rl) == 1 {
 		f.Region = rl[0]
 	}
-	f.PlainText = plainText(g, kind, len(kl), contested)
+	f.PlainText = plainText(g, kind, len(kl), contested, fb.window)
 	return f
 }
 
 // plainText is a neutral sentence built only from the claim's own words and the counts.
-func plainText(g group, kind string, nKeys int, contested bool) string {
+func plainText(g group, kind string, nKeys int, contested bool, window string) string {
 	c := g.claims[0]
 	s := fmt.Sprintf("%s %s %s", strings.TrimSpace(c.Subject), strings.ReplaceAll(c.Relation, "_", " "), strings.TrimSpace(c.Object))
 	if g.value != nil {
@@ -162,6 +187,9 @@ func plainText(g group, kind string, nKeys int, contested bool) string {
 		if g.unit != "" {
 			s += " " + g.unit
 		}
+	}
+	if window != "" {
+		s += ", as of " + window
 	}
 	src := "1 source"
 	if nKeys != 1 {

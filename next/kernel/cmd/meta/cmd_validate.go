@@ -46,6 +46,16 @@ func inferType(path string) string {
 		return "LedgerEvent"
 	case strings.HasPrefix(base, "edits."):
 		return "EditScript"
+	case base == "coverage.json":
+		return "Coverage"
+	case base == "probes.json":
+		return "Probes"
+	case base == "conflicts.json":
+		return "Conflicts"
+	case base == "how_checked.json":
+		return "HowChecked"
+	case base == "retractions.jsonl":
+		return "Retraction"
 	}
 	return ""
 }
@@ -59,14 +69,17 @@ type ValidateResult struct {
 	Errors  []schema.Error `json:"errors"`
 	Hash    string         `json:"hash,omitempty"`
 	Cover   *cover.Report  `json:"cover,omitempty"`
+	Xref    *Xref          `json:"xref,omitempty"`
 }
 
 // cmdValidate is G1. A .jsonl file (or a JSON array for a non-array type) is validated record by record.
 // Spec: the kernel computes the content hash (sha256 of the canonical JSON without "hash"); a supplied hash
-// must match. Cover: also runs the D1/D-042 checks and prints the computed overlaps. When the file lies in a
-// run directory, the verdict is recorded in run.json and the ledger.
+// must match; for a run's spec.json the hash is recorded in run.json (spec_hash) and the ledger (D-087).
+// Cover: also runs the D1/D-042 checks and prints the computed overlaps. EditScript, SectionMap, Coverage and
+// Probes: inside a run (or with --run), the ids they name are checked against the run's files (D-087). When
+// the file lies in a run directory, the verdict is recorded in run.json and the ledger.
 func cmdValidate(e *env, args []string) int {
-	f, err := parseFlags(args, []string{"type", "mode"}, nil)
+	f, err := parseFlags(args, []string{"type", "mode", "run"}, nil)
 	if err != nil || len(f.pos) != 1 {
 		return e.fail(usageErr("validate"))
 	}
@@ -90,6 +103,12 @@ func cmdValidate(e *env, args []string) int {
 	if runDir != "" {
 		if r, err = runs.Open(runDir); err != nil {
 			r = nil // a run.json we cannot read: validate anyway, record nothing
+		}
+	}
+	xr := r // the run whose files ids are checked against
+	if d := f.vals["run"]; d != "" {
+		if xr, err = openRun(d); err != nil {
+			return e.fail(err)
 		}
 	}
 	res := ValidateResult{File: file, Type: canon, Errors: []schema.Error{}}
@@ -156,6 +175,10 @@ func cmdValidate(e *env, args []string) int {
 			}
 		}
 	}
+	if len(res.Errors) == 0 && xr != nil {
+		xerrs, info := crossCheck(xr, canon, doc)
+		res.Errors, res.Xref = append(res.Errors, xerrs...), info
+	}
 	schema.Sort(res.Errors)
 	res.Valid = len(res.Errors) == 0
 	if r != nil {
@@ -171,6 +194,12 @@ func cmdValidate(e *env, args []string) int {
 		data := map[string]any{"file": rel, "type": canon, "valid": res.Valid, "records": res.Records, "errors": len(res.Errors), "sha256": fsx.SHA256(doc)}
 		if res.Hash != "" {
 			data["spec_hash"] = res.Hash
+			if res.Valid && rel == runs.SpecFile {
+				if err := r.Update(func(rec *model.RunRecord) error { rec.SpecHash = res.Hash; return nil }); err != nil {
+					return e.fail(err)
+				}
+				data["spec_hash_recorded"] = runs.RunFile
+			}
 		}
 		if err := e.log(r, "validate", res.Valid, data); err != nil {
 			return e.fail(err)

@@ -20,6 +20,7 @@ import (
 	"github.com/manutej/meta-suite/next/kernel/internal/kerr"
 	"github.com/manutej/meta-suite/next/kernel/internal/lock"
 	"github.com/manutej/meta-suite/next/kernel/internal/model"
+	"github.com/manutej/meta-suite/next/kernel/internal/norm"
 	runs "github.com/manutej/meta-suite/next/kernel/internal/rundir"
 	"github.com/manutej/meta-suite/next/kernel/internal/schema"
 	"github.com/manutej/meta-suite/next/kernel/internal/stage"
@@ -48,15 +49,29 @@ type Vocab map[string]struct {
 
 // LoadVocab reads cover.json's relation_vocab.
 func LoadVocab(r *runs.Run) (Vocab, error) {
+	v, _, err := loadCover(r)
+	return v, err
+}
+
+// loadCover reads cover.json's relation_vocab and its shared label list (normalized; nil when absent).
+func loadCover(r *runs.Run) (Vocab, map[string]bool, error) {
 	var cover struct {
 		RelationVocab []struct {
 			Name          string `json:"name"`
 			ValueType     string `json:"value_type"`
 			UnitDimension string `json:"unit_dimension"`
 		} `json:"relation_vocab"`
+		Labels []string `json:"labels"`
 	}
 	if err := r.ReadJSONFile(runs.CoverFile, &cover); err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+	var labels map[string]bool
+	if len(cover.Labels) > 0 {
+		labels = map[string]bool{}
+		for _, l := range cover.Labels {
+			labels[norm.Label(l)] = true
+		}
 	}
 	v := Vocab{}
 	for _, rel := range cover.RelationVocab {
@@ -65,7 +80,7 @@ func LoadVocab(r *runs.Run) (Vocab, error) {
 			UnitDimension string `json:"unit_dimension"`
 		}{rel.ValueType, rel.UnitDimension}
 	}
-	return v, nil
+	return v, labels, nil
 }
 
 // Add validates and appends one claim read from input. It returns (result, nil, nil) on success,
@@ -103,18 +118,26 @@ func Add(r *runs.Run, cfg *config.Config, token string, input []byte) (*AddResul
 		notes = append(notes, fmt.Sprintf("region %q replaced by the stage token's region %q", c.Region, t.Region))
 	}
 	c.Region = t.Region
-	vocab, err := LoadVocab(r)
+	vocab, labels, err := loadCover(r)
 	if err != nil {
 		return nil, nil, err
 	}
 	if rej := checkVocab(&c, vocab); rej != nil {
 		return nil, rej, nil
 	}
-	if rej := Normalize(&c, cfg, vocab); rej != nil {
+	known, rej := Normalize(&c, cfg, vocab)
+	if rej != nil {
 		return nil, rej, nil
 	}
-	if c.Normalized == nil && c.Unit != "" {
+	if !known {
 		notes = append(notes, fmt.Sprintf("unit %q is not in the canonical-unit table; kept as given", c.Unit))
+	}
+	if labels != nil { // D-088: the cover's shared label list is how independent regions agree on keys
+		for _, f := range [][2]string{{"subject", c.Subject}, {"object", c.Object}} {
+			if !labels[norm.Label(f[1])] {
+				notes = append(notes, fmt.Sprintf("%s %q is not in cover.json labels; use a listed label when one names the same thing", f[0], f[1]))
+			}
+		}
 	}
 	c.ID = ids.New()
 	c.StageToken = t
@@ -175,43 +198,74 @@ func checkVocab(c *model.Claim, v Vocab) *Rejection {
 // Normalize converts a numeric or relative claim's value to its dimension's canonical unit. The dimension is
 // the vocabulary's unit_dimension when it names a configured dimension, otherwise the dimension whose table
 // holds the claim's unit. A unit that belongs to a different dimension than the vocabulary declares is
-// rejected. A unit in no table is kept as given (Normalized stays nil).
-func Normalize(c *model.Claim, cfg *config.Config, v Vocab) *Rejection {
+// rejected. Code-only dimensions (config unit_codes, e.g. currency) are recognised and never converted; a
+// relation declared in one must use a listed code. It returns known=false for a unit in no table (kept as
+// given, Normalized nil); a canonical unit such as "%" is known and left unchanged (D-087).
+func Normalize(c *model.Claim, cfg *config.Config, v Vocab) (bool, *Rejection) {
 	if c.Unit == "" || (c.ValueType != "numeric" && c.ValueType != "relative") {
-		return nil
+		return true, nil
 	}
 	val, isNum := c.Value.(float64)
 	if !isNum {
-		return nil
+		return true, nil
 	}
 	declared := v[c.Relation].UnitDimension
-	dims := make([]string, 0, len(cfg.Units))
-	for d := range cfg.Units {
-		dims = append(dims, d)
-	}
-	sort.Strings(dims)
-	found := ""
-	for _, d := range dims {
+	found, coded := "", false
+	for _, d := range sortedDims(cfg) {
 		if _, ok := cfg.Units[d].Factors[c.Unit]; ok {
 			found = d
 			break
 		}
+		if uc, ok := cfg.UnitCodes[d]; ok && containsStr(uc.Codes, c.Unit) {
+			found, coded = d, true
+			break
+		}
+	}
+	if uc, ok := cfg.UnitCodes[declared]; ok && found == "" {
+		return false, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/unit_codes/" + declared,
+			Message: fmt.Sprintf("relation %q is declared as %s: unit must be one of %v (amounts in base units, never converted)", c.Relation, declared, uc.Codes)}}}
 	}
 	if found == "" {
-		return nil
+		return false, nil
 	}
-	if _, configured := cfg.Units[declared]; configured && declared != found {
-		return &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/units",
+	_, inUnits := cfg.Units[declared]
+	_, inCodes := cfg.UnitCodes[declared]
+	if (inUnits || inCodes) && declared != found {
+		return true, &Rejection{Errors: []schema.Error{{InstanceLocation: "/unit", KeywordLocation: "config/units",
 			Message: fmt.Sprintf("unit %q measures %s, but relation %q is declared as %s", c.Unit, found, c.Relation, declared)}}}
+	}
+	if coded {
+		return true, nil
 	}
 	dim := cfg.Units[found]
 	if c.Unit == dim.Canonical {
-		return nil
+		return true, nil
 	}
 	c.Normalized = &model.Normalized{Dimension: found, FromUnit: c.Unit, FromValue: val}
 	c.Value = val * dim.Factors[c.Unit]
 	c.Unit = dim.Canonical
-	return nil
+	return true, nil
+}
+
+func sortedDims(cfg *config.Config) []string {
+	dims := make([]string, 0, len(cfg.Units)+len(cfg.UnitCodes))
+	for d := range cfg.Units {
+		dims = append(dims, d)
+	}
+	for d := range cfg.UnitCodes {
+		dims = append(dims, d)
+	}
+	sort.Strings(dims)
+	return dims
+}
+
+func containsStr(list []string, s string) bool {
+	for _, x := range list {
+		if x == s {
+			return true
+		}
+	}
+	return false
 }
 
 // LineError locates a bad line in a shard.
@@ -224,6 +278,7 @@ type LineError struct {
 // MergeResult is printed by `meta claims merge`.
 type MergeResult struct {
 	Claims           int            `json:"claims"`
+	Retracted        int            `json:"retracted"`
 	Shards           []string       `json:"shards"`
 	ByRegion         map[string]int `json:"by_region"`
 	IndependenceKeys int            `json:"independence_keys"`
@@ -303,6 +358,18 @@ func Merge(r *runs.Run, cfg *config.Config, independenceKey func(string) string)
 	if len(bad) > 0 {
 		return nil, &MergeRejection{Bad: bad}, nil
 	}
+	tomb, err := Retracted(r)
+	if err != nil {
+		return nil, nil, err
+	}
+	live := all[:0:0]
+	for _, c := range all {
+		if _, gone := tomb[c.ID]; !gone {
+			live = append(live, c)
+		}
+	}
+	retracted := len(all) - len(live)
+	all = live
 	if err := fsx.WriteJSONL(r.Path(runs.ClaimsFile), all); err != nil {
 		return nil, nil, kerr.Wrap("io", err)
 	}
@@ -312,11 +379,16 @@ func Merge(r *runs.Run, cfg *config.Config, independenceKey func(string) string)
 		by[c.Region]++
 		keys[independenceKey(c.Source.IndependenceKey)] = true
 	}
-	return &MergeResult{Claims: len(all), Shards: shards, ByRegion: by, IndependenceKeys: len(keys), Out: runs.ClaimsFile}, nil, nil
+	return &MergeResult{Claims: len(all), Retracted: retracted, Shards: shards, ByRegion: by, IndependenceKeys: len(keys), Out: runs.ClaimsFile}, nil, nil
 }
 
-// Load reads claims.jsonl (G1 on every line).
+// Load reads claims.jsonl (G1 on every line), skipping retracted claims even when claims.jsonl predates the
+// retraction (G2 still flags that stale merge).
 func Load(r *runs.Run) ([]model.Claim, error) {
+	tomb, err := Retracted(r)
+	if err != nil {
+		return nil, err
+	}
 	lines, err := fsx.ReadLines(r.Path(runs.ClaimsFile))
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -335,7 +407,87 @@ func Load(r *runs.Run) ([]model.Claim, error) {
 		}
 		var c model.Claim
 		json.Unmarshal(l.Raw, &c)
+		if _, gone := tomb[c.ID]; gone {
+			continue
+		}
 		out = append(out, c)
 	}
 	return out, nil
+}
+
+// Retracted reads retractions.jsonl (absent: none), keyed by claim id. Every line is validated (G1).
+func Retracted(r *runs.Run) (map[string]model.Retraction, error) {
+	out := map[string]model.Retraction{}
+	lines, err := fsx.ReadLines(r.Path(runs.RetractFile))
+	if errors.Is(err, os.ErrNotExist) {
+		return out, nil
+	}
+	if err != nil {
+		return nil, kerr.Wrap("io", err)
+	}
+	for _, l := range lines {
+		if errs, err := schema.Validate("Retraction", l.Raw); err != nil || len(errs) > 0 {
+			if err != nil {
+				return nil, kerr.Wrap("internal", err)
+			}
+			return nil, kerr.New("invalid_json", "%s line %d does not validate (it is written only by `meta claim retract`)", runs.RetractFile, l.N).With(map[string]any{"errors": errs})
+		}
+		var t model.Retraction
+		json.Unmarshal(l.Raw, &t)
+		out[t.ID] = t
+	}
+	return out, nil
+}
+
+// Retract appends a tombstone for claim id (D-087). The claim must be in a shard and not already retracted.
+// Nothing is deleted: shards stay append-only, and merge, graph, findings, G2 and report skip the claim.
+func Retract(r *runs.Run, id, reason, stage string) (*model.Retraction, error) {
+	if !ids.Valid(id) {
+		return nil, kerr.New("usage", "--id %q is not a claim id (ULID)", id)
+	}
+	if strings.TrimSpace(reason) == "" {
+		return nil, kerr.New("usage", "--reason is required: say in one sentence why the claim is withdrawn")
+	}
+	all, _, _, err := ReadShards(r)
+	if err != nil {
+		return nil, err
+	}
+	found := false
+	for _, c := range all {
+		found = found || c.ID == id
+	}
+	if !found {
+		return nil, kerr.New("precondition", "claim %s is not in any shard of this run", id)
+	}
+	t := model.Retraction{ID: id, Reason: strings.TrimSpace(reason), At: runs.Stamp(runs.Now()), Stage: stage}
+	line, err := fsx.Compact(t)
+	if err != nil {
+		return nil, kerr.Wrap("internal", err)
+	}
+	if errs, err := schema.Validate("Retraction", line); err != nil || len(errs) > 0 {
+		return nil, kerr.New("kernel_fault", "retraction would not validate").With(map[string]any{"errors": errs})
+	}
+	path := r.Path(runs.RetractFile)
+	err = lock.With(path, func() error {
+		tomb, err := Retracted(r)
+		if err != nil {
+			return err
+		}
+		if _, dup := tomb[id]; dup {
+			return kerr.New("exists", "claim %s is already retracted", id)
+		}
+		f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+		if err != nil {
+			return kerr.Wrap("io", err)
+		}
+		if _, err := f.Write(append(line, '\n')); err != nil {
+			f.Close()
+			return kerr.Wrap("io", err)
+		}
+		return kerr.Wrap("io", f.Close())
+	})
+	if err != nil {
+		return nil, kerr.Wrap("io", err)
+	}
+	return &t, nil
 }

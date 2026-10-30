@@ -86,3 +86,49 @@ func TestDeterministicIDs(t *testing.T) {
 		t.Fatalf("%+v vs %+v", a, b)
 	}
 }
+
+// D-087: claims in different as_of windows never verify each other, and a different value in another window
+// is a change over time, not a conflict. Undated claims are their own window; undated finding ids are unchanged.
+func TestAsOfWindows(t *testing.T) {
+	pm := p
+	pm.AsOfWindow = "month"
+	dated := func(cl model.Claim, asOf string) model.Claim { cl.AsOf = asOf; return cl }
+	claims := []model.Claim{
+		dated(c("01", "Fines imposed", "states", "none reported", nil, "", "a.example", "r1"), "2026-08-02"),
+		dated(c("02", "Fines imposed", "states", "none reported", nil, "", "b.example", "r1"), "2026-10-26"),
+		dated(c("03", "Standard X", "has_status", "publication status", "pending", "", "a.example", "r1"), "2025-06-07"),
+		dated(c("04", "Standard X", "has_status", "publication status", "published", "", "b.example", "r1"), "2026-04-27"),
+		dated(c("05", "Org", "headcount", "Org", 10.0, "count", "a.example", "r1"), "2026-10-01"),
+		dated(c("06", "Org", "headcount", "Org", 10.0, "count", "b.example", "r1"), "2026-10-30"),
+		c("07", "Org", "located_in", "City", nil, "", "a.example", "r1"),
+		c("08", "Org", "located_in", "City", nil, "", "b.example", "r1"),
+	}
+	fs, conf := Verify(claims, pm)
+	if len(conf.Conflicts) != 0 {
+		t.Fatalf("values in different windows are not a conflict: %+v", conf)
+	}
+	byWindow := map[string]string{}
+	for _, f := range fs {
+		byWindow[f.Key.Subject+"@"+f.AsOf] = f.Kind
+	}
+	want := map[string]string{"fines imposed@2026-08": "single_source", "fines imposed@2026-10": "single_source",
+		"standard x@2025-06": "single_source", "standard x@2026-04": "single_source", "org@2026-10": "verified", "org@": "verified"}
+	for k, v := range want {
+		if byWindow[k] != v {
+			t.Errorf("%s = %q, want %q (all %v)", k, byWindow[k], v, byWindow)
+		}
+	}
+	// With the window off, the old behaviour returns: the two fines claims verify each other.
+	off := p
+	off.AsOfWindow = "none"
+	fs2, _ := Verify(claims[:2], off)
+	if len(fs2) != 1 || fs2[0].Kind != "verified" || fs2[0].AsOf != "" {
+		t.Fatalf("window none: %+v", fs2)
+	}
+	// Undated ids do not depend on the window setting.
+	und1, _ := Verify(claims[6:], pm)
+	und2, _ := Verify(claims[6:], off)
+	if und1[0].ID != und2[0].ID {
+		t.Fatal("undated finding id changed with the window setting")
+	}
+}

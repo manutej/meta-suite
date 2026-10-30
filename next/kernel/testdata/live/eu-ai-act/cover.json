@@ -1,0 +1,60 @@
+{
+  "tree": {
+    "id": "q0", "answer_type": "judgment",
+    "question": "What does the EU AI Act require from a mid-size SaaS company building features on third-party LLMs, what applies now vs later, and where is there disagreement?",
+    "children": [
+      {"id": "q1", "answer_type": "judgment", "question": "Which role does the company hold under the Act?", "children": [
+        {"id": "q1.role", "answer_type": "fact", "question": "Is a company that builds features on a third-party general-purpose model a provider of an AI system, a deployer, or both?", "children": []},
+        {"id": "q1.modify", "answer_type": "fact", "question": "When does fine-tuning or modifying a third-party model make the company a provider of a general-purpose AI model?", "children": []}
+      ]},
+      {"id": "q2", "answer_type": "list", "question": "Which obligations apply from which date?", "children": [
+        {"id": "q2.feb2025", "answer_type": "fact", "question": "What has applied since February 2025?", "children": []},
+        {"id": "q2.aug2025", "answer_type": "fact", "question": "What has applied since August 2025, including duties on the model providers upstream?", "children": []},
+        {"id": "q2.aug2026", "answer_type": "fact", "question": "What applies from August 2026, and was any of it postponed?", "children": []},
+        {"id": "q2.later", "answer_type": "fact", "question": "What applies in 2027 or later?", "children": []}
+      ]},
+      {"id": "q3", "answer_type": "list", "question": "What must the company concretely do?", "children": [
+        {"id": "q3.literacy", "answer_type": "fact", "question": "What does the AI literacy duty require?", "children": []},
+        {"id": "q3.transparency", "answer_type": "fact", "question": "What transparency duties apply to chatbots and generated content?", "children": []},
+        {"id": "q3.highrisk", "answer_type": "fact", "question": "What extra duties apply if a feature falls in a high-risk use area such as hiring or credit?", "children": []},
+        {"id": "q3.upstream", "answer_type": "fact", "question": "What must the model provider give the company, and what can the company rely on?", "children": []},
+        {"id": "q3.penalties", "answer_type": "number", "question": "What are the maximum fines, and how are smaller companies treated?", "children": []}
+      ]},
+      {"id": "q4", "answer_type": "list", "question": "Where do experts and regulators still disagree?", "children": [
+        {"id": "q4.omnibus", "answer_type": "judgment", "question": "Should and will the proposed delay and simplification package change the dates?", "children": []},
+        {"id": "q4.modify", "answer_type": "judgment", "question": "Is the threshold for becoming a model provider through modification workable?", "children": []},
+        {"id": "q4.enforcement", "answer_type": "judgment", "question": "Are national authorities and technical standards ready for enforcement?", "children": []},
+        {"id": "q4.classify", "answer_type": "judgment", "question": "How clear is the line between high-risk and non-high-risk uses?", "children": []}
+      ]}
+    ]
+  },
+  "universe": [
+    "q1.role", "q1.modify", "q2.feb2025", "q2.aug2025", "q2.aug2026", "q2.later",
+    "q3.literacy", "q3.transparency", "q3.highrisk", "q3.upstream", "q3.penalties",
+    "q4.omnibus", "q4.modify", "q4.enforcement", "q4.classify",
+    "kind:obligation", "kind:date", "kind:role", "kind:authority", "kind:document", "kind:penalty", "kind:stakeholder"
+  ],
+  "regions": [
+    {"id": "legal-text", "label": "The Act's own text and the EU's official timeline", "elements": ["q1.role", "q2.feb2025", "q2.aug2025", "q2.aug2026", "q2.later", "q3.penalties", "kind:obligation", "kind:date", "kind:role"]},
+    {"id": "commission-guidance", "label": "Commission guidelines, Q&A and the general-purpose model code of practice", "elements": ["q1.modify", "q3.upstream", "q3.literacy", "q2.aug2025", "q4.modify", "kind:document", "kind:obligation"]},
+    {"id": "legislative-change", "label": "The amendment process: Commission proposal, Parliament and Council positions", "elements": ["q4.omnibus", "q2.aug2026", "q2.later", "kind:date", "kind:document"], "contested": true},
+    {"id": "practitioner-analysis", "label": "Law-firm and compliance-practitioner analysis for companies building on models", "elements": ["q1.role", "q3.transparency", "q3.highrisk", "q4.classify", "q3.upstream", "kind:role", "kind:obligation"]},
+    {"id": "enforcement-standards", "label": "National authorities, penalties and technical standards", "elements": ["q4.enforcement", "q3.penalties", "q2.aug2026", "kind:authority", "kind:penalty"], "contested": true},
+    {"id": "stakeholder-positions", "label": "Industry groups, civil society and academic critics", "elements": ["q4.omnibus", "q4.modify", "q4.enforcement", "q4.classify", "q3.literacy", "kind:stakeholder"], "contested": true}
+  ],
+  "relation_vocab": [
+    {"name": "applies_from", "value_type": "qualitative", "description": "subject = an obligation set (canonical label); object = the instrument that sets the date ('EU AI Act' or 'Digital Omnibus on AI'); value = ISO date YYYY-MM-DD."},
+    {"name": "proposed_application_date", "value_type": "qualitative", "description": "subject = obligation set; object = the proposing instrument or institution position (e.g. 'Digital Omnibus on AI', 'European Parliament position', 'Council position'); value = ISO date or 'linked to standards availability'."},
+    {"name": "obliges", "value_type": "qualitative", "description": "subject = role (canonical label); object = obligation (canonical label). No value."},
+    {"name": "has_role", "value_type": "qualitative", "description": "subject = actor; object = role (canonical label). No value."},
+    {"name": "becomes", "value_type": "qualitative", "description": "subject = an action (e.g. 'substantial modification of a general-purpose AI model'); object = resulting role. No value."},
+    {"name": "threshold_share", "value_type": "numeric", "unit_dimension": "ratio", "description": "subject = rule; object = what is measured; value = number in %."},
+    {"name": "max_fine_amount", "value_type": "numeric", "unit_dimension": "currency", "description": "subject = infringement type; object = 'maximum fine'; value = number; unit = 'EUR'."},
+    {"name": "max_fine_turnover_share", "value_type": "numeric", "unit_dimension": "ratio", "description": "subject = infringement type; object = 'maximum fine as share of worldwide annual turnover'; value = number; unit = '%'."},
+    {"name": "has_status", "value_type": "qualitative", "description": "subject = a document or process; object = 'legislative status' or 'publication status'; value = one of proposed | in negotiation | provisionally agreed | adopted | published | pending."},
+    {"name": "published_on", "value_type": "qualitative", "description": "subject = document; object = publisher institution; value = ISO date."},
+    {"name": "position_on", "value_type": "qualitative", "description": "subject = stakeholder (organisation name); object = issue (canonical label); value = one of supports | opposes | mixed | calls for clarification."},
+    {"name": "enforced_by", "value_type": "qualitative", "description": "subject = obligation set; object = authority type. No value."},
+    {"name": "states", "value_type": "qualitative", "description": "Fallback for a sourced fact no other relation fits: subject = topic (canonical label); object = a short factual statement (under 25 words). No value."}
+  ]
+}

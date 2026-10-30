@@ -1,0 +1,27 @@
+{
+  "objective": "Let a mid-size SaaS company that builds features on third-party large language models decide which EU AI Act obligations it must meet, by when, and which points remain unsettled, so it can plan compliance work by date and know where to seek legal advice.",
+  "slots": [
+    {"name": "company_role_under_act", "type": "role classification (provider / deployer / downstream provider)", "required": true, "origin": "inferred", "note": "Building features on GPT/Claude implies the company is a downstream system provider and/or deployer, not a model provider."},
+    {"name": "company_size", "type": "enterprise size class", "required": true, "origin": "stated", "note": "mid-size"},
+    {"name": "model_supply", "type": "third-party general-purpose model via API", "required": true, "origin": "stated"},
+    {"name": "use_case_risk_tier", "type": "risk tier (prohibited / high-risk / transparency / minimal)", "required": true, "origin": "inferred", "note": "Unspecified by the user; the answer must branch on it."},
+    {"name": "modification_of_model", "type": "whether the company fine-tunes or substantially modifies the model", "required": false, "origin": "inferred"},
+    {"name": "as_of_date", "type": "date", "required": true, "origin": "default", "note": "2026-10-29, the run date."},
+    {"name": "eu_nexus", "type": "market presence in EU", "required": true, "origin": "inferred"}
+  ],
+  "constraints": [
+    {"text": "Separate obligations already applicable on the as-of date from those that apply on later dates, with the date of each.", "origin": "stated"},
+    {"text": "Identify points where experts, industry and regulators disagree or where guidance is pending.", "origin": "stated"},
+    {"text": "Treat pending amendments (proposed delays or simplifications) as pending, not as law, unless adopted.", "origin": "default"},
+    {"text": "No legal advice framing: state what the sources say and where it is unsettled.", "origin": "default"}
+  ],
+  "success_criteria": [
+    {"criterion": "Every leaf sub-question in the cover has at least one finding.", "satisfied_by": "single_source"},
+    {"criterion": "Each application date the page states as settled rests on a verified finding (two or more independent publishers agree).", "satisfied_by": "verified"},
+    {"criterion": "Every claim on the page traces to a source with a locator and a publisher.", "satisfied_by": "G2"},
+    {"criterion": "Disagreements between sources are shown with both sides and their sources, no winner picked.", "satisfied_by": "uncertain"},
+    {"criterion": "The page contains no internal method vocabulary.", "satisfied_by": "G6"},
+    {"criterion": "The request and spec files validate against their formats.", "satisfied_by": "G1"}
+  ],
+  "scope": "narrow"
+}

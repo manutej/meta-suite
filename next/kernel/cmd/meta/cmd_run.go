@@ -221,6 +221,35 @@ func cmdClaimAdd(e *env, args []string) int {
 	return e.out(res, 0)
 }
 
+// cmdClaimRetract appends a tombstone for one claim (D-087). Shards stay append-only; every later command
+// skips the claim. Run `meta claims merge` and the steps after it again.
+func cmdClaimRetract(e *env, args []string) int {
+	f, err := parseFlags(args, []string{"id", "reason", "stage"}, nil)
+	if err != nil || len(f.pos) != 1 || f.vals["id"] == "" || strings.TrimSpace(f.vals["reason"]) == "" {
+		return e.fail(usageErr("claim retract"))
+	}
+	r, err := openRun(f.pos[0])
+	if err != nil {
+		return e.fail(err)
+	}
+	if s := f.vals["stage"]; s != "" && !contains(stage.Stages, s) {
+		return e.failRun(r, "claim retract", kerr.New("usage", "unknown --stage %q (one of %v)", s, stage.Stages))
+	}
+	t, err := claims.Retract(r, f.vals["id"], f.vals["reason"], f.vals["stage"])
+	if err != nil {
+		return e.failRun(r, "claim retract", err)
+	}
+	if err := e.log(r, "claim retract", true, map[string]any{"id": t.ID, "reason": t.Reason, "stage": t.Stage}); err != nil {
+		return e.fail(err)
+	}
+	tomb, err := claims.Retracted(r)
+	if err != nil {
+		return e.fail(err)
+	}
+	return e.out(map[string]any{"retracted": t, "retractions": len(tomb),
+		"next": "run `meta claims merge`, then graph build, interface merge, findings verify, gate G2 and report again"}, 0)
+}
+
 func cmdClaimsMerge(e *env, args []string) int {
 	f, err := parseFlags(args, nil, nil)
 	if err != nil || len(f.pos) != 1 {
@@ -240,7 +269,7 @@ func cmdClaimsMerge(e *env, args []string) int {
 		}
 		return e.out(rej, kerr.ExitVerdict)
 	}
-	if err := e.log(r, "claims merge", true, map[string]any{"claims": res.Claims, "shards": res.Shards, "by_region": res.ByRegion,
+	if err := e.log(r, "claims merge", true, map[string]any{"claims": res.Claims, "retracted": res.Retracted, "shards": res.Shards, "by_region": res.ByRegion,
 		"claims_hash": r.HashFiles([]string{runs.ClaimsFile})}); err != nil {
 		return e.fail(err)
 	}
@@ -263,10 +292,11 @@ func cmdLedgerShow(e *env, args []string) int {
 }
 
 // cmdLedgerAppend records an operator event (S1): --kind is one of config ledger.kinds; deviation (D-080)
-// records a place the model departed from an op, with --stage and --note. Extra fields come from an optional
-// JSON object on stdin.
+// records a place the model departed from an op, with --stage and --note. Extra fields come from a JSON object
+// on stdin, read ONLY with --stdin (D-087): an open, empty, non-terminal stdin (a harness pipe) used to block
+// the command forever.
 func cmdLedgerAppend(e *env, args []string) int {
-	f, err := parseFlags(args, []string{"kind", "stage", "note", "event"}, nil)
+	f, err := parseFlags(args, []string{"kind", "stage", "note", "event"}, []string{"stdin"})
 	if err != nil || len(f.pos) != 1 {
 		return e.fail(usageErr("ledger append"))
 	}
@@ -295,7 +325,14 @@ func cmdLedgerAppend(e *env, args []string) int {
 		return e.failRun(r, "ledger append", kerr.New("usage", "unknown --stage %q (one of %v)", s, stage.Stages))
 	}
 	data := map[string]any{}
-	if in, err := readAll(e.stdin); err == nil && len(trimSpace(in)) > 0 {
+	if f.set["stdin"] {
+		in, err := readAll(e.stdin)
+		if err != nil {
+			return e.failRun(r, "ledger append", kerr.Wrap("io", err))
+		}
+		if len(trimSpace(in)) == 0 {
+			return e.failRun(r, "ledger append", kerr.New("usage", "--stdin given but stdin is empty; pipe one JSON object or drop --stdin"))
+		}
 		if err := json.Unmarshal(in, &data); err != nil {
 			return e.failRun(r, "ledger append", kerr.New("invalid_json", "stdin must be a JSON object: %v", err))
 		}

@@ -11,8 +11,9 @@ import (
 // Fixtures in testdata/ are SYNTHETIC (hand-written to exercise the schemas); see testdata/README.txt.
 
 func TestEveryCoreTypeEmbedded(t *testing.T) {
-	want := []string{"ArtifactPlan", "Brief", "Claim", "ClaimInput", "Cover", "DomainGraph", "EditScript", "Finding",
-		"Interface", "Judgment", "LedgerEvent", "RegionGraph", "RunRecord", "SectionMap", "Spec"}
+	want := []string{"ArtifactPlan", "Brief", "Claim", "ClaimInput", "Conflicts", "Cover", "Coverage", "DomainGraph", "EditScript",
+		"Finding", "HowChecked", "Interface", "Judgment", "LedgerEvent", "Probes", "RegionGraph", "Retraction", "RunRecord",
+		"SectionMap", "Spec"}
 	if got := Types(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("types = %v", got)
 	}

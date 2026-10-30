@@ -77,3 +77,21 @@ func TestEmptyShape(t *testing.T) {
 		t.Fatalf("%+v", s)
 	}
 }
+
+// D-087: a date given as a value (or as the object) counts as dated content for temporal_density.
+func TestTemporalDensityCountsDateValues(t *testing.T) {
+	withValue := cl("02A", "r1", "Duty A", "applies_from", "Law X", "")
+	withValue.Value = "2026-08-02"
+	notDate := cl("02B", "r1", "Duty B", "applies_from", "Law X", "")
+	notDate.Value = "Article 50"
+	g := BuildRegion("r1", []model.Claim{withValue, notDate,
+		cl("02C", "r1", "Report Y", "published_on", "2026-01", ""),
+		cl("02D", "r1", "Duty C", "enforced_by", "Authority Z", "2026-10-26"),
+	})
+	if got := g.ShapeMetrics.TemporalDensity; got != 0.75 {
+		t.Fatalf("temporal_density = %v, want 0.75 (3 of 4 morphisms dated)", got)
+	}
+	if Dated(notDate) || !Dated(withValue) {
+		t.Fatal("Dated misclassifies")
+	}
+}

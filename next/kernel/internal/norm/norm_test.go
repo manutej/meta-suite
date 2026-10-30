@@ -1,6 +1,9 @@
 package norm
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestLabel(t *testing.T) {
 	cases := map[string]string{
@@ -11,10 +14,72 @@ func TestLabel(t *testing.T) {
 		"Entity\tA\n":   "entity a",
 		"(entity b)":    "entity b",
 		"":              "",
+		// D-087: brackets stay balanced.
+		"transparency obligations (Article 50)":  "transparency obligations (article 50)",
+		"transparency obligations (Article 50).": "transparency obligations (article 50)",
+		"Commission guidelines (Article 6)":      "commission guidelines (article 6)",
+		"(Article 50) duties":                    "(article 50) duties",
+		"rule (a)(b)":                            "rule (a)(b)",
+		"((entity c))":                           "entity c",
+		"(a) and (b)":                            "(a) and (b)",
+		"article 50)":                            "article 50",
+		"(article 50":                            "article 50",
+		"[draft] code of practice":               "[draft] code of practice",
+		"\"so-called\" agents":                   "\"so-called\" agents",
+		"“quoted”":                               "quoted",
+		"members' states'":                       "members' states",
+		"...":                                    "",
+		"()":                                     "",
+		")x(":                                    "x",
 	}
 	for in, want := range cases {
 		if got := Label(in); got != want {
 			t.Errorf("Label(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+// TestLabelBalanced: trimming never unbalances a label: every input below is balanced inside its outer junk,
+// and so is its normalized form (D-087). Unbalanced brackets inside a label are the source's own text and stay.
+func TestLabelBalanced(t *testing.T) {
+	for _, in := range []string{"x (y)", "(x) y)", "((x)", "x (y (z))", "x [y]}", ")x (y)(", "a (b) c (d).", "\"x\" y\"", "<x> (y)!", "x (y)…"} {
+		out := Label(in)
+		for o, c := range closer {
+			if o == '"' {
+				if strings.Count(out, `"`)%2 != 0 {
+					t.Errorf("Label(%q) = %q: odd quotes", in, out)
+				}
+				continue
+			}
+			depth := 0
+			for _, r := range out {
+				if r == o {
+					depth++
+				} else if r == c {
+					depth--
+				}
+				if depth < 0 {
+					break
+				}
+			}
+			if depth != 0 {
+				t.Errorf("Label(%q) = %q: unbalanced %c%c", in, out, o, c)
+			}
+		}
+	}
+}
+
+func TestIsDateAndWindow(t *testing.T) {
+	for in, want := range map[string]bool{"2026-08-02": true, "2026-08": true, "2026-08-02T10:00Z": true, "2026": false, "Article 50": false, "2026-8-2": false, "": false} {
+		if got := IsDate(in); got != want {
+			t.Errorf("IsDate(%q) = %v", in, got)
+		}
+	}
+	cases := [][3]string{{"2026-08-02", "month", "2026-08"}, {"2026-08-02", "day", "2026-08-02"}, {"2026-08-02", "year", "2026"},
+		{"2026-08-02", "none", ""}, {"", "month", ""}, {"2026", "month", "2026"}}
+	for _, c := range cases {
+		if got := Window(c[0], c[1]); got != c[2] {
+			t.Errorf("Window(%q,%q) = %q, want %q", c[0], c[1], got, c[2])
 		}
 	}
 }

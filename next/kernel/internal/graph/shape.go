@@ -17,7 +17,8 @@ import (
 //   - two_sidedness: (deg(h2)/deg(h1)) × (share of morphisms touching h1 or h2), where h1 and h2 are the two
 //     most-connected objects, in [0,1]. 1 means two equally weighted hubs account for every relation (a
 //     natural split view); 0 when one hub dominates or there are fewer than two objects.
-//   - temporal_density: the share of morphisms backed by at least one claim with an as_of date, in [0,1].
+//   - temporal_density: the share of morphisms backed by at least one dated claim (Dated: an as_of, or an ISO
+//     date as value, object or subject), in [0,1].
 //
 // Values are rounded to 6 decimals so output bytes are stable across platforms.
 func Shape(objects []model.Object, morphs []model.Morphism, datedMorphisms []string) model.ShapeMetrics {

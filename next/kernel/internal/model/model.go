@@ -135,6 +135,7 @@ type Finding struct {
 	Key              *Key     `json:"key,omitempty"`
 	Value            any      `json:"value,omitempty"`
 	Unit             string   `json:"unit,omitempty"`
+	AsOf             string   `json:"as_of,omitempty"`
 	IndependenceKeys []string `json:"independence_keys,omitempty"`
 }
 
@@ -156,6 +157,15 @@ type Usage struct {
 	OutputTokens *int   `json:"output_tokens,omitempty"`
 }
 
+// Retraction is one line of retractions.jsonl: an append-only tombstone for a claim (`meta claim retract`).
+// The claim stays in its shard; every command after it skips the claim.
+type Retraction struct {
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
+	At     string `json:"at"`
+	Stage  string `json:"stage,omitempty"`
+}
+
 // RunRecord is run.json.
 type RunRecord struct {
 	RunID         string            `json:"run_id"`
@@ -170,6 +180,7 @@ type RunRecord struct {
 	ConfigHash    string            `json:"config_hash"`
 	ConfigSource  string            `json:"config_source,omitempty"`
 	SchemaVersion string            `json:"schema_version"`
+	SpecHash      string            `json:"spec_hash,omitempty"`
 	PlaybookHash  *string           `json:"playbook_hash"`
 	GateResults   []GateResult      `json:"gate_results"`
 	Usage         Usage             `json:"usage"`

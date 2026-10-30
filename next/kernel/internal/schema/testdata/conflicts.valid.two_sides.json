@@ -1,0 +1,46 @@
+{
+  "conflicts": [
+    {
+      "id": "C-0123456789ab",
+      "key": {
+        "subject": "duty a",
+        "relation": "applies_from",
+        "object": "law x"
+      },
+      "as_of": "2026-08",
+      "reason": "sources give different values for the same statement",
+      "sides": [
+        {
+          "finding_id": "F-0123456789ab",
+          "value": "2026-08-02",
+          "as_of": [
+            "2026-08-01"
+          ],
+          "claim_ids": [
+            "01M653AP3AR8PABW94M9E5J6KM"
+          ],
+          "independence_keys": [
+            "a.example"
+          ],
+          "regions": [
+            "r1"
+          ]
+        },
+        {
+          "finding_id": "F-ba9876543210",
+          "value": "2026-11-02",
+          "as_of": [],
+          "claim_ids": [
+            "01M653AP3AR8PABW94M9E5J6KM"
+          ],
+          "independence_keys": [
+            "b.example"
+          ],
+          "regions": [
+            "r2"
+          ]
+        }
+      ]
+    }
+  ]
+}

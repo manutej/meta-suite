@@ -39,7 +39,15 @@ const (
 	HowCheckedFile = "how_checked.json"
 	PlanFile       = "plan.json"
 	SectionMapFile = "section_map.json"
+	CoverageFile   = "coverage.json"
+	ProbesFile     = "probes.json"
+	RetractFile    = "retractions.jsonl"
+	ArtifactPage   = "artifact/index.html"
 )
+
+// WorkDirs are created by `meta run init`: every folder an op writes into, so a shell redirect such as
+// `> "$RUN/gates/G2.json"` never fails before the kernel runs (D-087).
+var WorkDirs = []string{ClaimsDir, TokensDir, "gates", "prompts", "review", "artifact", "artifact/shots", RegionsDir}
 
 // Now is the clock; tests may replace it.
 var Now = func() time.Time { return time.Now().UTC() }
@@ -102,6 +110,11 @@ func Create(root string, rec model.RunRecord) (*Run, error) {
 	dir := filepath.Join(root, "runs", rec.RunID)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, kerr.Wrap("io", err)
+	}
+	for _, d := range WorkDirs {
+		if err := os.MkdirAll(filepath.Join(dir, filepath.FromSlash(d)), 0o755); err != nil {
+			return nil, kerr.Wrap("io", err)
+		}
 	}
 	r := &Run{Dir: dir, Record: rec}
 	if err := r.write(); err != nil {

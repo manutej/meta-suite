@@ -13,7 +13,8 @@ import (
 	"github.com/manutej/meta-suite/next/kernel/internal/sheaf"
 )
 
-// cmdGateG2 runs the provenance gate. Exit 0 only on "pass"; "fail" and "unchecked" exit 1 with the report.
+// cmdGateG2 runs the provenance gate. Exit 0 only on "pass"; "fail", "incomplete" and "unchecked" exit 1 with
+// the report (D-087: a partial run is never a clean pass).
 func cmdGateG2(e *env, args []string) int {
 	f, err := parseFlags(args, nil, nil)
 	if err != nil || len(f.pos) != 1 {
@@ -38,7 +39,10 @@ func cmdGateG2(e *env, args []string) int {
 		}
 		summary += "; not yet checkable: " + strings.Join(parts, ", ")
 	}
-	g := model.GateResult{Gate: "G2", Verdict: rep.Verdict, At: runs.Stamp(runs.Now()), Summary: summary, InputsHash: r.HashFiles(rep.Inputs), Files: rep.Inputs}
+	// Every input G2 could read, present or not, is hashed, so a file that appears later (a retraction, a new
+	// shard) also makes this result stale.
+	all := gates.G2Inputs(r)
+	g := model.GateResult{Gate: "G2", Verdict: rep.Verdict, At: runs.Stamp(runs.Now()), Summary: summary, InputsHash: r.HashFiles(all), Files: all}
 	if err := r.RecordGate(g); err != nil {
 		return e.failRun(r, "gate G2", err)
 	}
@@ -138,8 +142,8 @@ func cmdReport(e *env, args []string) int {
 	if err != nil {
 		return e.failRun(r, "report", kerr.Wrap("io", err))
 	}
-	if err := fsx.WriteJSON(r.Path(runs.HowCheckedFile), hc); err != nil {
-		return e.failRun(r, "report", kerr.Wrap("io", err))
+	if err := writeTyped(r, runs.HowCheckedFile, "HowChecked", hc); err != nil {
+		return e.failRun(r, "report", err)
 	}
 	if err := e.log(r, "report", true, map[string]any{"out": runs.HowCheckedFile, "gates_passed": hc.GatesPassed,
 		"gates_failed": hc.GatesFailed, "gates_unchecked": hc.GatesUnchecked, "verified": hc.Counts.Verified}); err != nil {

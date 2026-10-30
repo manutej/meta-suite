@@ -449,9 +449,12 @@ func TestGateG2Failures(t *testing.T) {
 		t.Fatalf("empty run: %+v", r)
 	}
 	dir = pipeline(t)
-	// no problems so far, findings not computed yet: pass (exit 0) but complete=false
-	if r := meta(t, "", "gate G2", dir); r.code != 0 || r.json(t)["complete"] != false || r.json(t)["verdict"] != "pass" {
-		t.Fatalf("no findings yet must be an incomplete pass: %+v", r)
+	// D-087: no problems so far, findings not computed yet: "incomplete", exit 1, never a clean pass
+	if r := meta(t, "", "gate G2", dir); r.code != 1 || r.json(t)["complete"] != false || r.json(t)["verdict"] != "incomplete" {
+		t.Fatalf("no findings yet must be incomplete (exit 1): %+v", r)
+	}
+	if hc := must(t, "", "report", dir).json(t); hc["gates"].([]any)[1].(map[string]any)["status"] != "unchecked" {
+		t.Fatalf("report must show an incomplete G2 as unchecked: %v", hc["gates"])
 	}
 	must(t, "", "interface merge", dir, "--plain")
 	must(t, "", "findings verify", dir)
@@ -554,10 +557,18 @@ func TestLedger(t *testing.T) {
 	if k := meta(t, "", "ledger append", dir, "--kind", "deviation", "--stage", "Q7", "--note", "x").errKind(t); k != "usage" {
 		t.Fatal(k)
 	}
-	if k := meta(t, "not json", "ledger append", dir, "--kind", "usage").errKind(t); k != "invalid_json" {
+	if k := meta(t, "not json", "ledger append", dir, "--kind", "usage", "--stdin").errKind(t); k != "invalid_json" {
 		t.Fatal(k)
 	}
-	j := must(t, `{"calls":3,"source":"harness"}`, "ledger append", dir, "--kind", "usage").json(t)
+	if k := meta(t, "", "ledger append", dir, "--kind", "usage", "--stdin").errKind(t); k != "usage" {
+		t.Fatal(k)
+	}
+	// D-087: without --stdin, stdin is never read (an open, empty harness pipe used to hang the command).
+	var o, e strings.Builder
+	if code := run([]string{"ledger", "append", dir, "--kind", "note", "--note", "x"}, failingReader{t}, &o, &e); code != 0 {
+		t.Fatalf("ledger append without --stdin: %d %s", code, e.String())
+	}
+	j := must(t, `{"calls":3,"source":"harness"}`, "ledger append", dir, "--kind", "usage", "--stdin").json(t)
 	if j["kind"] != "usage" {
 		t.Fatalf("%v", j)
 	}
@@ -575,6 +586,14 @@ func TestLedger(t *testing.T) {
 	if k := meta(t, "", "ledger append", dir, "--kind", "note").errKind(t); k != "ledger_corrupt" {
 		t.Fatal(k)
 	}
+}
+
+// failingReader fails the test if anything reads it: a stand-in for a pipe that never closes.
+type failingReader struct{ t *testing.T }
+
+func (f failingReader) Read([]byte) (int, error) {
+	f.t.Fatal("stdin was read without --stdin")
+	return 0, nil
 }
 
 func TestReportBeforeAnything(t *testing.T) {

@@ -68,7 +68,7 @@ type G2Counts struct {
 
 // G2Inputs are the run-relative files G2 reads (for the inputs hash).
 func G2Inputs(r *runs.Run) []string {
-	in := []string{runs.ClaimsFile, runs.MergedFile, runs.FindingsFile}
+	in := []string{runs.ClaimsFile, runs.MergedFile, runs.FindingsFile, runs.RetractFile}
 	in = append(in, r.Glob(runs.ClaimsDir+"/*.jsonl")...)
 	in = append(in, r.Glob(runs.RegionsDir+"/*.json")...)
 	in = append(in, r.Glob(runs.TokensDir+"/*.json")...)
@@ -85,8 +85,12 @@ func G2Inputs(r *runs.Run) []string {
 //     normalized independence keys, recomputed from the claims (fake independence); a tension has >= 1
 //     claim on each side (unsourced sides).
 //
-// A part whose file does not exist yet is "unchecked" (with the reason); the verdict is "fail" when any check
-// fails, else "pass", and complete says whether every part was checked.
+// A part whose file does not exist yet is "unchecked" (with the reason). Verdict (D-087): "fail" when any
+// check fails; else "unchecked" when no claims exist yet; else "incomplete" when any part is unchecked (only
+// the parts that exist passed; never a clean pass); else "pass". complete says whether every part was checked.
+//
+// Retracted claims (retractions.jsonl, D-087) must still be valid and stamped in their shards, but must not
+// appear in claims.jsonl, any graph or any finding's evidence; each retraction must name a shard claim.
 //
 // D-081: claim text fields matching any injection pattern (config gates.g2.injection_patterns) are listed
 // as injection_suspect warnings. Warnings never change the verdict; they are for a reviewer to look at.
@@ -113,6 +117,11 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 		return nil, err
 	}
 	byID := map[string]model.Claim{}
+	tomb, err := claims.Retracted(r)
+	if err != nil {
+		return nil, err
+	}
+	gone := func(id string) bool { _, ok := tomb[id]; return ok }
 	claimCheck := Check{Name: "claims_sourced_and_stamped"}
 	if len(shards) == 0 && !r.Exists(runs.ClaimsFile) {
 		claimCheck.Status, claimCheck.Reason = "unchecked", "no claims gathered yet"
@@ -122,10 +131,19 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				add(Problem{Check: claimCheck.Name, File: b.File, Detail: fmt.Sprintf("line %d %s: %s", b.Line, e.InstanceLocation, e.Message)})
 			}
 		}
+		inShard := map[string]bool{}
 		for _, c := range shardClaims {
-			byID[c.ID] = c
+			inShard[c.ID] = true
 			if c.Source.Locator == "" || c.Source.IndependenceKey == "" {
 				add(Problem{Check: claimCheck.Name, File: runs.ClaimsDir, ID: c.ID, Detail: "missing locator or independence_key"})
+			}
+			if !gone(c.ID) {
+				byID[c.ID] = c
+			}
+		}
+		for id := range tomb {
+			if !inShard[id] {
+				add(Problem{Check: claimCheck.Name, File: runs.RetractFile, ID: id, Detail: "retracts a claim that is in no shard"})
 			}
 		}
 		claimCheck.Checked = len(shardClaims) + len(bad)
@@ -143,6 +161,10 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 					ID string `json:"id"`
 				}
 				json.Unmarshal(l.Raw, &c)
+				if gone(c.ID) {
+					add(Problem{Check: claimCheck.Name, File: runs.ClaimsFile, ID: c.ID, Detail: "retracted claim is still merged: run `meta claims merge`"})
+					continue
+				}
 				ids[c.ID] = true
 				if errs, _ := schema.Validate("Claim", l.Raw); len(errs) > 0 {
 					add(Problem{Check: claimCheck.Name, File: runs.ClaimsFile, ID: c.ID, Detail: fmt.Sprintf("line %d does not validate", l.N)})
@@ -194,6 +216,8 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 				for _, cid := range m.ClaimIDs {
 					c, ok := byID[cid]
 					switch {
+					case gone(cid):
+						add(Problem{Check: graphCheck.Name, File: rel, ID: m.ID, Detail: "references retracted claim " + cid + ": rebuild with `meta graph build`"})
 					case !ok:
 						add(Problem{Check: graphCheck.Name, File: rel, ID: m.ID, Detail: "references unknown claim " + cid})
 					case c.Region != g.Region:
@@ -233,7 +257,9 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 					add(Problem{Check: graphCheck.Name, File: runs.MergedFile, ID: m.ID, Detail: "unsourced morphism (no claim ids)"})
 				}
 				for _, cid := range m.ClaimIDs {
-					if _, ok := byID[cid]; !ok {
+					if gone(cid) {
+						add(Problem{Check: graphCheck.Name, File: runs.MergedFile, ID: m.ID, Detail: "references retracted claim " + cid + ": re-run `meta interface merge`"})
+					} else if _, ok := byID[cid]; !ok {
 						add(Problem{Check: graphCheck.Name, File: runs.MergedFile, ID: m.ID, Detail: "references unknown claim " + cid})
 					}
 				}
@@ -268,6 +294,10 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 			ks := map[string]bool{}
 			for _, cid := range f.Evidence {
 				c, ok := byID[cid]
+				if gone(cid) {
+					add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID, Detail: "evidence references retracted claim " + cid + ": re-run `meta findings verify`"})
+					continue
+				}
 				if !ok {
 					add(Problem{Check: findCheck.Name, File: runs.FindingsFile, ID: f.ID, Detail: "evidence references unknown claim " + cid})
 					continue
@@ -326,8 +356,13 @@ func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G
 			rep.Complete = false
 		}
 	}
-	if rep.Checks[0].Status == "unchecked" {
-		rep.Verdict = "unchecked"
+	if rep.Verdict != "fail" {
+		switch {
+		case rep.Checks[0].Status == "unchecked":
+			rep.Verdict = "unchecked"
+		case !rep.Complete:
+			rep.Verdict = "incomplete"
+		}
 	}
 	return rep, nil
 }

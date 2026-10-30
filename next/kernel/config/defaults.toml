@@ -69,6 +69,10 @@ allowed_stages = ["D2"]
 min_independent = 2
 # Two numeric values on the same key (in the same canonical unit) agree when |a-b| <= tol * max(|a|,|b|).
 numeric_rel_tol = 0.01
+# D-087: claims agree only inside one as_of window, so "no fines as of August" and "no fines as of October" do
+# not verify each other. The window is the as_of date truncated to: "day" | "month" | "year"; "none" ignores
+# as_of. Undated claims form their own window. Different values in different windows are not a conflict.
+as_of_window = "month"
 
 [graph]
 # Within-region entity merge. Slice 1 merges by exact normalized label only; relation-profile merging
@@ -145,8 +149,8 @@ atom_count = 34
 skill_max_words = 500
 
 # Canonical units (D-043). A claim's unit is matched case-sensitively against each dimension's factors; the
-# value is multiplied by the factor and the claim's unit becomes the canonical one. Unknown units are kept as
-# given and the claim is reported unit_normalized=false. Currencies are not converted (no static rate).
+# value is multiplied by the factor and the claim's unit becomes the canonical one. A canonical unit (e.g. "%")
+# is accepted as is. Unknown units are kept as given and noted. Currencies are in [unit_codes] below.
 [units.length]
 canonical = "m"
 factors = { "m" = 1.0, "km" = 1000.0, "cm" = 0.01, "mm" = 0.001, "mi" = 1609.344, "ft" = 0.3048, "in" = 0.0254 }
@@ -178,3 +182,12 @@ factors = { "Wh" = 1.0, "kWh" = 1000.0, "MWh" = 1000000.0, "GWh" = 1000000000.0,
 [units.count]
 canonical = "count"
 factors = { "count" = 1.0, "thousand" = 1000.0, "million" = 1000000.0, "billion" = 1000000000.0 }
+
+# Code-only dimensions (D-087): each code is its own canonical unit and is never converted (there is no static
+# exchange rate). A relation whose unit_dimension names one of these must use a listed code; values in two
+# codes on one key are reported as a disagreement in units the kernel cannot convert.
+[unit_codes.currency]
+codes = [
+  "EUR", "USD", "GBP", "CHF", "JPY", "CNY", "CAD", "AUD", "NZD", "INR", "BRL", "MXN", "KRW", "SGD", "HKD",
+  "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "BGN", "TRY", "ZAR", "AED", "SAR", "ILS",
+]

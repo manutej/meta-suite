@@ -54,6 +54,7 @@ type Config struct {
 		Pullback struct {
 			MinIndependent int     `toml:"min_independent" json:"min_independent"`
 			NumericRelTol  float64 `toml:"numeric_rel_tol" json:"numeric_rel_tol"`
+			AsOfWindow     string  `toml:"as_of_window" json:"as_of_window"`
 		} `toml:"pullback" json:"pullback"`
 	} `toml:"lens" json:"lens"`
 	Graph struct {
@@ -87,7 +88,10 @@ type Config struct {
 		AtomCount     int `toml:"atom_count" json:"atom_count"`
 		SkillMaxWords int `toml:"skill_max_words" json:"skill_max_words"`
 	} `toml:"check" json:"check"`
-	Units map[string]UnitDim `toml:"units" json:"units"`
+	Units     map[string]UnitDim `toml:"units" json:"units"`
+	UnitCodes map[string]struct {
+		Codes []string `toml:"codes" json:"codes"`
+	} `toml:"unit_codes" json:"unit_codes"`
 
 	// Hash is the sha256 of the bytes loaded; Source says where they came from.
 	Hash   string `toml:"-" json:"-"`
@@ -126,9 +130,9 @@ func Parse(b []byte, source string) (*Config, error) {
 	}
 	required := []string{
 		"schema", "mode_aliases", "loop.d2_reentry_max", "intake.re_expand_max", "roles", "claims.allowed_stages",
-		"lens.pullback.min_independent", "lens.pullback.numeric_rel_tol", "graph.merge_threshold",
+		"lens.pullback.min_independent", "lens.pullback.numeric_rel_tol", "lens.pullback.as_of_window", "graph.merge_threshold",
 		"independence.strip_prefixes", "gates.g2.injection_patterns", "ledger.kinds", "gates.g6.terms", "gates.g6.tokens", "gates.g6.phrases", "artifact.forms",
-		"artifact.layout", "report.gates", "report.implemented", "check.atom_count", "check.skill_max_words", "units",
+		"artifact.layout", "report.gates", "report.implemented", "check.atom_count", "check.skill_max_words", "units", "unit_codes",
 	}
 	for _, m := range []string{"fast", "deep_narrow", "deep_broad"} {
 		for _, k := range []string{"review_passes", "max_regions", "k", "g3_layers", "g3_pair_cap", "g4", "r2",
@@ -157,6 +161,19 @@ func Parse(b []byte, source string) (*Config, error) {
 	for i, p := range c.Gates.G2.InjectionPatterns {
 		if _, err := regexp.Compile("(?i)" + p); err != nil {
 			return nil, fmt.Errorf("config %s: gates.g2.injection_patterns[%d]: %v", source, i, err)
+		}
+	}
+	switch c.Lens.Pullback.AsOfWindow {
+	case "day", "month", "year", "none":
+	default:
+		return nil, fmt.Errorf("config %s: lens.pullback.as_of_window must be day, month, year or none", source)
+	}
+	for dim, uc := range c.UnitCodes {
+		if _, clash := c.Units[dim]; clash {
+			return nil, fmt.Errorf("config %s: unit dimension %q is in both units and unit_codes", source, dim)
+		}
+		if len(uc.Codes) == 0 {
+			return nil, fmt.Errorf("config %s: unit_codes.%s.codes is empty", source, dim)
 		}
 	}
 	if c.Lens.Pullback.MinIndependent < 1 {

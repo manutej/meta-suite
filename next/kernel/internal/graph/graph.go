@@ -44,7 +44,7 @@ func BuildRegion(region string, claims []model.Claim) model.RegionGraph {
 		s, o := addLabel(c.Subject), addLabel(c.Object)
 		k := mk{ObjectID(region, s), c.Relation, ObjectID(region, o)}
 		morphs[k] = append(morphs[k], c.ID)
-		if c.AsOf != "" {
+		if Dated(c) {
 			dated[k] = true
 		}
 	}
@@ -65,6 +65,17 @@ func BuildRegion(region string, claims []model.Claim) model.RegionGraph {
 	sort.Slice(g.Morphisms, func(i, j int) bool { return g.Morphisms[i].ID < g.Morphisms[j].ID })
 	g.ShapeMetrics = Shape(g.Objects, g.Morphisms, datedIDs)
 	return g
+}
+
+// Dated reports whether a claim carries dated content (D-087): an as_of, or an ISO calendar date (at least
+// year and month, norm.IsDate) as its value, object or subject. Dates encoded as values ("applies_from":
+// "2026-08-02") count, so a date-heavy question can reach the timeline layout threshold.
+func Dated(c model.Claim) bool {
+	if c.AsOf != "" || norm.IsDate(c.Object) || norm.IsDate(c.Subject) {
+		return true
+	}
+	v, ok := c.Value.(string)
+	return ok && norm.IsDate(v)
 }
 
 // Candidates proposes one Interface per pair of regions that share at least one normalized label.

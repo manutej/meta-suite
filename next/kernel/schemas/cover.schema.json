@@ -168,6 +168,16 @@
         ]
       },
       "minItems": 1
+    },
+    "labels": {
+      "type": "array",
+      "description": "Canonical entity labels shared by every gatherer (D1); `meta claim add` notes a subject or object outside this list (D-088).",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "uniqueItems": true
     }
   },
   "required": [
