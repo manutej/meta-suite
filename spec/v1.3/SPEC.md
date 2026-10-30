@@ -36,7 +36,7 @@ These are habits in the output, not the pipeline's paperwork:
 4. **It right-sizes at intake.** One artifact, not a bundle.
 5. **It keeps content as typed data, rendered by a build step.** This keeps numbers consistent and allows interactive weighting.
 
-**On the mathematical framing.** Its working form carries weight: list the entities, relations and invariants, then build from typed data. That is v1's typed slots and data model. But no v1 run ever opened `category-expansion.md`, and no category-theory vocabulary appears in any intermediate file. So the wording is not yet shown to be the mechanism. We keep the framing as the method and the brand, and test the wording on its own (T4).
+**On the mathematical framing.** Its working form carries weight, and it lives in one document: the **typed meta-prompt** (`03_META_PROMPT.md`). It has typed input slots, invariants ("every claim tagged", "never present a share as measured", "name the runner-up and what flips it"), a step-by-step procedure, and a typed output contract. That document is where habits 3 and 5 come from, so it is protected. Build from typed data (`05_DATA_MODEL.md` and `seed_data.json`). But no v1 run ever opened `category-expansion.md`, and no category-theory vocabulary appears in any intermediate file. So the wording is not yet shown to be the mechanism. We keep the framing as the method and the brand, and test the wording on its own (T4).
 
 ## 3. The original vision, carried forward
 
@@ -60,7 +60,7 @@ Scope: **meta-mvp first.** It was the entry skill in every v1 run and is the own
 | # | Change | Expected effect | Test |
 |---|---|---|---|
 | C1 | **Render audit.** One small script checks for overflow, overlapping elements, stacked slides and console errors at 360/390/1280 px, plus one tiled phone contact sheet. All fixes go in one batched edit, with at most 2 rounds. | −$0.5–0.8 and −1.5–4 min per run (about half of v1's extra cost). Catches the failure that sank v2's deck. | T1 |
-| C2 | **One BRIEF.md instead of eight planning files.** It holds the intake (4 lines), the thesis, the output rules, 3–6 modules with edge cases, and a data-model sketch. The component-spec meta-prompt, the work plan, and the unverifiable "refined 3–5 times" claims are dropped. | −$0.3–0.5 and −2–3 min | T1 |
+| C2 | **Merge, don't delete: one BRIEF.md instead of ten planning files** (about 3,000 words per run). Every job those files do is kept: the intake, the thesis (02), the research notes (01), **the typed meta-prompt with its invariants and output contract (03), which is load-bearing**, the data model (05), each module's edge cases (SPEC_01–03, condensed), and the verification checklist (from 04). Only duplicate scaffolding is dropped: the component-spec restatement (03b), the unit table where every owner is "orchestrator" (04), and the unverifiable "refined 3–5 times" claims. `seed_data.json`, `template.html` and `build.py` are untouched. | −$0.2–0.4 and −1–2 min | T1 + habit check |
 | C3 | **Core skill file under about 150 lines**, plus one reference loaded per artifact type (page, deck, dashboard). "Read the kits" and the off-topic worked example are removed. | About −12–15k tokens carried per run | T1 |
 | C4 | **The five habits (section 2) stated plainly at the top of the skill.** | About 0 cost; probably the main quality driver | T2 |
 | C5 | **Helper agents optional, inline work by default.** | Probably the largest real-use saving; unmeasured | T7 |
@@ -69,6 +69,16 @@ Scope: **meta-mvp first.** It was the entry skill in every v1 run and is the own
 
 ## 5. How a change ships
 
+0. **Habit check (automatic, before any blind test).** A script measures the winning features of the frozen v1 outputs:
+   - the number of data figures;
+   - the share of claims tagged fact or inference;
+   - verdict in the first screen;
+   - a named runner-up and what would flip the ranking;
+   - interactive weighting where the frozen output had it;
+   - graded sources;
+   - a clean render-audit pass at 360/390/1280 px.
+   
+   A lean output that falls below v1 on any of these is rejected without spending a blind test. Changes land one at a time: the safe cuts first (C1 batching, C3 loading, 03b), then the merge (C2), each re-checked.
 1. **Fixed comparators.** Every frozen prompt keeps its judged v1 output as the fixed comparison: tests 1, 2, 4A and 4B, plus 4C and 4D once run.
 2. **Pass bar.** A change ships only if, judged blind, it is **preferred or tied in at least 3 of 4 pairs** against frozen v1. It must also beat or tie the plain Opus baseline and cost **no more** in billed terms.
 3. **Judging.** The owner judges first. AI judges are a pre-screen only after calibration (T6): the design judge disagreed with the owner in test 2.
