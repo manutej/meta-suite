@@ -34,8 +34,9 @@ func (e *Error) With(detail map[string]any) *Error {
 	return &c
 }
 
-// Wrap turns any error into an *Error of the given kind (keeping an existing *Error unchanged).
-func Wrap(kind string, err error) *Error {
+// Wrap turns any error into an *Error of the given kind (keeping an existing *Error unchanged). A nil err
+// gives a nil error interface (never a typed nil pointer).
+func Wrap(kind string, err error) error {
 	if err == nil {
 		return nil
 	}

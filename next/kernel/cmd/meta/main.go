@@ -36,7 +36,7 @@ var (
 // Usage lines, one per command. `meta help` prints them; the report quotes them.
 var usage = []string{
 	"meta version",
-	"meta help",
+	"meta help [<command>]          (or: meta <command> --help)",
 	"meta config show [--mode fast|deep|deep_narrow|deep_broad]",
 	"meta run init --brief <brief.json> [--mode fast|deep] [--surface <name>] [--seed <n>] [--root <dir>] [--json]       (prints the run dir)",
 	"meta run scope <run_dir> narrow|broad",
@@ -50,10 +50,10 @@ var usage = []string{
 	"meta gate G2 <run_dir>",
 	"meta gate G6 <file>... [--run <run_dir>] [--allow <term>[,<term>...]]",
 	"meta ledger show <run_dir>",
-	"meta ledger append <run_dir> --event <name>         (optional JSON object on stdin)",
+	"meta ledger append <run_dir> --kind <kind> [--stage <stage>] [--note <text>]   (optional JSON object on stdin)",
 	"meta report <run_dir>",
 	"meta sheaf analyze <in.json> [--out <report.json>] [--k K] [--null-reps R] [--seed S] [--top N] [--boundary <b.json>]",
-	"meta check [--repo <repo_root>]",
+	"meta check [--repo <repo_root>] [--skip-go]",
 }
 
 func main() { os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr)) }
@@ -116,6 +116,18 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			return e.fail(kerr.New("usage", "unknown subcommand for %q; one of: %s", args[0], strings.Join(groups, ", ")))
 		}
 		return e.fail(kerr.New("usage", "unknown command %q (try `meta help`)", args[0]))
+	}
+	if wantsHelp(rest) || (name == "help" && len(rest) > 0) {
+		target := name
+		if name == "help" && !wantsHelp(rest) {
+			target = strings.Join(rest, " ")
+		}
+		h, ok := helpFor(target)
+		if !ok {
+			return e.fail(kerr.New("usage", "no help for %q (try `meta help`)", target))
+		}
+		fmt.Fprint(e.stdout, h)
+		return 0
 	}
 	if name != "version" && name != "help" {
 		cfg, err := config.Load()

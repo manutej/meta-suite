@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"io"
+	"path/filepath"
 	"strconv"
 
 	"github.com/manutej/meta-suite/next/kernel/internal/norm"
@@ -30,3 +31,11 @@ func trimSpace(b []byte) []byte { return bytes.TrimSpace(b) }
 func normIndep(s string, strip []string) string { return norm.IndependenceKey(s, strip) }
 
 func itoa(i int) string { return strconv.Itoa(i) }
+
+func mustAbs(p string) string {
+	a, err := filepath.Abs(p)
+	if err != nil {
+		return p
+	}
+	return a
+}

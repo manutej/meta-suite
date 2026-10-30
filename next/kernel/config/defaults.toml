@@ -95,6 +95,31 @@ phrases = [
   "restriction map", "global section",
 ]
 
+[gates.g2]
+# D-081: gathered content is data, never instructions. Claim text fields (subject, relation, object, a string
+# value, the locator) matching any of these patterns are reported as injection_suspect warnings. They are
+# warnings, not failures: a reviewer looks at them; the gate verdict is unchanged. RE2 syntax, matched
+# case-insensitively.
+injection_patterns = [
+  '\bignore\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|earlier)\b',
+  '\bdisregard\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|earlier|your)\b',
+  '\bforget\s+(all\s+|everything\s+)?(you|your|previous|prior)\b',
+  '\byou\s+are\s+(now\s+)?(an?\s+)?(ai|assistant|language\s+model|chatbot|claude|gpt)\b',
+  '\byou\s+are\s+now\b',
+  '\bsystem\s+prompt\b',
+  '\b(new|updated|override)\s+instructions?\b',
+  '\bas\s+an\s+ai\b',
+  '\b(assistant|claude|chatgpt|ai\s+model|language\s+model)\s*[,:]\s*(please\s+)?(do|ignore|output|write|say|reply|respond|include|add|delete|run|execute)\b',
+  '\b(do\s+not|don.t)\s+(tell|mention|reveal|disclose)\s+(the\s+)?(user|reader)\b',
+  '<\s*/?\s*(system|instructions?|assistant)\s*>',
+  '\[\s*(system|inst)\s*\]',
+  '\bjailbreak\b',
+]
+
+[ledger]
+# Kinds accepted by `meta ledger append --kind`. deviation (D-080): a place the model departed from an op.
+kinds = ["assumption", "attestation", "deviation", "note", "retry", "usage", "user_input"]
+
 [artifact.forms]
 profile = "profile page"
 compare = "decision workbench, tensions first"

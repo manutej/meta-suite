@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
 
 	"github.com/BurntSushi/toml"
@@ -62,12 +63,18 @@ type Config struct {
 		StripPrefixes []string `toml:"strip_prefixes" json:"strip_prefixes"`
 	} `toml:"independence" json:"independence"`
 	Gates struct {
+		G2 struct {
+			InjectionPatterns []string `toml:"injection_patterns" json:"injection_patterns"`
+		} `toml:"g2" json:"g2"`
 		G6 struct {
 			Terms   []string `toml:"terms" json:"terms"`
 			Tokens  []string `toml:"tokens" json:"tokens"`
 			Phrases []string `toml:"phrases" json:"phrases"`
 		} `toml:"g6" json:"g6"`
 	} `toml:"gates" json:"gates"`
+	Ledger struct {
+		Kinds []string `toml:"kinds" json:"kinds"`
+	} `toml:"ledger" json:"ledger"`
 	Artifact struct {
 		Forms  map[string]string  `toml:"forms" json:"forms"`
 		Layout map[string]float64 `toml:"layout" json:"layout"`
@@ -120,7 +127,7 @@ func Parse(b []byte, source string) (*Config, error) {
 	required := []string{
 		"schema", "mode_aliases", "loop.d2_reentry_max", "intake.re_expand_max", "roles", "claims.allowed_stages",
 		"lens.pullback.min_independent", "lens.pullback.numeric_rel_tol", "graph.merge_threshold",
-		"independence.strip_prefixes", "gates.g6.terms", "gates.g6.tokens", "gates.g6.phrases", "artifact.forms",
+		"independence.strip_prefixes", "gates.g2.injection_patterns", "ledger.kinds", "gates.g6.terms", "gates.g6.tokens", "gates.g6.phrases", "artifact.forms",
 		"artifact.layout", "report.gates", "report.implemented", "check.atom_count", "check.skill_max_words", "units",
 	}
 	for _, m := range []string{"fast", "deep_narrow", "deep_broad"} {
@@ -145,6 +152,11 @@ func Parse(b []byte, source string) (*Config, error) {
 	for alias, target := range c.ModeAliases {
 		if _, ok := c.Modes[target]; !ok {
 			return nil, fmt.Errorf("config %s: mode_aliases.%s -> unknown mode %q", source, alias, target)
+		}
+	}
+	for i, p := range c.Gates.G2.InjectionPatterns {
+		if _, err := regexp.Compile("(?i)" + p); err != nil {
+			return nil, fmt.Errorf("config %s: gates.g2.injection_patterns[%d]: %v", source, i, err)
 		}
 	}
 	if c.Lens.Pullback.MinIndependent < 1 {

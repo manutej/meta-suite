@@ -9,6 +9,7 @@ import (
 
 	"runtime"
 	"strconv"
+	"strings"
 
 	"github.com/manutej/meta-suite/next/kernel/internal/claims"
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
@@ -33,6 +34,7 @@ func cmdHelp(e *env, args []string) int {
 	for _, u := range usage {
 		fmt.Fprintln(e.stdout, u)
 	}
+	fmt.Fprint(e.stdout, "\n`meta <command> --help` prints the command's guidance: purpose, arguments, outputs, error kinds, gotchas.\n"+exitContract)
 	return 0
 }
 
@@ -260,28 +262,67 @@ func cmdLedgerShow(e *env, args []string) int {
 	return 0
 }
 
-// cmdLedgerAppend records an operator event (S1: e.g. an assumption, a usage figure, a blind attestation).
+// cmdLedgerAppend records an operator event (S1): --kind is one of config ledger.kinds; deviation (D-080)
+// records a place the model departed from an op, with --stage and --note. Extra fields come from an optional
+// JSON object on stdin.
 func cmdLedgerAppend(e *env, args []string) int {
-	f, err := parseFlags(args, []string{"event"}, nil)
-	if err != nil || len(f.pos) != 1 || f.vals["event"] == "" {
+	f, err := parseFlags(args, []string{"kind", "stage", "note", "event"}, nil)
+	if err != nil || len(f.pos) != 1 {
 		return e.fail(usageErr("ledger append"))
+	}
+	kind := f.vals["kind"]
+	if kind == "" && f.vals["event"] != "" {
+		kind = "note" // --event is the older spelling: a named note
+	}
+	if kind == "" {
+		return e.fail(usageErr("ledger append"))
+	}
+	known := false
+	for _, k := range e.cfg.Ledger.Kinds {
+		known = known || k == kind
+	}
+	if !known {
+		return e.fail(kerr.New("usage", "--kind %q is not one of %v (config ledger.kinds)", kind, e.cfg.Ledger.Kinds))
 	}
 	r, err := openRun(f.pos[0])
 	if err != nil {
 		return e.fail(err)
 	}
+	if kind == "deviation" && (f.vals["stage"] == "" || strings.TrimSpace(f.vals["note"]) == "") {
+		return e.failRun(r, "ledger append", kerr.New("usage", "--kind deviation needs --stage <stage> and --note \"what departed from the op, and why\""))
+	}
+	if s := f.vals["stage"]; s != "" && !contains(stage.Stages, s) {
+		return e.failRun(r, "ledger append", kerr.New("usage", "unknown --stage %q (one of %v)", s, stage.Stages))
+	}
 	data := map[string]any{}
-	if in, _ := readAll(e.stdin); len(trimSpace(in)) > 0 {
+	if in, err := readAll(e.stdin); err == nil && len(trimSpace(in)) > 0 {
 		if err := json.Unmarshal(in, &data); err != nil {
 			return e.failRun(r, "ledger append", kerr.New("invalid_json", "stdin must be a JSON object: %v", err))
 		}
 	}
-	data["event"] = f.vals["event"]
+	data["kind"] = kind
+	for _, k := range []string{"stage", "note", "event"} {
+		if v := f.vals[k]; v != "" {
+			data[k] = v
+		}
+	}
 	if err := e.log(r, "ledger append", true, data); err != nil {
 		return e.fail(err)
 	}
-	evs, _ := ledger.Events(r)
-	return e.out(map[string]any{"seq": len(evs)}, 0)
+	evs, err := ledger.Events(r)
+	if err != nil {
+		return e.fail(err)
+	}
+	return e.out(map[string]any{"seq": len(evs), "kind": kind}, 0)
+}
+
+func contains(list []string, s string) bool {
+	for _, x := range list {
+		if x == s {
+			return true
+		}
+	}
+	return false
 }
 
 func (e *env) indepKey(s string) string {

@@ -14,6 +14,7 @@ import (
 	"github.com/manutej/meta-suite/next/kernel/internal/config"
 	"github.com/manutej/meta-suite/next/kernel/internal/findings"
 	"github.com/manutej/meta-suite/next/kernel/internal/fsx"
+	"github.com/manutej/meta-suite/next/kernel/internal/ledger"
 	"github.com/manutej/meta-suite/next/kernel/internal/model"
 	"github.com/manutej/meta-suite/next/kernel/internal/norm"
 	runs "github.com/manutej/meta-suite/next/kernel/internal/rundir"
@@ -48,6 +49,16 @@ type Counts struct {
 	RegionsCombined    *bool          `json:"regions_combined"`
 	UnitConversions    int            `json:"unit_conversions"`
 	DatedClaims        int            `json:"dated_claims"`
+	Deviations         int            `json:"deviations"`
+	DeviationsByStage  map[string]int `json:"deviations_by_stage"`
+}
+
+// Deviation is one recorded departure from an op (D-080), listed for reviewers to skim.
+type Deviation struct {
+	Seq   int    `json:"seq"`
+	At    string `json:"at"`
+	Stage string `json:"stage"`
+	Note  string `json:"note"`
 }
 
 // Source is one entry of the sources list.
@@ -60,22 +71,23 @@ type Source struct {
 
 // HowChecked is how_checked.json.
 type HowChecked struct {
-	RunID          string   `json:"run_id"`
-	GeneratedAt    string   `json:"generated_at"`
-	Mode           string   `json:"mode"`
-	Kernel         string   `json:"kernel"`
-	ConfigHash     string   `json:"config_hash"`
-	SchemaVersion  string   `json:"schema_version"`
-	Rule           string   `json:"rule"`
-	MinIndependent int      `json:"min_independent"`
-	Counts         Counts   `json:"counts"`
-	Gates          []Gate   `json:"gates"`
-	GatesPassed    int      `json:"gates_passed"`
-	GatesFailed    int      `json:"gates_failed"`
-	GatesUnchecked int      `json:"gates_unchecked"`
-	Summary        []string `json:"summary"`
-	Limits         []string `json:"limits"`
-	Sources        []Source `json:"sources"`
+	RunID          string      `json:"run_id"`
+	GeneratedAt    string      `json:"generated_at"`
+	Mode           string      `json:"mode"`
+	Kernel         string      `json:"kernel"`
+	ConfigHash     string      `json:"config_hash"`
+	SchemaVersion  string      `json:"schema_version"`
+	Rule           string      `json:"rule"`
+	MinIndependent int         `json:"min_independent"`
+	Counts         Counts      `json:"counts"`
+	Gates          []Gate      `json:"gates"`
+	GatesPassed    int         `json:"gates_passed"`
+	GatesFailed    int         `json:"gates_failed"`
+	GatesUnchecked int         `json:"gates_unchecked"`
+	Summary        []string    `json:"summary"`
+	Limits         []string    `json:"limits"`
+	Deviations     []Deviation `json:"deviations"`
+	Sources        []Source    `json:"sources"`
 }
 
 var gateNames = map[string]string{
@@ -204,6 +216,23 @@ func Build(r *runs.Run, cfg *config.Config) (*HowChecked, error) {
 		c.RegionsCombined = &combined
 	}
 
+	evs, err := ledger.Events(r)
+	if err != nil {
+		return nil, err
+	}
+	c.DeviationsByStage = map[string]int{}
+	hc.Deviations = []Deviation{}
+	for _, ev := range evs {
+		if ev.Command != "ledger append" || ev.Data["kind"] != "deviation" {
+			continue
+		}
+		st, _ := ev.Data["stage"].(string)
+		note, _ := ev.Data["note"].(string)
+		hc.Deviations = append(hc.Deviations, Deviation{Seq: ev.Seq, At: ev.At, Stage: st, Note: note})
+		c.DeviationsByStage[st]++
+	}
+	c.Deviations = len(hc.Deviations)
+
 	hc.Gates = gates(r, cfg)
 	for _, g := range hc.Gates {
 		switch g.Status {
@@ -312,6 +341,9 @@ func summary(hc *HowChecked) []string {
 		s = append(s, "No sources disagreed on the same point.")
 	}
 	s = append(s, fmt.Sprintf("Checks: %d passed, %d failed, %d not run.", hc.GatesPassed, hc.GatesFailed, hc.GatesUnchecked))
+	if c.Deviations > 0 {
+		s = append(s, fmt.Sprintf("The process departed from its plan in %s, each logged with a reason.", plural(c.Deviations, "place", "places")))
+	}
 	return s
 }
 

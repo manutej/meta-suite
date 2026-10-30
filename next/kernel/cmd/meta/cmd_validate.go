@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/manutej/meta-suite/next/kernel/internal/cover"
@@ -198,13 +197,4 @@ func specHash(doc []byte) (string, string, error) {
 		return "", "", err
 	}
 	return fsx.SHA256(b), supplied, nil
-}
-
-func sortedStrings(m map[string]bool) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
 }

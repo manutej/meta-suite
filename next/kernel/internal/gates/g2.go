@@ -4,6 +4,8 @@ package gates
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"regexp"
 	"sort"
 
 	"github.com/manutej/meta-suite/next/kernel/internal/claims"
@@ -31,6 +33,16 @@ type Check struct {
 	Reason   string `json:"reason,omitempty"`
 }
 
+// Warning is a non-failing G2 observation (D-081: injection_suspect).
+type Warning struct {
+	Kind    string `json:"kind"`
+	File    string `json:"file"`
+	ID      string `json:"id"`
+	Field   string `json:"field"`
+	Pattern string `json:"pattern"`
+	Match   string `json:"match"`
+}
+
 // G2Report is G2's output.
 type G2Report struct {
 	Gate     string    `json:"gate"`
@@ -38,6 +50,7 @@ type G2Report struct {
 	Complete bool      `json:"complete"`
 	Checks   []Check   `json:"checks"`
 	Problems []Problem `json:"problems"`
+	Warnings []Warning `json:"warnings"`
 	Counts   G2Counts  `json:"counts"`
 	Inputs   []string  `json:"inputs"`
 }
@@ -74,8 +87,19 @@ func G2Inputs(r *runs.Run) []string {
 //
 // A part whose file does not exist yet is "unchecked" (with the reason); the verdict is "fail" when any check
 // fails, else "pass", and complete says whether every part was checked.
-func G2(r *runs.Run, minIndependent int, strip []string) (*G2Report, error) {
-	rep := &G2Report{Gate: "G2", Problems: []Problem{}, Inputs: []string{}}
+//
+// D-081: claim text fields matching any injection pattern (config gates.g2.injection_patterns) are listed
+// as injection_suspect warnings. Warnings never change the verdict; they are for a reviewer to look at.
+func G2(r *runs.Run, minIndependent int, strip []string, injection []string) (*G2Report, error) {
+	rep := &G2Report{Gate: "G2", Problems: []Problem{}, Warnings: []Warning{}, Inputs: []string{}}
+	pats := make([]*regexp.Regexp, 0, len(injection))
+	for _, p := range injection {
+		re, err := regexp.Compile("(?i)" + p)
+		if err != nil {
+			return nil, fmt.Errorf("gates.g2.injection_patterns: %v", err)
+		}
+		pats = append(pats, re)
+	}
 	for _, in := range G2Inputs(r) {
 		if r.Exists(in) {
 			rep.Inputs = append(rep.Inputs, in)
@@ -122,8 +146,14 @@ func G2(r *runs.Run, minIndependent int, strip []string) (*G2Report, error) {
 				ids[c.ID] = true
 				if errs, _ := schema.Validate("Claim", l.Raw); len(errs) > 0 {
 					add(Problem{Check: claimCheck.Name, File: runs.ClaimsFile, ID: c.ID, Detail: fmt.Sprintf("line %d does not validate", l.N)})
-				} else if _, ok := byID[c.ID]; !ok {
+				} else if sc, ok := byID[c.ID]; !ok {
 					add(Problem{Check: claimCheck.Name, File: runs.ClaimsFile, ID: c.ID, Detail: "claim is not in any shard (written outside `meta claim add`?)"})
+				} else {
+					var mc model.Claim
+					json.Unmarshal(l.Raw, &mc)
+					if !reflect.DeepEqual(mc, sc) {
+						add(Problem{Check: claimCheck.Name, File: runs.ClaimsFile, ID: c.ID, Detail: "differs from its shard: a file was edited after `meta claims merge`"})
+					}
 				}
 			}
 			if len(ids) != len(byID) {
@@ -131,6 +161,7 @@ func G2(r *runs.Run, minIndependent int, strip []string) (*G2Report, error) {
 			}
 		}
 	}
+	rep.Warnings = append(rep.Warnings, injectionScan(shardClaims, injection, pats)...)
 	sources, keys := map[string]bool{}, map[string]bool{}
 	for _, c := range byID {
 		sources[c.Source.Locator] = true
@@ -299,4 +330,24 @@ func G2(r *runs.Run, minIndependent int, strip []string) (*G2Report, error) {
 		rep.Verdict = "unchecked"
 	}
 	return rep, nil
+}
+
+// injectionScan checks each claim's text fields against the patterns, in claim-id then field order.
+func injectionScan(cs []model.Claim, raw []string, pats []*regexp.Regexp) []Warning {
+	var out []Warning
+	for _, c := range cs {
+		fields := [][2]string{{"subject", c.Subject}, {"relation", c.Relation}, {"object", c.Object}}
+		if v, ok := c.Value.(string); ok {
+			fields = append(fields, [2]string{"value", v})
+		}
+		fields = append(fields, [2]string{"source.locator", c.Source.Locator}, [2]string{"source.independence_key", c.Source.IndependenceKey})
+		for _, f := range fields {
+			for i, re := range pats {
+				if m := re.FindString(f[1]); m != "" {
+					out = append(out, Warning{Kind: "injection_suspect", File: runs.ClaimsDir + "/" + c.StageToken.Agent + ".jsonl", ID: c.ID, Field: f[0], Pattern: raw[i], Match: m})
+				}
+			}
+		}
+	}
+	return out
 }

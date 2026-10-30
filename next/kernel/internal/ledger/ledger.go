@@ -1,7 +1,7 @@
 // Package ledger is S1's append-only event log, runs/<run_id>/ledger.jsonl. Each line is a LedgerEvent
 // (validated by G1 before it is written) carrying a sequence number and the sha256 of the previous line, so
-// any edit, deletion or reordering is detectable. Appends happen under the ledger's file lock; ledger.head
-// caches the last sequence number and hash.
+// any edit, deletion or reordering is detectable. Every append happens under the ledger's file lock and first
+// re-verifies the whole chain, so nothing is ever appended to a tampered ledger.
 package ledger
 
 import (
@@ -40,13 +40,10 @@ func Append(r *runs.Run, command string, ok bool, data map[string]any) error {
 		data = map[string]any{}
 	}
 	path := r.Path(runs.LedgerFile)
-	headPath := path + ".head"
 	return lock.With(path, func() error {
-		var h head
-		if err := fsx.ReadJSON(headPath, &h); err != nil {
-			if h, err = scanHead(path); err != nil {
-				return err
-			}
+		h, err := scanHead(path)
+		if err != nil {
+			return err
 		}
 		prev := h.Hash
 		if h.Seq == 0 {
@@ -72,10 +69,7 @@ func Append(r *runs.Run, command string, ok bool, data map[string]any) error {
 			f.Close()
 			return kerr.Wrap("io", err)
 		}
-		if err := f.Close(); err != nil {
-			return kerr.Wrap("io", err)
-		}
-		return kerr.Wrap("io", fsx.WriteJSON(headPath, head{Seq: ev.Seq, Hash: fsx.SHA256(line)}))
+		return kerr.Wrap("io", f.Close())
 	})
 }
 

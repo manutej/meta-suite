@@ -23,11 +23,12 @@ func cmdGateG2(e *env, args []string) int {
 	if err != nil {
 		return e.fail(err)
 	}
-	rep, err := gates.G2(r, e.cfg.Lens.Pullback.MinIndependent, e.cfg.Independence.StripPrefixes)
+	rep, err := gates.G2(r, e.cfg.Lens.Pullback.MinIndependent, e.cfg.Independence.StripPrefixes, e.cfg.Gates.G2.InjectionPatterns)
 	if err != nil {
 		return e.failRun(r, "gate G2", err)
 	}
-	summary := "claims " + itoa(rep.Counts.Claims) + ", publishers " + itoa(rep.Counts.IndependenceKeys) + ", problems " + itoa(len(rep.Problems))
+	summary := "claims " + itoa(rep.Counts.Claims) + ", publishers " + itoa(rep.Counts.IndependenceKeys) + ", problems " + itoa(len(rep.Problems)) +
+		", injection_suspect warnings " + itoa(len(rep.Warnings))
 	if !rep.Complete {
 		var parts []string
 		for _, c := range rep.Checks {
@@ -42,7 +43,7 @@ func cmdGateG2(e *env, args []string) int {
 		return e.failRun(r, "gate G2", err)
 	}
 	if err := e.log(r, "gate G2", rep.Verdict == "pass", map[string]any{"verdict": rep.Verdict, "complete": rep.Complete,
-		"problems": len(rep.Problems), "counts": rep.Counts, "inputs_hash": g.InputsHash}); err != nil {
+		"problems": len(rep.Problems), "warnings": len(rep.Warnings), "counts": rep.Counts, "inputs_hash": g.InputsHash}); err != nil {
 		return e.fail(err)
 	}
 	if rep.Verdict != "pass" {
@@ -60,7 +61,11 @@ func cmdGateG6(e *env, args []string) int {
 	}
 	var allow []gates.Allow
 	var r *runs.Run
-	if dir := f.vals["run"]; dir != "" {
+	dir := f.vals["run"]
+	if dir == "" {
+		dir = runs.Find(f.pos[0]) // a file inside a run directory: that run's allowlist and record apply
+	}
+	if dir != "" {
 		if r, err = openRun(dir); err != nil {
 			return e.fail(err)
 		}
@@ -73,8 +78,6 @@ func cmdGateG6(e *env, args []string) int {
 			}
 		}
 		allow = append(allow, brief.VocabAllowlist...)
-	} else if dir := runs.Find(f.pos[0]); dir != "" {
-		r, _ = runs.Open(dir)
 	}
 	for _, t := range strings.Split(f.vals["allow"], ",") {
 		if t = strings.TrimSpace(t); t != "" {
@@ -84,7 +87,7 @@ func cmdGateG6(e *env, args []string) int {
 	for _, p := range f.pos {
 		if st, err := os.Stat(p); err != nil || st.IsDir() {
 			if err == nil {
-				err = kerr.New("usage", "%s is a directory; pass files", p)
+				err = kerr.New("io", "%s is a directory; pass files", p)
 			}
 			return e.failRun(r, "gate G6", kerr.Wrap("io", err))
 		}

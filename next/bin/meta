@@ -1,0 +1,42 @@
+#!/bin/sh
+# meta launcher (meta-suite-next): pick the platform binary next to this script, restore its exec bit,
+# and exec it. Invoke it as `sh <plugin root>/bin/meta …`, never ./bin/meta: unzip tools (Python's zipfile)
+# strip exec bits, and this script restores them. If the folder is mounted noexec, the binary is copied to
+# $TMPDIR and run from there. Never fakes a result: any failure exits 126/127 with a reason on stderr, which
+# the skill reads as kernel=absent (D-049).
+set -u
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || { echo "meta-launcher: cannot resolve bin dir (kernel=absent)" >&2; exit 127; }
+os=$(uname -s 2>/dev/null) || { echo "meta-launcher: uname failed (kernel=absent)" >&2; exit 127; }
+arch=$(uname -m 2>/dev/null) || { echo "meta-launcher: uname -m failed (kernel=absent)" >&2; exit 127; }
+case "$os" in
+  Linux) os=linux ;;
+  Darwin) os=darwin ;;
+  MINGW*|MSYS*|CYGWIN*) os=windows ;;
+  *) echo "meta-launcher: unsupported OS '$os' (kernel=absent)" >&2; exit 127 ;;
+esac
+case "$arch" in
+  x86_64|amd64) arch=amd64 ;;
+  aarch64|arm64) arch=arm64 ;;
+  *) echo "meta-launcher: unsupported arch '$arch' (kernel=absent)" >&2; exit 127 ;;
+esac
+ext=""; [ "$os" = windows ] && ext=.exe
+bin="$dir/meta-$os-$arch$ext"
+[ -f "$bin" ] || { echo "meta-launcher: no binary for $os-$arch at $bin (kernel=absent)" >&2; exit 127; }
+if [ ! -x "$bin" ]; then
+  chmod +x "$bin" 2>/dev/null || echo "meta-launcher: chmod failed on $bin, will try a temp copy" >&2
+fi
+# Probe: the folder may be read-only or mounted noexec. If the binary cannot start, run a copy from TMPDIR,
+# reusing a copy from an earlier call when its bytes match.
+if ! "$bin" version >/dev/null 2>&1; then
+  base=$(basename "$bin")
+  size=$(wc -c < "$bin" | tr -d ' ')
+  tmp="${TMPDIR:-/tmp}/meta-launcher-$(id -u 2>/dev/null || echo u)-$size"
+  if [ ! -x "$tmp/$base" ] || ! cmp -s "$bin" "$tmp/$base"; then
+    mkdir -p "$tmp" && cp "$bin" "$tmp/$base.$$" && chmod +x "$tmp/$base.$$" && mv -f "$tmp/$base.$$" "$tmp/$base" \
+      || { echo "meta-launcher: cannot stage a temp copy in $tmp (kernel=absent)" >&2; exit 126; }
+  fi
+  bin="$tmp/$base"
+  "$bin" version >/dev/null 2>&1 || { echo "meta-launcher: binary will not execute from $dir or $tmp (noexec?) (kernel=absent)" >&2; exit 126; }
+  echo "meta-launcher: $dir is not executable; using temp copy $bin" >&2
+fi
+exec "$bin" "$@"
