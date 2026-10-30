@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/conflicts.schema.json",
+  "title": "Conflicts",
+  "description": "conflicts.json, written by `meta findings verify`: same key, different values, as a disagreement (overlapping or undated periods) or a change over time (disjoint periods). Candidates, never resolved by the kernel (D-087, D-097). schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^C-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "enum": [
+              "disagreement",
+              "changed_over_time"
+            ],
+            "description": "disagreement: different values for overlapping (or undated) periods, both findings contested. changed_over_time: different values for disjoint periods, sides in time order (D-097)."
+          },
+          "key": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "subject": {
+                "type": "string",
+                "minLength": 1
+              },
+              "relation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "object": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subject",
+              "relation",
+              "object"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sides": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "finding_id": {
+                  "type": "string",
+                  "pattern": "^F-[0-9a-f]{12}$"
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "unit": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "as_of": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "claim_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                  },
+                  "minItems": 1
+                },
+                "independence_keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1
+                },
+                "regions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "finding_id",
+                "value",
+                "as_of",
+                "claim_ids",
+                "independence_keys",
+                "regions"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "key",
+          "reason",
+          "sides"
+        ]
+      }
+    }
+  },
+  "required": [
+    "conflicts"
+  ]
+}

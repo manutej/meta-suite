@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/sectionmap.schema.json",
+  "title": "SectionMap",
+  "description": "A2 section map: each section anchored to findings. Tags index findings, they do not partition them: one finding id may sit in a reasoning-order section and in an index section (contested, single_source, uncertain). how_checked and assumptions sections may have no finding ids (D-088). Spec: spec/v2/03-architecture.md, Core types. schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "tag": {
+            "enum": [
+              "main",
+              "contested",
+              "uncertain",
+              "single_source",
+              "how_checked",
+              "assumptions"
+            ]
+          },
+          "finding_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "finding_ids"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "sections"
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/cover.schema.json",
+  "title": "Cover",
+  "description": "D1 cover: decomposition tree, universe, regions, relation vocabulary. overlaps/triple_overlaps are computed by the kernel. Spec: spec/v2/03-architecture.md, Core types. schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "universe": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "tree": {
+      "$ref": "#/$defs/node"
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "contested": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "elements"
+        ]
+      },
+      "minItems": 1
+    },
+    "overlaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "regions",
+          "elements"
+        ]
+      }
+    },
+    "triple_overlaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "regions",
+          "elements"
+        ]
+      }
+    },
+    "relation_vocab": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "value_type": {
+            "enum": [
+              "qualitative",
+              "numeric",
+              "relative"
+            ]
+          },
+          "unit_dimension": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "value_type"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "value_type": {
+                  "enum": [
+                    "numeric",
+                    "relative"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "unit_dimension"
+              ]
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    },
+    "labels": {
+      "type": "array",
+      "description": "Canonical entity labels shared by every gatherer (D1); `meta claim add` notes a subject or object outside this list (D-088).",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "universe",
+    "tree",
+    "regions",
+    "relation_vocab"
+  ],
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "answer_type": {
+          "enum": [
+            "fact",
+            "number",
+            "list",
+            "judgment"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "question",
+        "answer_type",
+        "children"
+      ]
+    }
+  }
+}

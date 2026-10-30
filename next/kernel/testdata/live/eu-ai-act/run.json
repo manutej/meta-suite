@@ -1,0 +1,460 @@
+{
+  "run_id": "01M651YMAFM8EPYHJ0AB13C2WQ",
+  "created_at": "2026-10-30T00:04:30.671Z",
+  "brief_hash": "bb73c42561b6f2eca66e711a21ac8b46a71cfba7f31f727420f67a21d33b61fd",
+  "mode": "deep_narrow",
+  "surface": "claude-code-subagent",
+  "kernel": "present",
+  "kernel_version": "2.0.0-alpha.1",
+  "model_map": {
+    "gather-commission-guidance": "claude-opus-5-5",
+    "gather-enforcement-standards": "claude-opus-5-5",
+    "gather-legal-text": "claude-opus-5-5",
+    "gather-legislative-change": "claude-opus-5-5",
+    "gather-practitioner-analysis": "claude-opus-5-5",
+    "gather-stakeholder-positions": "claude-opus-5-5",
+    "main": "claude-opus-5-5",
+    "regather-legal-text": "claude-opus-5-5",
+    "regather-practitioner-analysis": "claude-opus-5-5",
+    "reviewer-1": "claude-opus-5-5"
+  },
+  "prompt_hashes": {
+    "A1@main": "c400ce8cb9a289cb5c8d0a27ef0f51b668a8a84908943719d26400f705fbafc1",
+    "A2@main": "ef36b3b073779f55cb5b093e629c005f97ac046caf77afcbec9ca75a9da3bb7e",
+    "D1@main": "c0a9d2ea7d5e54dcc4da1acadcb47f0546beb343d4be0edf91e7d1aeba4ae291",
+    "D2:commission-guidance@gather-commission-guidance": "f25d0e9a5c2d00e5fa209f9a7fb9a136e3bfbfd4c891223cad875562fd65dcb2",
+    "D2:enforcement-standards@gather-enforcement-standards": "9ec202399bba146103215830c78289da538a8b42b540cf1bc8e338ccf0d21164",
+    "D2:legal-text@gather-legal-text": "03148c4c2825c42621ce129aec988599ca2a864ccfba904804ba181a0f4fcd1d",
+    "D2:legal-text@regather-legal-text": "433b88ae452cf65795c7d0e09fe08f16a762ba7724e92f236c099ade8b54dd8b",
+    "D2:legislative-change@gather-legislative-change": "4df1424a7e4df4f09b5a620b9237f29b450e2d2fe092b13e544309d7c99bf645",
+    "D2:practitioner-analysis@gather-practitioner-analysis": "29076810a6d3d9233cab618d6cb89a164b866779ee632285178c8aa1bf553117",
+    "D2:practitioner-analysis@regather-practitioner-analysis": "4afb38b6f438662b6ba0ec84eac257619cdb95d254db3bedd60a08b62d1720b6",
+    "D2:stakeholder-positions@gather-stakeholder-positions": "99718b88e539b2fcc99f99911937e05fd80cdec9b9b24d7638618d0386a5efc1",
+    "D3@main": "a25b3b64d61a93855d7413230e5a136bcf81e25b510fb1e33dfca19d9739facc",
+    "I1@main": "bb847e44ef33933992279209c5e2cc2c4ae9ee9fb8abf43a221703382dc1f080",
+    "I2@main": "6cb89a9dd85b2ecd068fc7ee36f7e258d8c53dc237a4209a5154e9dc71056e5c",
+    "L2@main": "3aafc2eccaf0b92d122c30c8e6029d21e67cdc9424dcaf827ed8bb05c1e4f379",
+    "L3@main": "00e077692174539dac50fe6626edaec4f81e208ac9457d74a057c2b88409ac8b",
+    "R1@reviewer-1": "6a44f5a33ca247b0b07fd73159db609e8db69e3e4cce3aa0e826abb9436ed42b"
+  },
+  "config_hash": "5addd5161143f63403821bf7ec65e137a70b1f0522947c262c7ad6115c25577a",
+  "config_source": "embedded:config/defaults.toml",
+  "schema_version": "2.0.0-alpha.1",
+  "playbook_hash": null,
+  "gate_results": [
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:04:30.671Z",
+      "summary": "Brief",
+      "files": [
+        "brief.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:07:12.240Z",
+      "summary": "Spec",
+      "inputs_hash": "a9113d1f8dec726c691fb13ba91cf0a5c2869cb63c773888f53cffd8a9a23ec0",
+      "files": [
+        "spec.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:08:11.615Z",
+      "summary": "Cover",
+      "inputs_hash": "638528fd27d1e492ad08d216ce1079be3f03e50d8aa3daf2ef3dd499fef13c0e",
+      "files": [
+        "cover.json"
+      ]
+    },
+    {
+      "gate": "G2",
+      "verdict": "pass",
+      "at": "2026-10-30T00:29:55.907Z",
+      "summary": "claims 196, publishers 45, problems 0, injection_suspect warnings 0; not yet checkable: graph_no_orphans_no_unsourced, findings_independent_and_sourced",
+      "inputs_hash": "870342100213a41624e38c716ecffbdf41d78a28190dbca1033ea90fda13d20b",
+      "files": [
+        "claims.jsonl",
+        "claims/gather-commission-guidance.jsonl",
+        "claims/gather-enforcement-standards.jsonl",
+        "claims/gather-legal-text.jsonl",
+        "claims/gather-legislative-change.jsonl",
+        "claims/gather-practitioner-analysis.jsonl",
+        "claims/gather-stakeholder-positions.jsonl",
+        "tokens/01M651YTJBKE65WP10FR886FQN.json",
+        "tokens/01M6523J1RPK5RVC6WJJ1M0RK6.json",
+        "tokens/01M6525C18KZ6WZ0Q1NQSQY4DT.json",
+        "tokens/01M6526QP3468V688HDNDD1S86.json",
+        "tokens/01M6526QQDPGN01553B0MDWY0F.json",
+        "tokens/01M6526QRY38KNNNQRQTNM534F.json",
+        "tokens/01M6526QT6RBX0MWCFYDCCHKR1.json",
+        "tokens/01M6526QV35S448HAJE3YZ9E4T.json",
+        "tokens/01M6526QW0FSEGVWM17RC4QHGR.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:07.094Z",
+      "summary": "RegionGraph",
+      "inputs_hash": "df22a7b1565b452c1971fd9f6c9454e05047864116124a811d55eda23466dad4",
+      "files": [
+        "graph/regions/commission-guidance.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:07.128Z",
+      "summary": "RegionGraph",
+      "inputs_hash": "e6822a6716e3dc3e1935de66af2faf2166c2f35040c41cabb6e8ed8f97500aba",
+      "files": [
+        "graph/regions/enforcement-standards.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:07.164Z",
+      "summary": "RegionGraph",
+      "inputs_hash": "d872aad2e62cf73e60fe47451075743cc7ef134a78c13827e9012b191d82bb0f",
+      "files": [
+        "graph/regions/legal-text.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:07.197Z",
+      "summary": "RegionGraph",
+      "inputs_hash": "cc950fddb7abe0ba0ab32855e8b0b33b66715272cdd3279ea7b1a9816ccf65dd",
+      "files": [
+        "graph/regions/legislative-change.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:07.230Z",
+      "summary": "RegionGraph",
+      "inputs_hash": "5d137be80369548d8d239b90163f82a3cce8bfd40e24203b539697a214c88f0a",
+      "files": [
+        "graph/regions/practitioner-analysis.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:07.264Z",
+      "summary": "RegionGraph",
+      "inputs_hash": "ca7d4766f898bd51c8a03091e69609c51482e29dafae05b71654a3ecfea2e23e",
+      "files": [
+        "graph/regions/stakeholder-positions.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:30:19.986Z",
+      "summary": "DomainGraph",
+      "inputs_hash": "4053654d40645e16eeee4282042631225d5de9de5db8238ca2a6cc8b346a5454",
+      "files": [
+        "graph/merged.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:31:12.959Z",
+      "summary": "ArtifactPlan",
+      "inputs_hash": "4e1ba949973eba5dae49277b4bf0501acfa30c117027363c3cdc2a93620ebef7",
+      "files": [
+        "plan.json"
+      ]
+    },
+    {
+      "gate": "G2",
+      "verdict": "pass",
+      "at": "2026-10-30T00:31:17.476Z",
+      "summary": "claims 196, publishers 45, problems 0, injection_suspect warnings 0",
+      "inputs_hash": "5d850bb38f53e927ed40218f46570e1488b8b4934b5798574718a3f454ffe475",
+      "files": [
+        "claims.jsonl",
+        "claims/gather-commission-guidance.jsonl",
+        "claims/gather-enforcement-standards.jsonl",
+        "claims/gather-legal-text.jsonl",
+        "claims/gather-legislative-change.jsonl",
+        "claims/gather-practitioner-analysis.jsonl",
+        "claims/gather-stakeholder-positions.jsonl",
+        "findings.jsonl",
+        "graph/merged.json",
+        "graph/regions/commission-guidance.json",
+        "graph/regions/enforcement-standards.json",
+        "graph/regions/legal-text.json",
+        "graph/regions/legislative-change.json",
+        "graph/regions/practitioner-analysis.json",
+        "graph/regions/stakeholder-positions.json",
+        "tokens/01M651YTJBKE65WP10FR886FQN.json",
+        "tokens/01M6523J1RPK5RVC6WJJ1M0RK6.json",
+        "tokens/01M6525C18KZ6WZ0Q1NQSQY4DT.json",
+        "tokens/01M6526QP3468V688HDNDD1S86.json",
+        "tokens/01M6526QQDPGN01553B0MDWY0F.json",
+        "tokens/01M6526QRY38KNNNQRQTNM534F.json",
+        "tokens/01M6526QT6RBX0MWCFYDCCHKR1.json",
+        "tokens/01M6526QV35S448HAJE3YZ9E4T.json",
+        "tokens/01M6526QW0FSEGVWM17RC4QHGR.json",
+        "tokens/01M653DGKYQ6KPRZJMYVW4S2D3.json",
+        "tokens/01M653DX68JRBMDRSQFJ08EG5W.json",
+        "tokens/01M653E282801M7RXMKSE554BE.json",
+        "tokens/01M653FGZF558G37CE54HM6B6W.json",
+        "tokens/01M653FNCPDF6GRB1X5427J58G.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:40:13.842Z",
+      "summary": "SectionMap",
+      "inputs_hash": "fab69639d557729e4b91e384d7d11f82d484a7314c1fc7c8cc32998271ec5f35",
+      "files": [
+        "section_map.json"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:40:17.206Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "d92753b44ba66e8c17726b4f4d15e7017404863805f998d96348ed7598efc7d9",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:41:05.874Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "ddab17336a61112de7c64985b0711f9726da5bb0883bdd86b32c5dfb3fce0a2c",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:41:34.419Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "1976c982783d5c5f98918a250577888f368f1e8ec9039d359a2f8e05468d9cdf",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:41:34.856Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "4810d141c57587d3afefaff7480b3a09e5bbb4f7f71a3d2348e6fdff6485caa4",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:41:35.302Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "ac9afea4e5fa1618a7d58e4e67ea6e1211a467bfc684d2217d9816a91bc1b3b2",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:43:21.125Z",
+      "summary": "EditScript",
+      "inputs_hash": "fd33a264ba13887c14b2f22696af0b7cd50163d8ba14798c29ea880ebcaa5f27",
+      "files": [
+        "review/edits.1.json"
+      ]
+    },
+    {
+      "gate": "G1",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:01.224Z",
+      "summary": "SectionMap",
+      "inputs_hash": "b54c279c7bff333f61e6d3a5e6c5a731e79a1e218650691181a79f9767c0112a",
+      "files": [
+        "section_map.json"
+      ]
+    },
+    {
+      "gate": "G2",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:01.294Z",
+      "summary": "claims 201, publishers 49, problems 0, injection_suspect warnings 0",
+      "inputs_hash": "8d6acfbe8eec9efcea74755792dd241161ef3e5773af337877250a4901d2c013",
+      "files": [
+        "claims.jsonl",
+        "claims/gather-commission-guidance.jsonl",
+        "claims/gather-enforcement-standards.jsonl",
+        "claims/gather-legal-text.jsonl",
+        "claims/gather-legislative-change.jsonl",
+        "claims/gather-practitioner-analysis.jsonl",
+        "claims/gather-stakeholder-positions.jsonl",
+        "claims/regather-legal-text.jsonl",
+        "claims/regather-practitioner-analysis.jsonl",
+        "findings.jsonl",
+        "graph/merged.json",
+        "graph/regions/commission-guidance.json",
+        "graph/regions/enforcement-standards.json",
+        "graph/regions/legal-text.json",
+        "graph/regions/legislative-change.json",
+        "graph/regions/practitioner-analysis.json",
+        "graph/regions/stakeholder-positions.json",
+        "tokens/01M651YTJBKE65WP10FR886FQN.json",
+        "tokens/01M6523J1RPK5RVC6WJJ1M0RK6.json",
+        "tokens/01M6525C18KZ6WZ0Q1NQSQY4DT.json",
+        "tokens/01M6526QP3468V688HDNDD1S86.json",
+        "tokens/01M6526QQDPGN01553B0MDWY0F.json",
+        "tokens/01M6526QRY38KNNNQRQTNM534F.json",
+        "tokens/01M6526QT6RBX0MWCFYDCCHKR1.json",
+        "tokens/01M6526QV35S448HAJE3YZ9E4T.json",
+        "tokens/01M6526QW0FSEGVWM17RC4QHGR.json",
+        "tokens/01M653DGKYQ6KPRZJMYVW4S2D3.json",
+        "tokens/01M653DX68JRBMDRSQFJ08EG5W.json",
+        "tokens/01M653E282801M7RXMKSE554BE.json",
+        "tokens/01M653FGZF558G37CE54HM6B6W.json",
+        "tokens/01M653FNCPDF6GRB1X5427J58G.json",
+        "tokens/01M65439AV5QM80MKWYYKJHM80.json",
+        "tokens/01M6547048ECGE83BQK5KWFPP1.json",
+        "tokens/01M65470585S9JKWF551F8NTSP.json"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:01.742Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "be6e1c3792777a9c88bdd25aba1e4db5c32a16b4aaaa477ff66a79fbdf3df89f",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:02.147Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "5d306391de1cf37b65a04a488231c1e3e6af62c5250c87fa07160bd719bbb69a",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:02.593Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "b5bac230ab6334c3a222bb68b09ae334dd46c3763c19e87fe4442810f2d00ac1",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:22.055Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "321b66bd74bfd4f3ad7cef7cc083b4f74bc3025ca685d685dd0f8ad3b2dc4126",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:22.566Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "29ea8bebc44ce467bd109eb90a6ed8d47454d54db46dc427fac3263c7c75fdbb",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:37.956Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "69b1c5e78fb5aa9c5f16293823a76eb1dc90e96561f662c346d6c5166388b62a",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G6",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:38.361Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed",
+      "inputs_hash": "644b5c4fc5ca3e1f80fe2869acc8e49d7cd17660f3b04dc7df6d0f2fb412c9ea",
+      "files": [
+        "artifact/index.html"
+      ]
+    },
+    {
+      "gate": "G2",
+      "verdict": "pass",
+      "at": "2026-10-30T00:45:38.433Z",
+      "summary": "claims 201, publishers 49, problems 0, injection_suspect warnings 0",
+      "inputs_hash": "8d6acfbe8eec9efcea74755792dd241161ef3e5773af337877250a4901d2c013",
+      "files": [
+        "claims.jsonl",
+        "claims/gather-commission-guidance.jsonl",
+        "claims/gather-enforcement-standards.jsonl",
+        "claims/gather-legal-text.jsonl",
+        "claims/gather-legislative-change.jsonl",
+        "claims/gather-practitioner-analysis.jsonl",
+        "claims/gather-stakeholder-positions.jsonl",
+        "claims/regather-legal-text.jsonl",
+        "claims/regather-practitioner-analysis.jsonl",
+        "findings.jsonl",
+        "graph/merged.json",
+        "graph/regions/commission-guidance.json",
+        "graph/regions/enforcement-standards.json",
+        "graph/regions/legal-text.json",
+        "graph/regions/legislative-change.json",
+        "graph/regions/practitioner-analysis.json",
+        "graph/regions/stakeholder-positions.json",
+        "tokens/01M651YTJBKE65WP10FR886FQN.json",
+        "tokens/01M6523J1RPK5RVC6WJJ1M0RK6.json",
+        "tokens/01M6525C18KZ6WZ0Q1NQSQY4DT.json",
+        "tokens/01M6526QP3468V688HDNDD1S86.json",
+        "tokens/01M6526QQDPGN01553B0MDWY0F.json",
+        "tokens/01M6526QRY38KNNNQRQTNM534F.json",
+        "tokens/01M6526QT6RBX0MWCFYDCCHKR1.json",
+        "tokens/01M6526QV35S448HAJE3YZ9E4T.json",
+        "tokens/01M6526QW0FSEGVWM17RC4QHGR.json",
+        "tokens/01M653DGKYQ6KPRZJMYVW4S2D3.json",
+        "tokens/01M653DX68JRBMDRSQFJ08EG5W.json",
+        "tokens/01M653E282801M7RXMKSE554BE.json",
+        "tokens/01M653FGZF558G37CE54HM6B6W.json",
+        "tokens/01M653FNCPDF6GRB1X5427J58G.json",
+        "tokens/01M65439AV5QM80MKWYYKJHM80.json",
+        "tokens/01M6547048ECGE83BQK5KWFPP1.json",
+        "tokens/01M65470585S9JKWF551F8NTSP.json"
+      ]
+    }
+  ],
+  "usage": {
+    "source": "estimated",
+    "calls": 0
+  },
+  "wall_ms": 0,
+  "seed": 2417771318472291326
+}

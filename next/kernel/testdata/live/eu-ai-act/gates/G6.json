@@ -1,0 +1,10 @@
+{
+  "gate": "G6",
+  "verdict": "pass",
+  "files": [
+    "artifact/index.html"
+  ],
+  "hits": [],
+  "allowed": [],
+  "allowlist": []
+}

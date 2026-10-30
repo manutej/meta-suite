@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/finding.schema.json",
+  "title": "Finding",
+  "description": "A finding; slice 1 emits kinds verified and single_source from `meta findings verify`. Spec: spec/v2/03-architecture.md, Core types. schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": [
+        "verified",
+        "single_source",
+        "exception",
+        "tension",
+        "obstruction",
+        "profile_trait",
+        "coarse_model",
+        "uncertain"
+      ]
+    },
+    "sides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "label",
+          "claim_ids"
+        ]
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "supporting": {
+      "type": "array",
+      "description": "Claims that support this finding without being its primary evidence: same value, a coarser or undated as_of that contains this finding's window (D-097). Counted toward independent publishers, deduplicated by independence key. Each claim is primary evidence in exactly one finding.",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+      },
+      "uniqueItems": true
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "confidence": {
+      "enum": [
+        "settled",
+        "single_source",
+        "contested",
+        "uncertain"
+      ]
+    },
+    "plain_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "subject",
+        "relation",
+        "object"
+      ]
+    },
+    "value": {
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "as_of": {
+      "type": "string",
+      "minLength": 4,
+      "description": "The as_of window the finding's claims share (lens.pullback.as_of_window); absent for undated claims (D-087)."
+    },
+    "independence_keys": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "evidence",
+    "confidence",
+    "plain_text"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "tension"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "sides"
+        ]
+      }
+    }
+  ]
+}

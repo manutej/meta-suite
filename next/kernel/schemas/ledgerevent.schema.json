@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manutej/meta-suite/next/kernel/schemas/ledgerevent.schema.json",
+  "title": "LedgerEvent",
+  "description": "One line of ledger.jsonl (S1). Append-only. Spec: spec/v2/03-architecture.md, Core types. schema_version 2.0.0-alpha.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "seq": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "data": {
+      "type": "object"
+    },
+    "prev": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{64}|genesis)$"
+    }
+  },
+  "required": [
+    "seq",
+    "at",
+    "run",
+    "command",
+    "ok",
+    "data",
+    "prev"
+  ]
+}

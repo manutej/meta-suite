@@ -131,6 +131,28 @@ Where a surface exposes no usage data, the run records call counts and is labell
 - **Logging.** Wall time and turn count are ledger fields (M10).
 - **Speed is a ship criterion** ([eval](05-eval.md)), not a hope.
 
+## Glossary: two things called "programmatic tool calling" (D-076)
+
+| Term in this spec | Means | Language |
+|---|---|---|
+| **Scripted kernel calls** (what v2 uses) | The agent drives the `meta` CLI from bash or short scripts, so many operations happen per model turn. This works on every surface that can run the binary. | Go (kernel), plus any shell |
+| **API programmatic tool calling** | The Claude API feature in which the model writes Python inside Anthropic's code-execution container to call tools. It has no network, short cells and a pending-call timeout, and it is not ZDR-eligible. | Python (orchestration); tool handlers can be any language |
+
+VR-09 and D-059 mean the first. The second is an optional runtime for the eval harness or for Stitch, never a v2.0 dependency.
+
+## Host-controlled levers (D-077)
+
+On product surfaces (the Claude app, Claude Code, Cowork), the **host** sets model effort, prompt caching, thinking display and, on some surfaces, the subagent model. A skill can only make itself cache-friendly (stable prefixes, ops loaded in a fixed order) and request a subagent model where the surface allows it.
+
+| Lever | Product surfaces | Eval harness (API / `claude -p`) |
+|---|---|---|
+| Effort (Opus 5.5 default `medium`) | host decides; record it if visible | `fast` → low, `deep_narrow` → high, `deep_broad` → max; recorded per run |
+| Prompt caching | host decides; skill keeps prefixes stable | cache breakpoints after tools and system; `cache_read` recorded |
+| Subagent model (cheap gather) | where the Agent tool accepts a model, else same model (recorded) | per-role model map |
+| Thinking | always on (cannot be disabled on Opus 5.5); never parsed by the kernel | same |
+
+**Eval rule:** the headline arms run with **product-default levers**. Tuned-lever results are reported separately as `v2-tuned`, so no claim depends on settings users don't have.
+
 ## Kernel CLI (`meta`) → atoms
 
 | Command | Atom |
@@ -141,13 +163,14 @@ Where a surface exposes no usage data, the run records call counts and is labell
 | `meta palette` | palette generation and contrast audit, ported from v1's `dict_color.py` into Go (D-004); DS1 calls it |
 | `meta validate <file>` | G1 |
 | `meta claim add` (stdin JSON; returns ULID or a schema error) | D2, G1 |
+| `meta claim retract <run_dir> --id <ULID> --reason <text>` (append-only tombstone; later commands skip the claim, D-087) | D2, L2, S1 |
 | `meta stage begin <stage> [--region r]` → stage token (env) | O1 |
 | `meta sample issue \| record \| aggregate \| run` (batch) | J1 |
 | `meta gate G2\|G3\|G4\|G5\|G6\|G7 <run_dir>` | gates |
 | `meta graph build \| shape <run_dir>` | D3 |
 | `meta interface declare \| merge <run_dir>` | L3 (refuses a merge without an interface) |
 | `meta delta <run_dir>` | R2 aggregation |
-| `meta ledger append \| show <run_dir>` | S1 |
+| `meta ledger append \| show <run_dir>` (append reads stdin only with `--stdin`, D-087) | S1 |
 | `meta playbook propose \| list` | S2 |
 | `meta loop next <run_dir>` | O1 |
 | `meta sheaf analyze <in.json> --out <report.json>` | the standalone gluing check (D-048): the same engine as G3 layers 1–3, usable on any JSON sheaf without running the pipeline |
@@ -167,6 +190,11 @@ The capability matrix is resolved in the M0 spike:
 | subagents (blind contexts) | yes | to verify | yes | varies |
 | network for gather | yes | yes | yes | varies |
 | headless browser (G7) | **verified**: Chrome for Testing + Playwright in the cloud sandbox | to verify (`meta-probe` step 6) | to verify | no |
+| effort control | host-set | host-set | host-set | — |
+| subagent model choice | yes (Agent `model`) | to verify | to verify | — |
+| web search tool for D2 | yes | yes | yes | varies |
+| private data (Notion, Gmail) from the sandbox | **no**: cloud egress is blocked (Notion no connection, Gmail 403); local Claude Code works | via connectors only | local | — |
+| max concurrent subagents | 20 (Claude Code docs) | to verify | to verify | — |
 | cross-family judge | via eval harness only | no | no | — |
 | eval harness | `claude --bare -p … --output-format json`. Tokens are taken from `modelUsage` (top-level `usage` excludes subagents); dollars are estimates unless reconciled | — | — | — |
 

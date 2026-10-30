@@ -1,0 +1,1 @@
+{"region":"r1","objects":[{"id":"r1:entity-a","kind":"entity","labels":["entity-a"]},{"id":"r1:entity-b","kind":"entity","labels":["entity-b"]}],"morphisms":[{"id":"r1:m1","src":"r1:entity-a","dst":"r1:entity-b","relation_type":"has_part","claim_ids":[]}],"shape_metrics":{"hub_concentration":0.5,"longest_chain":1,"two_sidedness":1,"temporal_density":0}}

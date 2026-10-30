@@ -1,0 +1,1 @@
+{"objective":"o","slots":[{"name":"time_window","type":"date_range","required":true,"origin":"stated"}],"constraints":[{"text":"public sources only","origin":"default"}],"success_criteria":[{"criterion":"every sub-question has a finding","satisfied_by":"verified"},{"criterion":"every claim traces to a source","satisfied_by":"G2"}]}

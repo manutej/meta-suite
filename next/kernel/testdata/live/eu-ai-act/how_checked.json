@@ -1,0 +1,1035 @@
+{
+  "run_id": "01M651YMAFM8EPYHJ0AB13C2WQ",
+  "generated_at": "2026-10-30T00:45:37.990Z",
+  "mode": "deep_narrow",
+  "kernel": "present",
+  "config_hash": "5addd5161143f63403821bf7ec65e137a70b1f0522947c262c7ad6115c25577a",
+  "schema_version": "2.0.0-alpha.1",
+  "rule": "A point counts as verified only when at least 2 independent publishers state it.",
+  "min_independent": 2,
+  "counts": {
+    "claims": 201,
+    "sources": 65,
+    "independent_sources": 49,
+    "regions_planned": 6,
+    "regions_gathered": 6,
+    "regions_not_gathered": [],
+    "claims_by_region": {
+      "commission-guidance": 38,
+      "enforcement-standards": 24,
+      "legal-text": 38,
+      "legislative-change": 40,
+      "practitioner-analysis": 38,
+      "stakeholder-positions": 23
+    },
+    "findings": 103,
+    "verified": 73,
+    "single_source": 30,
+    "contested_findings": 6,
+    "conflicts": 3,
+    "shared_entities": 19,
+    "regions_combined": true,
+    "unit_conversions": 0,
+    "dated_claims": 13,
+    "deviations": 42,
+    "deviations_by_stage": {
+      "A1": 2,
+      "A2": 8,
+      "D1": 3,
+      "D2": 14,
+      "D3": 1,
+      "I1": 3,
+      "I2": 3,
+      "L2": 2,
+      "R1": 5,
+      "S1": 1
+    }
+  },
+  "gates": [
+    {
+      "gate": "G1",
+      "name": "Every record matches its declared format",
+      "status": "passed",
+      "summary": "13 file(s) checked, and every claim was checked as it was recorded",
+      "files": [
+        "brief.json",
+        "cover.json",
+        "graph/merged.json",
+        "graph/regions/commission-guidance.json",
+        "graph/regions/enforcement-standards.json",
+        "graph/regions/legal-text.json",
+        "graph/regions/legislative-change.json",
+        "graph/regions/practitioner-analysis.json",
+        "graph/regions/stakeholder-positions.json",
+        "plan.json",
+        "review/edits.1.json",
+        "section_map.json",
+        "spec.json"
+      ]
+    },
+    {
+      "gate": "G2",
+      "name": "Every statement traces to a named source, and independent sources really differ",
+      "status": "passed",
+      "at": "2026-10-30T00:45:01.294Z",
+      "summary": "claims 201, publishers 49, problems 0, injection_suspect warnings 0"
+    },
+    {
+      "gate": "G3",
+      "name": "Overlapping parts of the research agree with each other",
+      "status": "unchecked",
+      "reason": "not part of this build"
+    },
+    {
+      "gate": "G4",
+      "name": "Answers built from parts match the answer to the whole question",
+      "status": "unchecked",
+      "reason": "not part of this build"
+    },
+    {
+      "gate": "G5",
+      "name": "The plan still matches what was asked",
+      "status": "unchecked",
+      "reason": "not part of this build"
+    },
+    {
+      "gate": "G6",
+      "name": "No internal jargon reaches the reader",
+      "status": "passed",
+      "at": "2026-10-30T00:45:37.956Z",
+      "summary": "0 hit(s) in 1 file(s), 0 allowed"
+    },
+    {
+      "gate": "G7",
+      "name": "The page renders, reads and works on phone and desktop",
+      "status": "unchecked",
+      "reason": "not part of this build"
+    }
+  ],
+  "gates_passed": 3,
+  "gates_failed": 0,
+  "gates_unchecked": 4,
+  "summary": [
+    "201 statements were gathered from 65 sources, published by 49 independent publishers.",
+    "The question was split into 6 parts; 6 of them returned evidence.",
+    "73 points are verified (a point counts as verified only when at least 2 independent publishers state it), 30 rest on a single source.",
+    "3 points are contested where sources disagree; both sides are shown and no winner is picked.",
+    "Checks: 3 passed, 0 failed, 4 not run.",
+    "The process departed from its plan in 42 places, each logged with a reason."
+  ],
+  "limits": [
+    "Disagreements are listed, not resolved: weighing them is left to the reader."
+  ],
+  "deviations": [
+    {
+      "seq": 4,
+      "at": "2026-10-30T00:06:57.025Z",
+      "stage": "I1",
+      "note": "Ran stage begin I1 after run init (op order requires it: no run dir exists before init), so the I1 token is issued after the Brief was validated and written; it stamps nothing. Suggest: let run init issue the I1 token or drop I1 stage begin. Owner: skill."
+    },
+    {
+      "seq": 5,
+      "at": "2026-10-30T00:06:57.065Z",
+      "stage": "I1",
+      "note": "Stakes are high (legal standing) and some assumptions are high-stakes but none costly to redo, so no question was asked (also no user reachable from this runner)."
+    },
+    {
+      "seq": 6,
+      "at": "2026-10-30T00:06:57.103Z",
+      "stage": "S1",
+      "note": "meta ledger append blocks forever when stdin is an open, empty, non-tty pipe (it waits for the optional JSON object). Workaround: </dev/null. Suggest: only read stdin when it is not a terminal AND has data, or require an explicit --stdin flag. Owner: kernel."
+    },
+    {
+      "seq": 7,
+      "at": "2026-10-30T00:06:57.135Z",
+      "stage": "I1",
+      "note": "TMPDIR unset; brief drafted at /tmp/meta-lens-brief.json per the op's fallback, outside the run dir; it is not preserved with the run except as the kernel's brief.json copy. Owner: skill (could draft into cwd)."
+    },
+    {
+      "seq": 11,
+      "at": "2026-10-30T00:07:19.674Z",
+      "stage": "I2",
+      "note": "I2 says record scope in assumptions.md only; the Spec schema has a 'scope' field and the kernel has 'meta run scope <run> narrow|broad' which the skill never mentions. Did all three. Suggest: I2 step 2 should call meta run scope and set spec.scope. Owner: skill."
+    },
+    {
+      "seq": 12,
+      "at": "2026-10-30T00:07:19.705Z",
+      "stage": "I2",
+      "note": "Spec success_criteria.satisfied_by has no value for 'disagreements shown both-sided' (findings verify emits conflicts/confidence=contested, but no 'contested' or 'conflict' enum); used 'uncertain'. 'Every leaf has a finding' mapped to single_source as the weakest finding kind. Owner: kernel (add contested/coverage enum) or skill (name allowed values)."
+    },
+    {
+      "seq": 13,
+      "at": "2026-10-30T00:07:19.733Z",
+      "stage": "I2",
+      "note": "meta validate prints the Spec hash but does not write it into spec.json and run.json has no spec_hash; the op says 'the kernel computes it' without saying where it lands. Owner: kernel."
+    },
+    {
+      "seq": 16,
+      "at": "2026-10-30T00:08:30.259Z",
+      "stage": "D1",
+      "note": "D1 step 6 says to mark contested regions in probes.json, whose stated shape {region_id:[question]} has no slot for it; the Cover schema has regions[].contested. Marked contested in cover.json instead. Owner: skill."
+    },
+    {
+      "seq": 17,
+      "at": "2026-10-30T00:08:30.299Z",
+      "stage": "D1",
+      "note": "Relation vocab needs a currency unit dimension for fines; config has no currency table ('currencies are not converted'). Declared unit_dimension 'currency' and unit 'EUR'; kernel will keep it as given. Owner: kernel (accept a declared non-convertible dimension)."
+    },
+    {
+      "seq": 18,
+      "at": "2026-10-30T00:08:30.337Z",
+      "stage": "D1",
+      "note": "Verification needs identical normalized subject+relation+object across publishers, but D1/D2 give gatherers no shared label list ('plainest standard label' only). Added a canonical label glossary to every D2 brief so independent regions can agree on keys. Owner: skill (D1 should emit a label glossary)."
+    },
+    {
+      "seq": 25,
+      "at": "2026-10-30T00:08:56.481Z",
+      "stage": "D2",
+      "note": "No Agent/Task tool exposed to this runner (only TaskStop/SendMessage), so D2 regions ran sequentially in the main thread under their own tokens; 'gathering was not isolated' added to assumptions. Contested/uncontested model split impossible (one model). Owner: host/skill (skill fallback worked as written)."
+    },
+    {
+      "seq": 26,
+      "at": "2026-10-30T00:08:56.513Z",
+      "stage": "D2",
+      "note": "D2 subagent brief template has no slot for the canonical label glossary; added it to each D2-<r>.md prompt file. Owner: skill."
+    },
+    {
+      "seq": 63,
+      "at": "2026-10-30T00:16:54.486Z",
+      "stage": "D2",
+      "note": "Kernel bug: claim add notes 'unit \"%\" is not in the canonical-unit table' although % is units.ratio canonical; claims.go Normalize returns early without setting Normalized when unit==canonical, and claim add treats Normalized==nil as unknown. Message is false; data is fine. Owner: kernel."
+    },
+    {
+      "seq": 64,
+      "at": "2026-10-30T00:16:54.516Z",
+      "stage": "D2",
+      "note": "Source fetching: WebFetch on URLs built by hand (artificialintelligenceact.eu/article/99, /25, /3) was blocked by the host permission layer; only search-surfaced URLs could be opened, so primary-text coverage was via mirrors (springlex.eu, ai-act-service-desk.ec.europa.eu). Owner: host (note for skill: D2 brief should say 'reach primary text via search results')."
+    },
+    {
+      "seq": 143,
+      "at": "2026-10-30T00:20:19.522Z",
+      "stage": "D2",
+      "note": "The 'registration of 6(3)-exempt systems' fact (kept, simplified) had no fitting relation; encoded as has_status=adopted, which loses meaning. Vocab gap. Also the Parliament vote count went into 'states' as text. Owner: skill (D1 vocab guidance) — not a kernel bug."
+    },
+    {
+      "seq": 179,
+      "at": "2026-10-30T00:27:20.605Z",
+      "stage": "D2",
+      "note": "To let the kernel detect the provider-vs-deployer disagreement, has_role was used with a qualitative value (object = the question, value = role), which departs from D1's own vocab description ('No value'). The kernel accepts any value on a qualitative relation; vocab descriptions are not enforced. Owner: kernel (enforce value presence per relation) or skill (D1 should mark which relations carry values)."
+    },
+    {
+      "seq": 204,
+      "at": "2026-10-30T00:28:34.444Z",
+      "stage": "D2",
+      "note": "Counts (e.g. '9 of 27 member states clearly designated') have no count relation in my vocab; encoded as threshold_share 33.3% which is a lossy derived number. Vocab design gap (D1 should include a count relation). Owner: skill."
+    },
+    {
+      "seq": 205,
+      "at": "2026-10-30T00:28:34.473Z",
+      "stage": "D2",
+      "note": "Same-fact claims with different as_of dates (no fines: as of 2 Aug vs 26 Oct 2026) share a key; kernel agreement ignores as_of, so they merge as verified though they cover different windows. Owner: kernel (consider as_of in agreement or flag spread)."
+    },
+    {
+      "seq": 206,
+      "at": "2026-10-30T00:28:44.704Z",
+      "stage": "D2",
+      "note": "Gatherer error (mine): claim 'AI Act fines imposed / no fines reported as of late October 2026' attributed to wsgrdataadvisor.com (dated 2 Aug 2026), which only supports 'no actions reported on 2 Aug'. Claims are append-only and hand edits are forbidden, so the resulting finding will be left off the page and listed under Known limits. Owner: kernel (need a claim retract command, e.g. meta claim retract <id> --reason)."
+    },
+    {
+      "seq": 230,
+      "at": "2026-10-30T00:29:51.053Z",
+      "stage": "D2",
+      "note": "Partial-support claim (mine): theregister.com reports ~50 signatories of a 110+-member coalition asking for a two-year delay; it was recorded on the same key as IAPP's 'over 110 EU businesses lobbied for a two-year pause'. Loosely supported; the page should not lean on '110' as verified. Owner: skill (gatherer discipline)."
+    },
+    {
+      "seq": 233,
+      "at": "2026-10-30T00:29:55.966Z",
+      "stage": "D2",
+      "note": "Run folder has no gates/ directory; ops say 'meta gate G2 \"$RUN\" > \"$RUN/gates/G2.json\"' which fails in the shell before the kernel runs. Created it by hand. Owner: kernel (run init should create gates/, prompts/, review/, artifact/) or skill (mkdir -p)."
+    },
+    {
+      "seq": 234,
+      "at": "2026-10-30T00:29:56.000Z",
+      "stage": "D2",
+      "note": "prompts/ also missing at run init; I1 says 'write ... to $RUN/prompts/I1.md' with no mkdir. Owner: kernel/skill (same fix)."
+    },
+    {
+      "seq": 235,
+      "at": "2026-10-30T00:30:06.916Z",
+      "stage": "D2",
+      "note": "G2 at the D2 step reports verdict=pass, complete=false, exit 0, while 2 of 3 checks are unchecked; help says an absent part is 'unchecked'. The overall verdict should be 'unchecked' (or 'partial') when complete=false, else D2 reads as passed. Owner: kernel."
+    },
+    {
+      "seq": 244,
+      "at": "2026-10-30T00:30:19.817Z",
+      "stage": "D3",
+      "note": "Label normalization strips outer punctuation, so 'transparency obligations (Article 50)' becomes 'transparency obligations (article 50' (unbalanced paren) in graph labels and interface candidates. Cosmetic, but it leaks into any label shown to readers. Owner: kernel (strip only unbalanced outer punctuation)."
+    },
+    {
+      "seq": 250,
+      "at": "2026-10-30T00:31:02.102Z",
+      "stage": "L2",
+      "note": "coverage.json has no schema type in the kernel (not in meta validate's type list) and no kernel check; it is hand-judged and unvalidated, yet A2 reads it. Owner: kernel (add Coverage type) or skill (state it is unvalidated)."
+    },
+    {
+      "seq": 251,
+      "at": "2026-10-30T00:31:02.132Z",
+      "stage": "L2",
+      "note": "Three findings deliberately left off the page: F-71196fd9e41c (my mis-encoded 'no fines as of late Oct' — one side only supports 2 Aug), F-31926d6e4b1a (loosely supported '110 businesses'), F-8a1814c4e683 (minor). Kernel has no 'exclude finding with reason' mechanism. Owner: kernel."
+    },
+    {
+      "seq": 254,
+      "at": "2026-10-30T00:31:12.986Z",
+      "stage": "A1",
+      "note": "shape_metrics.temporal_density counts only claims with as_of; this run encodes dates as values of applies_from/published_on (per D1 vocab), so a date-heavy timeline question scores 0.08 and the timeline layout never fires. Added a timeline section via the second question type instead. Owner: kernel (count date-valued relations) or skill (D1 vocab should put dates in as_of)."
+    },
+    {
+      "seq": 255,
+      "at": "2026-10-30T00:31:13.020Z",
+      "stage": "A1",
+      "note": "plan.host_type: the host offers a publish-an-artifact tool, but the runner was told to write a local self-contained HTML, so host_type left empty; schema forbids omitting? (empty string accepted). Owner: skill (say 'omit' vs empty)."
+    },
+    {
+      "seq": 259,
+      "at": "2026-10-30T00:33:43.995Z",
+      "stage": "A2",
+      "note": "Rewrote assumptions.md into plain language before rendering: the earlier lines (mine) carried internal names (mode keys, model id) that the page must not show. A2 renders assumptions.md verbatim, so ops that append to it (I2, D2, D3, L3) should be told to write reader-facing prose. Owner: skill."
+    },
+    {
+      "seq": 260,
+      "at": "2026-10-30T00:33:44.026Z",
+      "stage": "D2",
+      "note": "claims' retrieved_at is set at claim-add time (helper stamps now), minutes after the actual fetch; the WebFetch tool does not expose a fetch timestamp. Owner: skill (brief should say retrieval time = log time is acceptable) / host."
+    },
+    {
+      "seq": 261,
+      "at": "2026-10-30T00:33:44.057Z",
+      "stage": "A2",
+      "note": "A2 writes the page to $RUN/artifact/index.html; caller asked for artifact.html. Built at the op path and copied. Owner: none (caller override)."
+    },
+    {
+      "seq": 263,
+      "at": "2026-10-30T00:40:13.874Z",
+      "stage": "A2",
+      "note": "A2 says 'A section with no finding ids is cut', but also requires a how_checked section, which by nature has no finding ids; kept it with an empty list (schema allows). Owner: skill."
+    },
+    {
+      "seq": 264,
+      "at": "2026-10-30T00:40:13.922Z",
+      "stage": "A2",
+      "note": "Coverage shows every leaf has a verified finding, so no 'uncertain' section strictly arises; single_source and uncertain tags were emitted as cross-cutting index sections in section_map while the page stamps those findings in place within reasoning-order sections (one finding id can appear in two sections). Skill does not say whether tags partition findings or index them. Owner: skill."
+    },
+    {
+      "seq": 272,
+      "at": "2026-10-30T00:41:38.201Z",
+      "stage": "A2",
+      "note": "Order seam: A2 step 2 runs 'meta report' before the page exists, step 6 runs G6 after, so how_checked.json (and the page's checks table) shows G6 'not run'. Resolved by render -> G6 -> report -> re-render -> G6 (page text for the G6 row changes, so one extra loop). Suggest: report after G6, or report reads G6 lazily. Owner: skill (reorder) + kernel (report could accept --after G6)."
+    },
+    {
+      "seq": 273,
+      "at": "2026-10-30T00:41:38.234Z",
+      "stage": "A2",
+      "note": "Self-check (overflow/console/targets/screenshots) ran with headless Chromium and was saved to gates/A2.selfcheck.json; it is not a kernel gate, and G7 stays 'unchecked: not part of this build' in how_checked.json. Page states this under Known limits. Owner: kernel (G7 / meta rubric not yet built)."
+    },
+    {
+      "seq": 274,
+      "at": "2026-10-30T00:41:38.269Z",
+      "stage": "A2",
+      "note": "Self-check 'every number traces to the data block': remaining unsourced digits are article numbers (Article 50, 6(3)), dates inside claim labels, '27 member states' and the rule constant '2' in prose. Accepted as non-measurement text. Owner: skill (define which digits count as numbers)."
+    },
+    {
+      "seq": 276,
+      "at": "2026-10-30T00:42:10.288Z",
+      "stage": "R1",
+      "note": "No in-host subagent tool was exposed to this runner; R1 ran as a separate headless 'claude -p' process (fresh context, same model id) in an isolated folder holding only page, shots, spec, findings and how_checked, so blind=true is honest. Skill assumes a host subagent API. Owner: skill (name the CLI fallback)."
+    },
+    {
+      "seq": 277,
+      "at": "2026-10-30T00:42:10.323Z",
+      "stage": "R1",
+      "note": "Caller caps R1 at one applied pass (apply P1/P2 once); deep_narrow config says review_passes=2. Second review pass not run; open items go to Known limits. Owner: none (caller override)."
+    },
+    {
+      "seq": 279,
+      "at": "2026-10-30T00:43:21.178Z",
+      "stage": "R1",
+      "note": "Reviewer routed page-text edits to target_stage D3 (8 of 17) although they are A2 rendering issues; EditScript has no 'page text' stage hint and index.md routes by target_stage literally, which would re-run D3+ for wording fixes. Re-routed page-wording edits to A2. Owner: skill (reviewer brief should define stages in plain terms)."
+    },
+    {
+      "seq": 280,
+      "at": "2026-10-30T00:43:21.214Z",
+      "stage": "R1",
+      "note": "Reviewer mis-cited ids in two rationales (said F-21bdc3f258a0 is the 'deployer' side, it is 'provider'; cited F-3439439cbccb/F-11d86c23447e for the SME 'lower of two' rule, which is F-8a8e2200ba24). Substance of both edits holds; applied on substance. Kernel does not check that EditScript target ids or cited ids exist. Owner: kernel (validate target_id against page/section_map/findings)."
+    },
+    {
+      "seq": 303,
+      "at": "2026-10-30T00:45:37.532Z",
+      "stage": "R1",
+      "note": "Edits were applied once without re-running R1 (caller cap). Routing per index.md would re-run every stage after D2 for the regather edit; D3, L3, L2, A1 (plan unchanged) and A2 were re-run, A1 kept its plan since shape is unchanged. Owner: none."
+    },
+    {
+      "seq": 304,
+      "at": "2026-10-30T00:45:37.563Z",
+      "stage": "A2",
+      "note": "R1 P3 'collapse raw evidence triples' is a real gap: A2 scaffold says level 3 evidence shows 'claim text', which in this kernel is subject/relation/object triples; readers see relation names like 'applies from'. Owner: skill (scaffold should say render claim as publisher + title + date, triple optional)."
+    }
+  ],
+  "sources": [
+    {
+      "locator": "https://adamleonsmith.substack.com/p/is-ai-harder-than-cement-is-the-eu",
+      "publisher": "adamleonsmith.substack.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANTNGZK5X8TZAKB43FN7"
+      ]
+    },
+    {
+      "locator": "https://ai-regulation.com/designation-of-national-competent-authorities-under-the-eu-ai-act/",
+      "publisher": "ai-regulation.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANK5A09RV5P7HTWYJ42Y",
+        "01M653ANMX33YF3PMN3MKPZSC0"
+      ]
+    },
+    {
+      "locator": "https://www.aiacto.eu/en/blog/is-your-saas-using-ai-without-realising-it-obligations-provider-ai-act",
+      "publisher": "aiacto.eu",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538D3QPA1722QKN4QX9NYV",
+        "01M6538DKKT75F4TC6BD6S3DEE"
+      ]
+    },
+    {
+      "locator": "https://www.amnesty.eu/news/eu-ai-omnibus-deal-lawmakers-should-reject-a-rollback-of-ai-safeguards",
+      "publisher": "amnesty.eu",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CT49HMW9VKKXDYMYKFSF",
+        "01M653CT54CAP873YRMPB4FVFS"
+      ]
+    },
+    {
+      "locator": "https://artificialintelligenceact.eu/annex/12/",
+      "publisher": "artificialintelligenceact.eu",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3C96WBFS0948EQBREW6"
+      ]
+    },
+    {
+      "locator": "https://artificialintelligenceact.eu/es/national-implementation-plans",
+      "publisher": "artificialintelligenceact.eu",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANNRXXX97EMBBJM7SEN9",
+        "01M653ANRKD1FC7376CKRKQNTY"
+      ]
+    },
+    {
+      "locator": "https://artificialintelligenceact.eu/gpai-guidelines-overview/",
+      "publisher": "artificialintelligenceact.eu",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S2SZ6DDCNWZJDPRZXP3P",
+        "01M652S2WM4NYWJNQ969E4DD4N",
+        "01M652S2ZR2R29YK0YNHQ1JVMH",
+        "01M652S31GBDQ49139646A2BN0",
+        "01M652S33HT2ZWEQJKK0Z6YACT",
+        "01M652S36D6TD75XPVX02Q465M",
+        "01M653AP5WXXXYDW3FFK6PSN2P"
+      ]
+    },
+    {
+      "locator": "https://artificialintelligenceact.eu/implementation-timeline/",
+      "publisher": "artificialintelligenceact.eu",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MYBDKC1B5CMX0V2BP7RM",
+        "01M652MYDT8NTD11TXVDN9BENR",
+        "01M652MYG3S1SE7610DW5RZKJX",
+        "01M652MYGY2F0MA5MD42FPE3T7",
+        "01M652MYK1BYK0BTYQY6ZF66CQ",
+        "01M652MYKWHQT2EA0233664CEK"
+      ]
+    },
+    {
+      "locator": "https://artificialintelligenceact.eu/modifying-ai-under-the-eu-ai-act/",
+      "publisher": "artificialintelligenceact.eu",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MZ6MJECZBNKK6CV90Y8Q",
+        "01M652MZ8AMWWYMSX3S0Q8Y4FX",
+        "01M652MZATP0MDA9V833MK0FN6",
+        "01M652S2TYSJH8V1DHVBBB8Q2Z",
+        "01M652S2YW1FSW6Q6ZC18MGBWS",
+        "01M653CTG23Q8JBP984KRMT79D"
+      ]
+    },
+    {
+      "locator": "https://btlaw.com/en/insights/alerts/2026/european-commissions-draft-guidelines-on-the-classification-of-high-risk-ai-systems",
+      "publisher": "btlaw.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3R75C907KMDKR94WRYQ",
+        "01M6538DY3F26XRH268X6QNW9H",
+        "01M6538E18X8ADTKN9H0ZX2QQ1"
+      ]
+    },
+    {
+      "locator": "https://bundesnetzagentur.de/EN/Areas/Digitalisation/AI/06_Definitions/start.html",
+      "publisher": "bundesnetzagentur.de",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MZ41JFJY2RXJ9RVN9Q8V"
+      ]
+    },
+    {
+      "locator": "https://ccianet.org/news/2025/06/ai-act-eu-leaders-urged-to-pause-implementation-amid-growing-concerns/",
+      "publisher": "ccianet.org",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CSZ0VKJHK42NHE74YXTF"
+      ]
+    },
+    {
+      "locator": "https://cdp.cooley.com/digital-ai-omnibus-delays-key-deadlines-introduces-new-rules/",
+      "publisher": "cooley.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VHP01MPD2X94H02DNEJV",
+        "01M652VHRYMMDPQBHC1HFARS1D",
+        "01M652VHW09R2PWZTS4KGM85Y1",
+        "01M652VHZYRYDNGBV9HHF4ZH8A",
+        "01M652VJ43XCN8K3XGDRV31S0S",
+        "01M652VJ6JZV54C7S26RS7R7T2",
+        "01M652VJ9F3YDGRREZEJ3DXJV5",
+        "01M652VJB64D6JTECMQFK1FAGJ",
+        "01M652VJFZFXJN1436XP4PFDRT",
+        "01M652VJQHB2G98XATKJJN5Y86",
+        "01M652VJTPATFAC1BGZNXQRFVA"
+      ]
+    },
+    {
+      "locator": "https://www.cuatrecasas.com/en/spain/intellectual-property/art/digital-omnibus-ai-has-been-published",
+      "publisher": "cuatrecasas.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VHPY4ZQZKDPDV6JDEZ9N",
+        "01M652VHT0FAZ8DQP6PPRE8Y64",
+        "01M652VJ10W6E2TCHBSW3DVWGY",
+        "01M652VJ7MH8KF6N408JMK4F68",
+        "01M652VJC2WR9MPBVNX0F73YQQ",
+        "01M652VJPPWFHD4QBWEAW4QTN2"
+      ]
+    },
+    {
+      "locator": "https://www.cullen-international.com/news/2025/09/EU-AI-Act-implementation--Only-a-few-countries-have-designated-AI-Act-enforcement-authorities.html",
+      "publisher": "cullen-international.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANM2ET5Q3HC1XJS76X6V"
+      ]
+    },
+    {
+      "locator": "https://www.cullen-international.com/news/2026/04/National-implementation-of-the-EU-AI-Act--a-snapshot-of-AI-laws--regulatory-bodies-and-penalties.html",
+      "publisher": "cullen-international.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANPJG3FX9GXAKNMHJJC9"
+      ]
+    },
+    {
+      "locator": "https://www.dqsglobal.com/en/about/newsroom/eu-ai-act-parliament-and-council-align-on-postponing-high-risk-ai-obligations",
+      "publisher": "dqsglobal.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANSM5M5HVR51QNYC8WZJ",
+        "01M653ANVJY28B2PCH30YGYAKP",
+        "01M653ANWEY9P1DFYAMZG9NBK8"
+      ]
+    },
+    {
+      "locator": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-25",
+      "publisher": "ec.europa.eu",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MZ5S7ZFKXD7X5TCTX7VV",
+        "01M652MZ7G8KNKM1VWZ08MHJHR",
+        "01M652MZ9JRSKW940KDW3B8NHE",
+        "01M652MZC1K3WPJ22KS2YDHFB4"
+      ]
+    },
+    {
+      "locator": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-4",
+      "publisher": "ec.europa.eu",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3FRZGV17117GVRTM7CA",
+        "01M652S3HEGDHZA67TEB0HCXQ8",
+        "01M652S3K3RFNNHP9B9TZ4GBJF"
+      ]
+    },
+    {
+      "locator": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act",
+      "publisher": "ec.europa.eu",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MYA60TF000K3W2BGRCNK",
+        "01M652MYCH5126M3WA4J94YEK5",
+        "01M652MYF3X93DDAAT3RCAS3MF",
+        "01M652MYHTCQPZH22YSCZ511N7",
+        "01M652VJ22BQXZACDRDG7D00H7",
+        "01M652VJ8JWD2ZQ9NQEA89559E",
+        "01M652VJH1GW9WZKHBGF7P9W7B",
+        "01M653AP7KR9W0PS4NK66NB0Y4"
+      ]
+    },
+    {
+      "locator": "https://www.ecija.com/en/news-and-insights/la-importancia-de-la-alfabetizacion-en-ia-pese-a-la-simplificacion-normativa-del-ria-por-el-digital-omnibus-europeo/",
+      "publisher": "ecija.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VJVW6FTB346R8599W1W4"
+      ]
+    },
+    {
+      "locator": "https://edri.org/our-work/open-letter-european-commission-must-champion-the-ai-act-amidst-simplification-pressure/",
+      "publisher": "edri.org",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CT2J5JCYTSGPWXVS6T8M"
+      ]
+    },
+    {
+      "locator": "https://eucrim.eu/news/edpb-and-edps-warn-against-weakening-ai-act-safeguards/",
+      "publisher": "eucrim.eu",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CT7M1Z3QZQ63DM3ZKNEA",
+        "01M653CT995R6C88J3RRK52MH7",
+        "01M653CTBVASFV9ASDYH3W7D9D",
+        "01M653CTDJ7XVA2A9PYPFQAN6N"
+      ]
+    },
+    {
+      "locator": "https://euperspectives.eu/2025/11/digital-omnibus-splits-eu/",
+      "publisher": "euperspectives.eu",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CT1Q99Q5PCB8XEZB2E3N",
+        "01M653CT3E8EMFWXYVS2GYPEDS",
+        "01M653CT5ZRXKPZ8XZSGSTQJWQ",
+        "01M653CT6TT6D89N6AJG3TJRVK"
+      ]
+    },
+    {
+      "locator": "https://transition-pathways.europa.eu/adv-man/legislation/ai-act-digital-omnibus-high-risk-deadlines-postponed-machinery-carved-out",
+      "publisher": "europa.eu",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VJM0YHZ90W59017MGH0N"
+      ]
+    },
+    {
+      "locator": "https://www.faegredrinker.com/en/insights/publications/2026/6/draft-commission-guidelines-on-high-risk-ai-implications-for-the-workplace",
+      "publisher": "faegredrinker.com",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538DSJSS3Z8PP5ZZ1KRZ75",
+        "01M6538DW44ZEW9FKT780R3P5N",
+        "01M6538E03AFK0M68P15V9Y2HP"
+      ]
+    },
+    {
+      "locator": "https://forkast.news/the-eu-ai-act-hits-in-six-days-the-enforcement-infrastructure-doesnt-exist/",
+      "publisher": "forkast.news",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANQKG5283DJDGB5R6C95"
+      ]
+    },
+    {
+      "locator": "https://www.freevacy.com/news/euractiv/eu-commission-misses-second-deadline-to-publish-high-risk-ai-system-guidance/7154",
+      "publisher": "freevacy.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3S4RV5YEWZVMERJ0J45"
+      ]
+    },
+    {
+      "locator": "https://www.freevacy.com/news/european-commission/eu-commission-publishes-gpai-code-of-practice-assessment-and-signatory-list/6621",
+      "publisher": "freevacy.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3779MSESWPFV1HT3X56",
+        "01M652S38W7E6B3N9Q1GNG84AJ",
+        "01M652S3AP5EQF2ADWH7ZVE1KS"
+      ]
+    },
+    {
+      "locator": "https://www.freevacy.com/news/european-parliament/eu-parliament-passes-digital-omnibus-amendment-delaying-high-risk-ai-rules/7474",
+      "publisher": "freevacy.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VJNRYVZNTAV0ATSBFRV5"
+      ]
+    },
+    {
+      "locator": "https://www.freshfields.com/en/our-thinking/blogs/technology-quotient/eu-ai-act-unpacked-7-use-of-gpai-models-along-the-ai-value-chain-102j9u9",
+      "publisher": "freshfields.com",
+      "retrieved_at": "2026-10-30T00:44:02Z",
+      "claim_ids": [
+        "01M654709WKV771FWA48GNGMGZ"
+      ]
+    },
+    {
+      "locator": "https://gdprlocal.com/eu-ai-act-article-50/",
+      "publisher": "gdprlocal.com",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538D7AAZQ4S5BM1Y9W82JP",
+        "01M6538D9YC6BZY5E1YNPCTN35",
+        "01M6538DCHQK1X3Q4112YYP7DZ",
+        "01M6538DF58X7FCD65YPFVCJ5T",
+        "01M6538DHBQJA06M97806PSZKN",
+        "01M6538DRK5J6DSWXBNCTTEGFP"
+      ]
+    },
+    {
+      "locator": "https://www.globalpolicywatch.com/2026/05/10-takeaways-european-commission-draft-guidelines-on-ai-transparency-under-the-eu-ai-act/",
+      "publisher": "globalpolicywatch.com",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538D86K9YYHZNT0Y6DDXNZ",
+        "01M6538DAVRMHE9J5JB1B9EHT2",
+        "01M6538DMSP3ZR6DSVXT7TNYDV",
+        "01M6538DQRJGH2W1BVE5TMJ3HH"
+      ]
+    },
+    {
+      "locator": "https://www.goodwinlaw.com/en/insights/publications/2025/08/alerts-technology-aiml-european-commission-issues",
+      "publisher": "goodwinlaw.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S35GCH1AQGJ11Y7PM7J2",
+        "01M652S382682HW0V26H10G65C",
+        "01M652S39TFS8SXMDVXCBPA7D6",
+        "01M652S3BFXXKDKCQZ6G5Z11QQ"
+      ]
+    },
+    {
+      "locator": "https://www.govinfosecurity.com/eu-pledges-no-pause-over-enforcement-blocs-ai-act-a-28903",
+      "publisher": "govinfosecurity.com",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CT0SB2YZC550V4QS3ET3"
+      ]
+    },
+    {
+      "locator": "https://guptadeepak.com/eu-ai-act-downstream-provider/",
+      "publisher": "guptadeepak.com",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538D5JZ08G48J5MWC935FP",
+        "01M6538E35C8VQRKETW3842MVW"
+      ]
+    },
+    {
+      "locator": "https://haerting.de/en/insights/provider-or-deployer-decoding-the-key-roles-in-the-ai-act/",
+      "publisher": "haerting.de",
+      "retrieved_at": "2026-10-30T00:44:02Z",
+      "claim_ids": [
+        "01M654707VNJGBM89HV9VQGWGX"
+      ]
+    },
+    {
+      "locator": "https://www.hlc.com/en/publications/eu-legislators-agree-to-delay-for-highrisk-ai-rules",
+      "publisher": "hlc.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VJ5DYHNKWR9Y27TXZT64",
+        "01M652VJA9SP0QP95KK15W0AE9",
+        "01M652VJJ70JD634C7QGD8XZSE"
+      ]
+    },
+    {
+      "locator": "https://www.holisticai.com/blog/penalties-of-the-eu-ai-act",
+      "publisher": "holisticai.com",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MYNK1JX2DDR5G65T69V0",
+        "01M652MYQ94H74ZQR71C5EK1YQ",
+        "01M652MYS2K3W10WJ2FZD69ZB8",
+        "01M652MYTZJGYX2AE4AD7PB7GK",
+        "01M652MYWS0YWATG9QJPAB54HX",
+        "01M652MYYFF4K3RJHYPCCRVRNT",
+        "01M652MZ05G9NBS2HZ5N942RTT",
+        "01M652MZ11YXJ950AJAXMSWNMC",
+        "01M653AP0S6VRBC6CSZVZGERWC"
+      ]
+    },
+    {
+      "locator": "https://www.hunton.com/privacy-and-cybersecurity-law-blog/eu-digital-omnibus-on-ai-enters-into-force",
+      "publisher": "hunton.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VHX6M073ES7QEZG1VQ3V"
+      ]
+    },
+    {
+      "locator": "https://www.hunton.com/privacy-and-information-security-law/european-commission-publishes-q-a-on-ai-literacy",
+      "publisher": "hunton.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3DYGM3YDQ9DXZ8E1VGE",
+        "01M653AP6QA3F34DCTYSW3Q34F"
+      ]
+    },
+    {
+      "locator": "https://iapp.org/news/a/eu-ai-act-literacy-changes-may-complicate-more-than-simplify-compliance",
+      "publisher": "iapp.org",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3MRJ4CM3K2DKZXVZJEM",
+        "01M652VJX1XZ37QQD91EMX20DT",
+        "01M653CTB1RP35J41EQZ6FSR2D",
+        "01M653CTF8G7G8PB17E7V7DB5X"
+      ]
+    },
+    {
+      "locator": "https://iapp.org/news/a/european-commission-delivers-draft-high-risk-ai-guidelines-after-delays",
+      "publisher": "iapp.org",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3QBYG76TT2C3EMMZG33",
+        "01M652S3T413Y1WR8RBZHS6WBY",
+        "01M653ANXD3H4CM2NM4C83BSNN",
+        "01M653CTGYBXG7MAJDTXRDYQVW"
+      ]
+    },
+    {
+      "locator": "https://www.insideprivacy.com/artificial-intelligence/european-commission-provides-guidance-on-ai-literacy-requirement-under-the-eu-ai-act/",
+      "publisher": "insideprivacy.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3EWXZGHP26E0H0GAZ6R",
+        "01M652S3GJDRPVC02YM6PW3XP4",
+        "01M652S3J99ACSBRHJRXV08ZGN"
+      ]
+    },
+    {
+      "locator": "https://www.jonesday.com/en/insights/2026/06/european-commission-publishes-final-code-of-practice-on-marking-and-labelling-aigenerated-content",
+      "publisher": "jonesday.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3NKRZ7MWKE53ZJNR9R1",
+        "01M652S3PGJNNEM9GHRQD3GNTZ",
+        "01M6538DBQ1X57F360E86SMP8D",
+        "01M6538DEAMX1A9DQW2Z67VVSK",
+        "01M653AP44TWAWD51TNSFGNPSN"
+      ]
+    },
+    {
+      "locator": "https://ki-campus.org/en/blog/eu-ai-act-ai-omnibus-recalibrates-article-4-ai-literacy-remains-mandatory",
+      "publisher": "ki-campus.org",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3KXEDA2VKWCSDAM78RW"
+      ]
+    },
+    {
+      "locator": "https://www.lewissilkin.com/insights/2026/07/27/the-digital-omnibus-on-ai-enters-into-force-today-102nedo",
+      "publisher": "lewissilkin.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VHR2PG9PYZP34YS8J1EK",
+        "01M652VHV29PMD9BE58D6R0W3K",
+        "01M652VHY4P8SANZNC1EDG7YPV",
+        "01M652VJ33B9DGS55QFYRP8594",
+        "01M652VJE85B8DM2WDJRZX8ETZ",
+        "01M652VJSJVNS2B9BPZS37P0HD"
+      ]
+    },
+    {
+      "locator": "https://docs.modulos.ai/frameworks/eu-ai-act/commission-guidance/high-risk-examples",
+      "publisher": "modulos.ai",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538DTD7DYFFWCXKT2D947R",
+        "01M6538DVAVV688F7H5PDGG89Q",
+        "01M6538DX5R6YEW312QPVX5H2Z",
+        "01M6538DYZ7EK8EAQJP41YD57X",
+        "01M6538E2B1DJ6YGFKESQNGDFP"
+      ]
+    },
+    {
+      "locator": "https://www.modulos.ai/blog/eu-ai-act-omnibus-deal/",
+      "publisher": "modulos.ai",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VJK35WBTTMDS0H64W9NV",
+        "01M652VJRGV30777FX9WSET4SC"
+      ]
+    },
+    {
+      "locator": "https://www.reedsmith.com/our-insights/blogs/technology-law-dispatch/102o6as/eu-ai-act-the-ai-office-sends-its-first-requests-for-information-to-leading-ai/",
+      "publisher": "reedsmith.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653AP1M52JN8V757HZ24F0Q",
+        "01M653AP2F2XQYBGWJB53TVMY6"
+      ]
+    },
+    {
+      "locator": "https://www.scl.org/edpb-and-edps-support-streamlining-ai-act-implementation-but-call-for-stronger-safeguards/",
+      "publisher": "scl.org",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CT8FG0A4CV2XE1J255DZ",
+        "01M653CTA6RC5220Q2C0Z0HNHY",
+        "01M653CTCQM7TSGVGFVK8Y82ET",
+        "01M653CTEDSJK7C25HM1059ZY3"
+      ]
+    },
+    {
+      "locator": "https://secureprivacy.ai/blog/eu-ai-act-digital-omnibus-the-new-high-risk-ai-deadlines-after-council-approval",
+      "publisher": "secureprivacy.ai",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VJDD5FC7B1F4DG6GVTYX",
+        "01M652VJMWQ7ZXQS6FESK8D147"
+      ]
+    },
+    {
+      "locator": "https://www.skwschwarz.de/en/news/ki-flash-to-be-or-not-to-be-an-ai-provider-that-is-the-question",
+      "publisher": "skwschwarz.de",
+      "retrieved_at": "2026-10-30T00:44:02Z",
+      "claim_ids": [
+        "01M654708X362G7T9ZWV0HED7N"
+      ]
+    },
+    {
+      "locator": "https://sota.io/blog/eu-ai-act-art50-provider-deployer-third-party-ai-api-disclosure-2026",
+      "publisher": "sota.io",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538D6D21T4ENEWE14Q171X"
+      ]
+    },
+    {
+      "locator": "https://www.springlex.eu/en/packages/ai-act/ai-act-regulation/annex-12/",
+      "publisher": "springlex.eu",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S3D3A3PPCHCHZPVFV890"
+      ]
+    },
+    {
+      "locator": "https://www.springlex.eu/en/packages/ai-act/ai-act-regulation/article-2/",
+      "publisher": "springlex.eu",
+      "retrieved_at": "2026-10-30T00:44:02Z",
+      "claim_ids": [
+        "01M65470BYSPTJPX7TBQA46DPA"
+      ]
+    },
+    {
+      "locator": "https://www.springlex.eu/en/packages/ai-act/ai-act-regulation/article-3/",
+      "publisher": "springlex.eu",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MZ4ZD52N18WHYCFC29B4"
+      ]
+    },
+    {
+      "locator": "https://www.springlex.eu/en/packages/ai-act/ai-act-regulation/article-99/",
+      "publisher": "springlex.eu",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MYMQJ83WXX8NJCHF3V13",
+        "01M652MYPDXP1S6GV0H42BX3RZ",
+        "01M652MYR4ERD5M1CSMA9YW2Z5",
+        "01M652MYT1GSKZA9JJG6Y93HRD",
+        "01M652MYVXHYBTZX1SX3B2C6GD",
+        "01M652MYXNQT8JKKC7CAYEQV58",
+        "01M652MYZACC1TEQEDMNH4CEGB"
+      ]
+    },
+    {
+      "locator": "https://www.stephensonharwood.com/insights/the-digital-omnibus-on-ai-ten-key-takeaways/",
+      "publisher": "stephensonharwood.com",
+      "retrieved_at": "2026-10-30T00:20:18Z",
+      "claim_ids": [
+        "01M652VHZ15YFAQ8XWW07AY8ZA",
+        "01M652VJF3KP6MM0ERZZXD7R0R"
+      ]
+    },
+    {
+      "locator": "https://www.stephensonharwood.com/insights/the-roles-of-the-provider-and-deployer-in-ai-systems-and-models/",
+      "publisher": "stephensonharwood.com",
+      "retrieved_at": "2026-10-30T00:16:41Z",
+      "claim_ids": [
+        "01M652MZ1WGY0ZTBKHBAY4M3WV",
+        "01M652MZ2XSWSKTQBAEKW8XXMS",
+        "01M6538D4NW31Q3T010AZY22S1",
+        "01M6538E40940J2WKTZZ0VTAM5"
+      ]
+    },
+    {
+      "locator": "https://www.theregister.com/2025/07/04/eu_businesses_push_for_freedom/",
+      "publisher": "theregister.com",
+      "retrieved_at": "2026-10-30T00:29:43Z",
+      "claim_ids": [
+        "01M653CSZXW2YTXVSY3B97JQM9",
+        "01M653CTHWAA4GCTGXBJZ0TG9Y"
+      ]
+    },
+    {
+      "locator": "https://www.williamfry.com/knowledge/a-practical-guide-to-the-extraterritorial-reach-of-the-ai-act/",
+      "publisher": "williamfry.com",
+      "retrieved_at": "2026-10-30T00:44:02Z",
+      "claim_ids": [
+        "01M65470D5J9E9FCWC8DR2RY0G"
+      ]
+    },
+    {
+      "locator": "https://www.wilmerhale.com/en/insights/blogs/wilmerhale-privacy-and-cybersecurity-law/20250724-european-commission-issues-guidelines-for-providers-of-general-purpose-ai-models",
+      "publisher": "wilmerhale.com",
+      "retrieved_at": "2026-10-30T00:18:57Z",
+      "claim_ids": [
+        "01M652S2RK1191WDC3CWHC5PHC",
+        "01M652S2VSF3E3XT2G6J7JRK7Z",
+        "01M652S2XW4CNJ7HT6M2D2E0Y6",
+        "01M652S30NCG9D4PVAGGVHGQD2",
+        "01M652S32ENEA5Q8VPVYPGKY10",
+        "01M652S34JGCNYDQPYRPAFP279"
+      ]
+    },
+    {
+      "locator": "https://www.winstontaylor.com/insights/article-50-eu-ai-act-what-the-european-commission-s-draft-transparency-guidelines-mean-for-your-business",
+      "publisher": "winstontaylor.com",
+      "retrieved_at": "2026-10-30T00:27:19Z",
+      "claim_ids": [
+        "01M6538D923R979Q4XV4FQ4X8G",
+        "01M6538DDC059JPV6C3QJAKQ99",
+        "01M6538DG4FD4CHYAKT5HT85VC",
+        "01M6538DJCT5CVGP9WCCBR9Y6R",
+        "01M6538DNY8XVM1J9PXHW6H1Z0",
+        "01M6538DPVCD0A6HRKDXN8QZP0"
+      ]
+    },
+    {
+      "locator": "https://www.wsgrdataadvisor.com/2026/08/eu-ai-act-enforcement-phase-begins/",
+      "publisher": "wsgrdataadvisor.com",
+      "retrieved_at": "2026-10-30T00:28:33Z",
+      "claim_ids": [
+        "01M653ANY84RKYZP15T4FFSPRP",
+        "01M653ANZ3FXX7MFXFN8PVZHXW",
+        "01M653ANZZTAC86KQR9JRJVXRM",
+        "01M653AP3AR8PABW94M9E5J6KM",
+        "01M653AP50XJA324C9RZE8R83Y"
+      ]
+    }
+  ]
+}
