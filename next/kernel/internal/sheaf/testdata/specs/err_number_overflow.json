@@ -1,1 +1,0 @@
-{"format":"frontier-sheaf/v1","nodes":[{"id":"a","dim":1},{"id":"b","dim":1}],"edges":[{"u":"a","v":"b"}],"x":[[1e400],[1]]}
