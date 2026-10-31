@@ -1,6 +1,6 @@
 # meta-suite v1.3, Lean
 
-**Status:** draft for the owner's review (2026-10-30). This replaces the v2 build plan as the active direction. The v2 spec and the `next/` preview stay in the repo as a record; nothing is deleted.
+**Status:** draft for the owner's review (2026-10-30). This replaces the v2 build plan as the active direction. v2 (its spec and the `next/` preview) is archived, complete, on branch `v2`, and taken off `main`.
 
 **In one line:** keep v1 and keep what wins, cut what costs, and ship only what beats both v1 and plain Opus in a blind test, at the same or lower cost.
 
