@@ -1,1 +1,0 @@
-{"objective":"o","slots":[{"name":"x","type":"t","required":true,"origin":"guessed"}],"constraints":[],"success_criteria":[{"criterion":"c","satisfied_by":"G2"}]}

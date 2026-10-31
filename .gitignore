@@ -21,8 +21,3 @@ venv/
 node_modules/
 # dist/ is committed on purpose: it holds the generated per-tool packages (scripts/package.py)
 .vercel/
-
-# meta-suite v2 (next/): run state stays in the user's workspace (P13), built binaries are produced by
-# `make -C next/kernel build`. The launchers next/bin/meta and next/bin/meta.cmd are committed.
-runs/
-next/bin/meta-*

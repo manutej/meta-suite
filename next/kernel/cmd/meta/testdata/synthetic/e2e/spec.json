@@ -1,1 +1,0 @@
-{"objective":"Profile Org Alpha (synthetic fixture)","slots":[{"name":"subject","type":"entity","required":true,"origin":"stated"}],"constraints":[{"text":"public sources only","origin":"default"}],"success_criteria":[{"criterion":"every sub-question has at least one finding","satisfied_by":"verified"},{"criterion":"every claim traces to a source","satisfied_by":"G2"}]}
