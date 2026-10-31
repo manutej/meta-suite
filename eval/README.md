@@ -32,10 +32,12 @@ The check passes both v1 pages and fails every page the owner ranked lower:
 
 | Lane | v1 | plain Opus | v2 deep | v2 fast |
 |---|---|---|---|---|
-| 4A ICP | PASS | FAIL: grades, verdict, runner-up | FAIL: figures, tags, runner-up, length | FAIL: figures, tags, grades, runner-up, length |
+| 4A ICP | PASS | FAIL: grades, runner-up | FAIL: figures, tags, runner-up, length | FAIL: figures, tags, grades, runner-up, length |
 | 4B deck | PASS | FAIL: figures, controls | FAIL: figures, verdict, length, **overlapping slides at all three widths** | FAIL: figures, tags, verdict, flip, overlap at 1280 |
 
 It catches the stacked-slide failure the owner flagged in v2 deep's deck. No other check did.
+
+**Fixed 2026-10-31:** the first-screen detector ignored headings that wrap a styled word, which gave a false "no verdict" on two pages. It now reads every visible text node. The re-run kept 8/8 agreement.
 
 **Limits, stated plainly:**
 - It was calibrated on these same 8 pages, so its 8/8 agreement is in-sample.

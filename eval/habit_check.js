@@ -71,7 +71,14 @@ async function measure(file, shotsDir) {
         await page.waitForTimeout(900);
         const screenText = () => page.evaluate(() => {
           const vis = el => { for (let e = el; e && e.nodeType === 1; e = e.parentElement) { const s = getComputedStyle(e); if (s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) < 0.1) return false; } return true; };
-          return [...document.querySelectorAll('h1,h2,h3,p,li,div,span,strong')].filter(el => { const r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0 && r.height > 0 && el.children.length === 0 && vis(el); }).map(el => el.textContent).join(' ');
+          // Every visible text node on screen (headings often wrap a styled word, so don't require leaf elements).
+          const out = []; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          for (let n = w.nextNode(); n; n = w.nextNode()) {
+            const t = n.textContent.trim(); if (!t) continue; const el = n.parentElement;
+            if (!el || el.closest('script,style,noscript,template')) continue;
+            const r = el.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0 && r.height > 0 && vis(el)) out.push(t);
+          }
+          return out.join(' ');
         });
         const screen1 = await screenText();
         await page.keyboard.press('ArrowRight'); await page.waitForTimeout(350);
