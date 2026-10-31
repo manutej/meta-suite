@@ -1,0 +1,26 @@
+{
+  "4A": {
+    "figures": 2,
+    "tags": 42,
+    "controls": 14,
+    "source_links": 19,
+    "grade_marks": 8,
+    "verdict_first_screen": true,
+    "runner_up": true,
+    "flip_condition": true,
+    "words": 2036,
+    "source": "v1/final.html"
+  },
+  "4B": {
+    "figures": 8,
+    "tags": 39,
+    "controls": 50,
+    "source_links": 21,
+    "grade_marks": 31,
+    "verdict_first_screen": true,
+    "runner_up": false,
+    "flip_condition": true,
+    "words": 4322,
+    "source": "v1/final.html"
+  }
+}

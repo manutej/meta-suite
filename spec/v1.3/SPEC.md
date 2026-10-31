@@ -30,7 +30,7 @@ v2 lost every time, and in the artifact lanes it finished below plain Opus. v1 b
 
 These are habits in the output, not the pipeline's paperwork:
 
-1. **It encodes data as custom figures.** In 4A, v1 rendered 26 SVG figures against 1 for plain Opus. In 4B it was 9 real charts against 0. The owner rewarded "has figures" and "client-ready", and penalised "research dossier".
+1. **It encodes data as custom figures.** In 4B, v1 had 8 data charts against 0 for plain Opus. In 4A the gap was small: 2 data figures against 1. The earlier "26 vs 1" count included v1's custom icon set. (Corrected by the habit check, eval/README.md.) The owner rewarded "has figures" and "client-ready", and penalised "research dossier".
 2. **It looks at real phone renders and fixes what it sees.**
 3. **It writes output rules before it builds.** Each claim is tagged fact or inference, estimates are never shown as measured, the page leads with the verdict, and it names the runner-up and what would change the ranking.
 4. **It right-sizes at intake.** One artifact, not a bundle.
@@ -78,7 +78,7 @@ Scope: **meta-mvp first.** It was the entry skill in every v1 run and is the own
    - graded sources;
    - a clean render-audit pass at 360/390/1280 px.
    
-   A lean output that falls below v1 on any of these is rejected without spending a blind test. Changes land one at a time: the safe cuts first (C1 batching, C3 loading, 03b), then the merge (C2), each re-checked.
+   A lean output that falls below the floor set from v1 on any of these (counts at 75% of v1, required flags, at most 2× v1's length, clean render) is rejected without spending a blind test. Built and calibrated: `eval/habit_check.js`; it agrees with the owner on 8 of 8 frozen pages, in-sample. Changes land one at a time: the safe cuts first (C1 batching, C3 loading, 03b), then the merge (C2), each re-checked.
 1. **Fixed comparators.** Every frozen prompt keeps its judged v1 output as the fixed comparison: tests 1, 2, 4A and 4B, plus 4C and 4D once run.
 2. **Pass bar.** A change ships only if, judged blind, it is **preferred or tied in at least 3 of 4 pairs** against frozen v1. It must also beat or tie the plain Opus baseline and cost **no more** in billed terms.
 3. **Judging.** The owner judges first. AI judges are a pre-screen only after calibration (T6): the design judge disagreed with the owner in test 2.
