@@ -25,6 +25,7 @@ These are the habits the owner rewarded in blind tests, plus a render audit:
 | A runner-up named; what would flip the ranking | required if v1 had it |
 | Length: the dossier guard | ≤ 2× v1's words |
 | Render at 360, 390 and 1280 px: horizontal overflow, script errors, overlapping text (also after two slide steps) | must be clean |
+| **Sandboxed viewer** (srcdoc in a sandboxed iframe, the way app previews load pages): script errors | must be clean |
 
 ## Calibration (2026-10-30, lanes 4A and 4B, 8 frozen pages)
 
@@ -38,6 +39,8 @@ The check passes both v1 pages and fails every page the owner ranked lower:
 It catches the stacked-slide failure the owner flagged in v2 deep's deck. No other check did.
 
 **Fixed 2026-10-31:** the first-screen detector ignored headings that wrap a styled word, which gave a false "no verdict" on two pages. It now reads every visible text node. The re-run kept 8/8 agreement.
+
+**Added 2026-10-31:** the sandboxed-viewer pass, after the owner saw a script error in a lean deck. An unguarded `history.replaceState` throws in a preview frame but not when the file is opened directly. Re-run: still 8/8 on the frozen pages, and it now fails that lean deck (as the owner did).
 
 **Limits, stated plainly:**
 - It was calibrated on these same 8 pages, so its 8/8 agreement is in-sample.

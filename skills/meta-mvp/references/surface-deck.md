@@ -10,6 +10,8 @@
 - a contents jump;
 - the `#n` hash updates, and `ArrowRight` works on load without a click.
 
+**It must run in a sandboxed viewer** (app file previews, embedded frames). Wrap every `history.*`, `location` write, `localStorage`/`sessionStorage` and clipboard call in `try { … } catch (e) {}`. One unguarded `history.replaceState` crashes the whole deck in a preview, even though it works when opened as a file.
+
 **Shape, typically 12–20 slides:**
 1. Title.
 2. **The ask and the verdict** (decision, budget, timeline).

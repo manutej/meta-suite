@@ -63,6 +63,7 @@ Work in one folder. Keep only these files: `BRIEF.md`, `seed_data.json`, `templa
    - a domain whose structure isn't obvious → also `references/category-expansion.md`
 
    Render `final.html` from `seed_data.json` with the build step; never hand-copy numbers into the page.
+   The page must also run inside a sandboxed viewer: wrap `history`, `location` writes, storage and clipboard calls in try/catch.
    Pick the palette with `scripts/dict_color.py generate`, or use the brand's.
 5. **Audit (at most 2 rounds).** Run `node scripts/render_audit.js final.html --out audit/`. It
    checks 360, 390 and 1280 px for sideways overflow, script errors and overlapping text (decks

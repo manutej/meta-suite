@@ -72,9 +72,19 @@ const overlapProbe = () => {
     await sheet.screenshot({ path: path.join(outDir, `contact-${width}.png`), fullPage: true });
     await sheet.close(); await page.close();
   }
+  // Sandboxed-viewer pass: app previews load pages in a sandboxed frame where history/storage calls throw.
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 760 } });
+    const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+    await page.setContent('<iframe id=f sandbox="allow-scripts" style="width:390px;height:740px;border:0"></iframe>');
+    await page.$eval('#f', (f, h) => { f.srcdoc = h; }, fs.readFileSync(file, 'utf8'));
+    await page.waitForTimeout(1200);
+    for (const e of [...new Set(errs)].slice(0, 3)) problems.push(`sandboxed viewer: script error: ${e.slice(0, 160)} (wrap history/location/storage calls in try/catch)`);
+    await page.close();
+  }
   await browser.close();
   if (problems.length) { console.log(`render_audit: ${problems.length} problem(s)` + (problems.length > 12 ? ' (first 12 shown; the rest are usually the same cause)' : '') + '\n- ' + problems.slice(0, 12).join('\n- ')); }
-  else console.log('render_audit: clean at 360, 390 and 1280 px');
+  else console.log('render_audit: clean at 360, 390 and 1280 px and in a sandboxed viewer');
   console.log(`contact sheets: ${outDir}/contact-360.png, contact-390.png, contact-1280.png (look at them once, then fix everything in one edit)`);
   process.exit(problems.length ? 1 : 0);
 })().catch(e => { console.log('render_audit could not run: ' + e.message); process.exit(2); });

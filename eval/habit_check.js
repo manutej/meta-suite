@@ -126,6 +126,15 @@ async function measure(file, shotsDir) {
       }
       await page.close();
     }
+    {
+      const page = await browser.newPage({ viewport: { width: 390, height: 760 } });
+      const errs = []; page.on('pageerror', e => errs.push(String(e.message).slice(0, 160))); page.on('console', m => { if (m.type() === 'error') errs.push(m.text().slice(0, 160)); });
+      await page.setContent('<iframe id=f sandbox="allow-scripts" style="width:390px;height:740px;border:0"></iframe>');
+      await page.$eval('#f', (f, h) => { f.srcdoc = h; }, fs.readFileSync(path.resolve(file), 'utf8'));
+      await page.waitForTimeout(1200);
+      out.render.sandbox = { overflow_px: 0, errors: [...new Set(errs)].slice(0, 5), overlaps: 0, overlap_examples: [] };
+      await page.close();
+    }
   } finally { await browser.close(); }
   return out;
 }
