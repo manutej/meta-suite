@@ -54,7 +54,7 @@ the same set across both builds. Never import a stock icon font/CDN.
 viewport meta · ≥2 breakpoints · grids → 1 col · SVG scales (viewBox+width:100%) · tap targets ≥38px
 · no primary action behind hover-only · ceti player + controls wrap.
 
-## Verify (run before ship: SKILL.md step 5, scripts/render_audit.js plus the dict_color audit)
+## Verify (run before ship — see references/quality-gates.md)
 JS parses · ceti contract (8 beats / 35–45s / pure render) · palette coherence · mobile markers ·
 no stock icons · no hype words · no category-theory vocabulary in client output.
 ```

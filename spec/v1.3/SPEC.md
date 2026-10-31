@@ -1,8 +1,23 @@
 # meta-suite v1.3, Lean
 
-**Status:** draft for the owner's review (2026-10-30). This replaces the v2 build plan as the active direction. v2 (its spec and the `next/` preview) is archived, complete, on branch `v2`, and taken off `main`.
+**Status (2026-10-31): the lean candidate FAILED blind testing and is not shipped. meta-mvp stays at v1.2.0.** The candidate is preserved at commit `7295864` on branch v13. The original draft (2026-10-30) follows the results. This replaces the v2 build plan as the active direction. v2 (its spec and the `next/` preview) is archived, complete, on branch `v2`, and taken off `main`.
 
-**In one line:** keep v1 and keep what wins, cut what costs, and ship only what beats both v1 and plain Opus in a blind test, at the same or lower cost.
+## 0. Results (2026-10-31)
+
+| Test | Owner's pick (blind unless noted) | Lean cost vs v1 |
+|---|---|---|
+| T1 · 4A ICP (Athletic Brewing) | **v1** over lean (semi-blind: he recognised the v1 page) | $2.65 vs $3.80 |
+| T1 · 4B pitch deck | **v1** over lean (lean crashed in a sandboxed preview: an unguarded `history.replaceState`) | $2.32 vs $3.52 |
+| 5A · ICP, new B2B case (FLOW Intelligence) | **plain Opus** first, **v1** second, **lean** third | $3.14 vs $3.67 (Opus $2.53) |
+
+What this says:
+- **Lean loses to v1 every time (0 of 3).** Merging the planning files, loading references on demand and capping the fix loop saved 14–34%, but cost quality the owner can see. The six habits are needed but not enough: they are a floor, not the whole of what he rewards.
+- **v1 beats plain Opus 2 times out of 3, not always.** On the new B2B case plain Opus won, at 69% of v1's cost. One run per lane, so this is variance-limited.
+- **What lasts:** the evaluation harness, i.e. the blind protocol, `eval/habit_check.js` (now with a sandboxed-viewer pass), billed-cost accounting and the skill-use audit. It caught three real regressions before the owner saw them, and two of its own bugs.
+
+Next, only when budget allows: ask the owner what made each winner win, then replicate v1 against plain Opus on a fresh case before changing v1 again.
+
+**In one line (original draft):** keep v1 and keep what wins, cut what costs, and ship only what beats both v1 and plain Opus in a blind test, at the same or lower cost.
 
 ## 1. Why the direction changed
 
