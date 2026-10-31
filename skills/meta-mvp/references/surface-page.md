@@ -13,7 +13,7 @@
 - No decorative blobs.
 - Icons don't count as figures.
 
-**Interaction**, only where it answers a question: a weighting slider that re-ranks, a filter, a tab between segments.
+**An interactive model, at least one, bound to seed_data:** weights that re-rank the options ("weight what matters to you"), a cost or ROI calculator, or a scenario toggle. Add filters or tabs only where they answer a question.
 
 **Tags:** a small Fact or Inference chip on every claim. Estimates are labelled "≈" with their basis.
 

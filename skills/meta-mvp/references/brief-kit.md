@@ -50,7 +50,7 @@ For each module, one block:
   - Open: {ASSUME / SPIKE / ASK-{who}}
 
 ## Verification checklist
-- Five habits visible (figures encode data · verdict first · tags · runner-up + flip · phone render checked)
+- Six habits visible (figures encode data · verdict first · tags · runner-up + flip · phone render checked · one interactive model bound to the data)
 - seed_data.json parses; every source id resolves; counts match the text
 - render_audit clean at 360/390/1280; palette PASS; no hype or formal words
 - {domain-specific checks, e.g. totals add up, dates are in order}

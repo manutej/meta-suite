@@ -18,7 +18,7 @@ metadata:
 
 # meta-mvp (lean)
 
-## The five habits that win (measured in blind tests; do all five)
+## The six habits that win (measured in blind tests; do all six)
 1. **Encode, don't decorate.** Put the key numbers into custom inline-SVG figures (bars, dot plots,
    ranges, timelines, matrices) that answer a question the reader has. One glance tells the story.
 2. **Lead with the verdict.** The first screen (or first slide after the title) states the decision
@@ -26,6 +26,9 @@ metadata:
 3. **Tag every claim** as Fact (with its source) or Inference. Estimates are never shown as measured.
 4. **Name the runner-up and what would flip it**, plus what would change your mind.
 5. **Check real phone renders** and fix what you see, in one batched pass (step 5).
+6. **Let the reader test the decision.** Include one working interactive model bound to
+   `seed_data.json`: weights that re-rank the options, a cost or ROI calculator, or a scenario
+   toggle. It is not decoration; it answers "what if my numbers differ?".
 
 ## The core move (do it, then hide it)
 Expand the prompt into a typed domain: its entities, how they relate, and what must stay true.
@@ -80,6 +83,6 @@ sub-agent tool exists, do the same work inline.
 ## Done means
 - [ ] BRIEF.md has the intake, the thesis, the typed meta-prompt with its real edit list, the data model, the modules with their edge cases, and the checklist
 - [ ] `seed_data.json` parses; every rendered claim is tagged and traces to a real source id
-- [ ] All five habits are visible in `final.html`
+- [ ] All six habits are visible in `final.html`
 - [ ] The render audit is clean at 360, 390 and 1280 (or any open issue is reported); palette PASS; no hype words or formal vocabulary
 - [ ] One artifact, right-sized; assumptions stated

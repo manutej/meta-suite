@@ -22,6 +22,12 @@
 9. The ask again.
 10. Sources, graded A/B/C.
 
+**An interactive model**, at least one, bound to seed_data, typically on the costs or pilot slide:
+- a budget or ROI calculator with editable inputs (seats, months, rates) that recomputes totals live;
+- or a weighting or scenario control that changes the recommendation.
+
+The decision-maker should be able to test the decision with their own numbers.
+
 **Every slide:**
 - a heading that states the claim (not a topic label);
 - one figure or one tight list;
