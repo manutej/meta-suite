@@ -1,0 +1,43 @@
+# Fixture: a token-bucket rate limiter, small enough to read, deep enough to exercise
+# three refinement levels. Used only by test_ontspec.py.
+spec:
+  id: limiter
+  title: Token-bucket rate limiter
+  version: 0.1
+  max_depth: 4
+  verbal: >-
+    Each client has a bucket of tokens. A request is admitted if a token is available and
+    takes it; tokens refill at a fixed rate up to a fixed capacity.
+atoms:
+  - {id: limiter, kind: System, depth: 0, status: stated, source: "brief", statement: "Admit requests at most at a fixed rate per client."}
+
+  - {id: capacity, kind: Value, depth: 1, parent: limiter, status: stated, source: "brief", key: capacity, value: 10, type: "u32 tokens", statement: "A bucket holds at most 10 tokens."}
+  - {id: request, kind: Boundary, depth: 1, parent: limiter, status: stated, source: "brief", type: "struct{client_id, at_ms}", statement: "A request arrives from a client at a time."}
+  - {id: decision, kind: Entity, depth: 1, parent: limiter, status: stated, source: "brief", type: "enum{admit, reject}", statement: "Whether the request is admitted."}
+  - {id: bucket, kind: State, depth: 1, parent: limiter, status: stated, source: "brief", durable: true, type: "struct{tokens: u32, last_ms: u64}",
+     shared_writers: "refill and take-spend both write it; they must run in one atomic step per client",
+     statement: "Per-client token count and last refill time."}
+
+  - {id: admit, kind: Operation, depth: 1, parent: limiter, status: stated, source: "brief", inputs: [request], outputs: [decision], statement: "Decide one request."}
+
+  - {id: refill-rate, kind: Value, depth: 2, parent: admit, status: stated, source: "brief", key: refill_per_s, value: 1, type: "u32 tokens/s", statement: "One token is added per second."}
+  - {id: refill, kind: Operation, depth: 2, parent: admit, status: stated, source: "brief", effect: deterministic,
+     inputs: [request, bucket], outputs: [bucket], reads: [capacity, refill-rate], writes: [bucket],
+     pre: ["request.at_ms >= bucket.last_ms"], post: ["bucket.tokens <= capacity"],
+     statement: "Add the tokens earned since the last refill, capped at capacity."}
+  - {id: take, kind: Operation, depth: 2, parent: admit, status: stated, source: "brief",
+     inputs: [request], outputs: [decision], statement: "Take a token if one is left."}
+
+  - {id: take-check, kind: Operation, depth: 3, parent: take, status: stated, source: "brief", effect: pure,
+     inputs: [request, bucket], outputs: [decision], reads: [bucket],
+     pre: ["bucket refilled for request.at_ms"], post: ["decision = admit iff bucket.tokens > 0"],
+     statement: "Admit exactly when a token is available."}
+  - {id: take-spend, kind: Operation, depth: 3, parent: take, status: inferred, effect: effectful,
+     inputs: [decision, bucket], outputs: [bucket], writes: [bucket],
+     pre: ["decision is known"], post: ["tokens decrease by one exactly when admitted"],
+     statement: "Spend the token of an admitted request."}
+
+  - {id: never-negative, kind: Invariant, depth: 1, parent: limiter, status: stated, source: "brief", uses: [bucket], formal: "forall b: 0 <= b.tokens <= capacity", statement: "Token counts stay within 0 and capacity."}
+
+  - {id: ob-cap, kind: Obligation, depth: 1, parent: limiter, status: inferred, method: proof, target: [never-negative, refill], statement: "Prove refill and spend keep tokens within bounds."}
+  - {id: ob-check, kind: Obligation, depth: 1, parent: limiter, status: inferred, method: property-test, target: [take-check, take-spend], statement: "Admit-iff-token and spend-once hold over random request streams."}
