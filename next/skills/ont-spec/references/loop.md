@@ -26,8 +26,9 @@ A leaf is atomic when it can become one contract with nothing left to decide:
 ## The pass
 
 1. Edit `ontology.yaml` (add a depth, or resolve findings).
-2. Run `check`, `check --converging` (once depth 4 is reached), `operad`, and `delta` against the previous
-   pass. Save the outputs in `certificates/pass-N/`.
+2. Run `check --max-depth N` (N = the depth this pass reaches), `check --converging` once leaves exist,
+   `operad`, and from pass 2 `delta` against the previous pass's snapshot. Save the outputs and a copy
+   of `ontology.yaml` in `certificates/pass-N/`.
 3. Append to CONVERGENCE.md:
    ```
    ## Pass N: <what this pass did>
@@ -46,9 +47,16 @@ reviewer see why every atom exists.
 Stop when, in the same pass:
 - `check --converging` is GREEN (or AMBER only with each finding explained);
 - `operad` is GREEN (NOTEs are fine);
-- `delta` against the previous pass shows no atoms added, removed or structurally changed.
+- `delta` against the previous pass shows no atoms added, removed, or changed in structure or contract.
+
+`ontspec.py converged certificates/pass-(N-1)/ontology.yaml ontology.yaml` applies all three at once.
 
 The last condition needs one quiet pass after the last edit; that pass is the convergence proof.
+Budgets and scope pull against each other: lexical scoping lifts shared definitions toward the
+root, and every deeper refinement inherits them inside a smaller budget (8000, 4000, 2000 tokens at
+depths 2, 3, 4). Keep shared definitions' statements terse; a `budget.child` finding at depth 4
+usually means the root vocabulary has grown, not that the leaf is too big.
+
 If a pass keeps reopening the same branch, the branch is a separate system: give it its own spec
 and reference it at a Boundary. If an unknown blocks convergence, it stays an `Open` atom and
 moves to the investigation brief; convergence means the spec is stable, not that the world is known.

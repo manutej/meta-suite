@@ -42,6 +42,22 @@ METHODS = {"proof", "model-check", "property-test", "differential", "review"}
 MAX_DEPTH = 4
 DEPTH_BUDGETS = {2: 8000, 3: 4000, 4: 2000}  # tokens per refinement brief; must strictly decrease
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
+KEY_REF = re.compile(r"\{([A-Za-z0-9._-]+)\}")
+COMMON_FIELDS = {"id", "kind", "depth", "parent", "status", "source", "statement", "notes"}
+KIND_FIELDS = {
+    "System": set(), "Component": set(),
+    "Entity": {"type", "durable", "external_input", "shared_writers"},
+    "Value": {"key", "value", "type"},
+    "State": {"type", "durable", "shared_writers", "external_input"},
+    "Relation": {"type", "uses"}, "Event": {"type", "external_input"}, "Boundary": {"type"},
+    "Operation": {"inputs", "outputs", "reads", "writes", "effect", "pre", "post", "errors"},
+    "Invariant": {"uses", "formal"},
+    "Obligation": {"target", "method", "evidence"},
+    "Open": {"blocks", "resolve_by"},
+}
+EFFECT_RANK = {"pure": 0, "deterministic": 1, "effectful": 2, "llm": 2, "human": 2}
+CONTRACT_FIELDS = ("effect", "pre", "post", "formal", "errors", "status", "method", "target",
+                   "shared_writers", "durable", "blocks", "resolve_by", "evidence")
 EXIT = {"GREEN": 0, "AMBER": 1, "RED": 2}
 
 
@@ -127,7 +143,7 @@ def refs(a: dict) -> dict[str, list[str]]:
 # ── ontology laws (pure) ──────────────────────────────────────────────────────
 
 
-def check(spec: Spec, converging: bool = False) -> list[Finding]:
+def check(spec: Spec, converging: bool = False, max_depth: int | None = None) -> list[Finding]:
     """O1-O11. With converging=True, leaf atomicity and verification coverage become RED."""
     F: list[Finding] = []
     A = spec.atoms
@@ -157,6 +173,12 @@ def check(spec: Spec, converging: bool = False) -> list[Finding]:
         if isinstance(depth, int) and depth > spec.meta.get("max_depth", MAX_DEPTH):
             F.append(Finding("O1.max-depth", "RED", aid, (aid,), "Can this be stated at depth 4 or less, or is it a separate spec?"))
 
+    if max_depth is not None:
+        deep = [a for a in spec.order if isinstance(A[a].get("depth"), int) and A[a]["depth"] > max_depth]
+        if deep:
+            F.append(Finding("O1.pass-depth", "RED", "spec", tuple(deep[:8]),
+                             f"This pass is limited to depth {max_depth}: move these to the next pass?"))
+
     # cycles in the parent relation
     for aid in spec.order:
         seen, cur = set(), aid
@@ -169,7 +191,7 @@ def check(spec: Spec, converging: bool = False) -> list[Finding]:
 
     # O2 typed references: every reference exists and has a kind that can play that role
     allowed = {
-        "inputs": DEFINES, "outputs": DEFINES, "reads": {"Entity", "State", "Value"},
+        "inputs": DEFINES, "outputs": DEFINES, "reads": {"Entity", "State", "Value", "Boundary"},
         "writes": {"Entity", "State"}, "uses": KINDS - {"Obligation", "Open"},
         "target": KINDS - {"Obligation", "Open"}, "blocks": KINDS,
     }
@@ -262,12 +284,50 @@ def check(spec: Spec, converging: bool = False) -> list[Finding]:
                 if r in A and A[r].get("kind") in DEFINES and r not in visible:
                     F.append(Finding("O10.sibling-leak", "AMBER", aid, (aid, r),
                                      f"{r!r} is private to another branch: lift it to a common ancestor?"))
-    # O11 effect honesty: a pure operation reads its inputs and returns outputs; it writes nothing
+    # O11 effect honesty: a pure operation writes nothing, and a refined operation's declared
+    # effect is at least as strong as the strongest effect among its child operations
     for aid in spec.order:
         a = A[aid]
-        if a.get("kind") == "Operation" and a.get("effect") == "pure" and a.get("writes"):
+        if a.get("kind") != "Operation":
+            continue
+        if a.get("effect") == "pure" and a.get("writes"):
             F.append(Finding("O11.impure", "RED", aid, (aid,),
                              "It is marked pure but writes state: return the new state as an output, or change its effect?"))
+        kids = [k for k in spec.subtree(aid)[1:] if A[k].get("kind") == "Operation" and A[k].get("effect") in EFFECT_RANK]
+        if a.get("effect") in EFFECT_RANK and kids:
+            strongest = max(kids, key=lambda k: EFFECT_RANK[A[k]["effect"]])
+            if EFFECT_RANK[A[strongest]["effect"]] > EFFECT_RANK[a["effect"]]:
+                F.append(Finding("O11.understated", "RED", aid, (aid, strongest),
+                                 f"It is declared {a['effect']} but contains a {A[strongest]['effect']} step: raise its effect?"))
+
+    # O12 closed schema: a field the schema does not know is probably a typo or an unchecked idea
+    for aid in spec.order:
+        a = A[aid]
+        extra = set(a) - COMMON_FIELDS - KIND_FIELDS.get(a.get("kind"), set())
+        if extra:
+            F.append(Finding("O12.unknown-field", "AMBER", aid, (aid,),
+                             f"Unknown fields {sorted(extra)}: rename to a schema field, or move into notes?"))
+
+    # O13 constants by reference: {key} in text must name a Value key, so text cannot drift from values
+    keys = {A[v].get("key") for v in spec.order if A[v].get("kind") == "Value"}
+    for aid in spec.order:
+        a = A[aid]
+        texts = [a.get("formal") or ""] + list(a.get("pre") or []) + list(a.get("post") or [])
+        for k in sorted({m for t in texts for m in KEY_REF.findall(str(t))}):
+            if k not in keys:
+                F.append(Finding("O13.unknown-key", "RED", aid, (aid,), f"{{{k}}} names no Value key: which parameter is meant?"))
+
+    # O5b coverage strength: a pure or deterministic leaf covered only by review could be checked mechanically
+    by_target = defaultdict(set)
+    for o in spec.order:
+        if A[o].get("kind") == "Obligation":
+            for t in A[o].get("target") or []:
+                by_target[t].add(A[o].get("method"))
+    for aid in spec.leaves():
+        a = A[aid]
+        if a.get("kind") == "Operation" and a.get("effect") in ("pure", "deterministic") and by_target.get(aid) == {"review"}:
+            F.append(Finding("O5.weak", "AMBER", aid, (aid,),
+                             "Only reviewed, yet it is pure or deterministic: which proof or test could check it mechanically?"))
     return F
 
 
@@ -376,6 +436,10 @@ def project(spec: Spec) -> tuple[dict, str]:
         k = a.get("kind")
         sid = f"a.{aid}"
         body = _safe(a.get("statement", ""))
+        if k in DEFINES and spec.children.get(aid):
+            # a refined definition is still a definition (Fact) but also the Goal of its own brief
+            atoms.append({"id": f"g.{aid}", "kind": "Goal", "scope": ["global"], "requires": ["Contract"],
+                          "body": _safe(f"Refine the definition: {a.get('statement', aid)}")})
         if k in DEFINES:
             facts = {f"def.{aid}": _safe(f"{k}:{a.get('type', '?')}")}
             if k == "Value" and "key" in a and "value" in a:
@@ -409,7 +473,8 @@ def _term(spec: Spec, aid: str, inherited: list[str]) -> str:
     kids = spec.children.get(aid, [])
     defs_here = [k for k in kids if A[k].get("kind") in DEFINES]
     context = inherited + defs_here
-    parts = ["@role.refiner", "@contract.refine", f"@a.{aid}"] + [f"@a.{d}" for d in dict.fromkeys(context)]
+    own = [f"@g.{aid}", f"@a.{aid}"] if A[aid].get("kind") in DEFINES else [f"@a.{aid}"]
+    parts = ["@role.refiner", "@contract.refine"] + own + [f"@a.{d}" for d in dict.fromkeys(context) if d != aid]
     for k in kids:
         if A[k].get("kind") in DEFINES and not spec.children.get(k):
             continue  # already in context
@@ -456,9 +521,13 @@ def delta(old: Spec, new: Spec) -> dict:
     structural_fields = ("kind", "parent", "inputs", "outputs", "reads", "writes", "uses", "type", "value", "key")
     changed = sorted(a for a in o & n
                      if any(old.atoms[a].get(f) != new.atoms[a].get(f) for f in structural_fields))
+    # Contract-level fields change what an implementation must satisfy, so they also block convergence.
+    contract_changed = sorted(a for a in o & n if a not in changed
+                              and any(old.atoms[a].get(f) != new.atoms[a].get(f) for f in CONTRACT_FIELDS))
     added, removed = sorted(n - o), sorted(o - n)
     return {"added": added, "removed": removed, "structurally_changed": changed,
-            "converged": not (added or removed or changed)}
+            "contract_changed": contract_changed,
+            "converged": not (added or removed or changed or contract_changed)}
 
 
 # ── generated views (pure) ────────────────────────────────────────────────────
@@ -468,11 +537,23 @@ def contracts(spec: Spec) -> list[dict]:
     """One typed contract per leaf Operation and per Invariant; regenerable into any language."""
     A = spec.atoms
     out = []
-    obligations = defaultdict(list)
+    obligations, blockers = defaultdict(list), defaultdict(list)
     for aid in spec.order:
         if A[aid].get("kind") == "Obligation":
             for t in A[aid].get("target") or []:
-                obligations[t].append({"id": aid, "method": A[aid].get("method"), "statement": A[aid].get("statement")})
+                obligations[t].append({"id": aid, "method": A[aid].get("method"), "statement": A[aid].get("statement"),
+                                       "evidence": A[aid].get("evidence")})
+        if A[aid].get("kind") == "Open":
+            for b in A[aid].get("blocks") or []:
+                blockers[b].append(aid)
+
+    def blocked_by(cid: str) -> list[str]:
+        """Unknowns on the contract itself, on an enclosing Operation, or on a definition it uses.
+        An unknown about a whole System or Component is a project risk, not a contract gap."""
+        a = A[cid]
+        related = [cid] + [x for x in spec.ancestors(cid) if A[x].get("kind") == "Operation"]
+        related += [r for f in ("inputs", "outputs", "reads", "writes", "uses") for r in a.get(f) or []]
+        return sorted({u for r in related for u in blockers.get(r, [])})
     for aid in spec.order:
         a = A[aid]
         if a.get("kind") == "Operation" and not spec.children.get(aid):
@@ -483,11 +564,12 @@ def contracts(spec: Spec) -> list[dict]:
                 "reads": a.get("reads") or [], "writes": a.get("writes") or [],
                 "requires": a.get("pre") or [], "ensures": a.get("post") or [], "errors": a.get("errors") or [],
                 "source": a.get("source"), "status": a.get("status"), "verified_by": obligations.get(aid, []),
+                "blocked_by": blocked_by(aid),
             })
         elif a.get("kind") == "Invariant":
             out.append({"id": aid, "kind": "invariant", "statement": a.get("statement"), "formal": a.get("formal"),
                         "constrains": a.get("uses") or [], "source": a.get("source"), "status": a.get("status"),
-                        "verified_by": obligations.get(aid, [])})
+                        "verified_by": obligations.get(aid, []), "blocked_by": blocked_by(aid)})
     return out
 
 
@@ -511,10 +593,14 @@ def elements(spec: Spec) -> str:
         lines.append(f"| {eff} | {why.get(eff, '?')} | {', '.join(rows[eff])} |")
     lines += ["", "## State and its owners", "", "| state | durable | written by | read by |", "|---|---|---|---|"]
     for s in spec.order:
-        if A[s].get("kind") in ("State", "Entity"):
+        if A[s].get("kind") == "State" or (A[s].get("kind") == "Entity" and A[s].get("durable")):
             w = [o for o in ops if s in (A[o].get("writes") or [])]
             r = [o for o in ops if s in (A[o].get("reads") or []) or s in (A[o].get("inputs") or [])]
             lines.append(f"| {s} | {'yes' if A[s].get('durable') else 'no'} | {', '.join(w) or '-'} | {', '.join(r) or '-'} |")
+    shared = [(s, A[s]["shared_writers"]) for s in spec.order if A[s].get("shared_writers")]
+    if shared:
+        lines += ["", "## Shared writers and why", "", "| state | reason |", "|---|---|"]
+        lines += [f"| {s} | {r} |" for s, r in shared]
     lines += ["", "## Boundaries (what crosses into or out of the system)", "", "| boundary | carries | statement |", "|---|---|---|"]
     for b in spec.order:
         if A[b].get("kind") == "Boundary":
@@ -550,6 +636,14 @@ def render(spec: Spec, findings: list[Finding]) -> str:
         pad = "  " * a.get("depth", 0)
         tag = f"`{a.get('kind')}` " + ("" if a.get("status") == "stated" else f"*{a.get('status')}* ")
         lines.append(f"{pad}- **{aid}** {tag}— {a.get('statement')}")
+    opens = [u for u in spec.order if A[u].get("kind") == "Open"]
+    if opens:
+        lines += ["", "## Open questions", "", "| open | blocks | settled by | question |", "|---|---|---|---|"]
+        lines += [f"| {u} | {', '.join(A[u].get('blocks') or [])} | {A[u].get('resolve_by', '?')} | {A[u].get('statement')} |" for u in opens]
+    obs = [x for x in spec.order if A[x].get("kind") == "Obligation"]
+    if obs:
+        lines += ["", "## Verification obligations", "", "| obligation | method | verifies | evidence |", "|---|---|---|---|"]
+        lines += [f"| {x} | {A[x].get('method')} | {', '.join(A[x].get('target') or [])} | {A[x].get('evidence') or '-'} |" for x in obs]
     lines += ["", "## Findings", ""]
     lines += [f"- {f.line()}" for f in findings] or ["- none"]
     return "\n".join(lines) + "\n"
@@ -563,6 +657,9 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("check"); c.add_argument("spec"); c.add_argument("--converging", action="store_true",
                                                                      help="treat non-atomic or unverified leaves as RED")
+    c.add_argument("--max-depth", type=int, help="this pass may not go deeper than N")
+    v = sub.add_parser("converged", help="the stopping rule: converging GREEN, operad GREEN, no change since PREV")
+    v.add_argument("prev"); v.add_argument("spec"); v.add_argument("--stitch")
     o = sub.add_parser("operad"); o.add_argument("spec"); o.add_argument("--stitch"); o.add_argument("--emit", help="write snapshot + term to this directory")
     d = sub.add_parser("delta"); d.add_argument("old"); d.add_argument("new")
     k = sub.add_parser("contracts"); k.add_argument("spec"); k.add_argument("--out", required=True)
@@ -573,13 +670,22 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "delta":
             print(json.dumps(delta(load(Path(args.old)), load(Path(args.new))), indent=2))
             return 0
+        if args.cmd == "converged":
+            prev, cur = load(Path(args.prev)), load(Path(args.spec))
+            conv = verdict(check(cur, converging=True))
+            stitch = find_stitch(args.stitch)
+            op = run_stitch(stitch, *project(cur))["verdict"] if stitch else "UNAVAILABLE"
+            d = delta(prev, cur)
+            ok = conv == "GREEN" and op in ("GREEN", "NOTE") and d["converged"]
+            print(json.dumps({"converged": ok, "check_converging": conv, "operad": op, "delta": d}, indent=2))
+            return 0 if ok else 1
         spec = load(Path(args.spec))
     except (SpecError, OSError, json.JSONDecodeError) as err:
         print(f"invalid: {err}", file=sys.stderr)
         return 3
 
     if args.cmd == "check":
-        findings = check(spec, converging=args.converging)
+        findings = check(spec, converging=args.converging, max_depth=args.max_depth)
         v = verdict(findings)
         print(json.dumps({"verdict": v, "stats": stats(spec), "findings": [f.line() for f in findings]}, indent=2))
         return EXIT[v]
@@ -628,7 +734,9 @@ def render_contract(c: dict) -> str:
             lines += ["", "## Errors", ""] + [f"- {e}" for e in c["errors"]]
     else:
         lines += ["", "## Predicate", "", f"`{c.get('formal')}`", "", f"constrains: {', '.join(c['constrains'])}"]
-    lines += ["", "## Verified by", ""] + ([f"- {v['id']} ({v['method']}): {v['statement']}" for v in c["verified_by"]] or ["- nothing yet"])
+    lines += ["", "## Verified by", ""] + ([f"- {v['id']} ({v['method']}): {v['statement']}" + (f" Evidence: {v['evidence']}" if v.get("evidence") else "")
+                                            for v in c["verified_by"]] or ["- nothing yet"])
+    lines += ["", "## Blocked by", ""] + ([f"- {b}" for b in c.get("blocked_by") or []] or ["- nothing: final unless the ontology changes"])
     return "\n".join(lines) + "\n"
 
 

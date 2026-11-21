@@ -120,6 +120,54 @@ def test_pure_operation_that_writes_state_is_red(tmp_path, raw):
     assert "O11.impure" in laws(o.check(spec_from(raw, tmp_path)))
 
 
+def test_refined_operation_cannot_understate_its_childrens_effect(tmp_path, raw):
+    atom(raw, "take")["effect"] = "pure"  # contains take-spend, which is effectful
+    f = o.check(spec_from(raw, tmp_path))
+    hit = next(x for x in f if x.law == "O11.understated")
+    assert hit.atoms == ("take", "take-spend")
+
+
+def test_unknown_fields_are_reported(tmp_path, raw):
+    atom(raw, "refill")["postt"] = ["typo"]
+    assert "O12.unknown-field" in laws(o.check(spec_from(raw, tmp_path)))
+
+
+def test_key_references_in_text_must_name_a_value(tmp_path, raw):
+    atom(raw, "refill")["post"] = ["bucket.tokens <= {capacity}"]
+    assert "O13.unknown-key" not in laws(o.check(spec_from(raw, tmp_path)))
+    atom(raw, "refill")["post"] = ["bucket.tokens <= {capacityy}"]
+    assert "O13.unknown-key" in laws(o.check(spec_from(raw, tmp_path)))
+
+
+def test_review_only_coverage_of_a_mechanisable_step_is_weak(tmp_path, raw):
+    atom(raw, "ob-check")["method"] = "review"  # covers take-check (pure) only by review
+    assert "O5.weak" in laws(o.check(spec_from(raw, tmp_path)))
+
+
+def test_pass_depth_limit(tmp_path, raw):
+    assert "O1.pass-depth" in laws(o.check(spec_from(raw, tmp_path), max_depth=2))
+    assert "O1.pass-depth" not in laws(o.check(spec_from(raw, tmp_path), max_depth=3))
+
+
+def test_delta_counts_contract_changes_against_convergence(tmp_path, raw):
+    a = spec_from(raw, tmp_path)
+    b_raw = copy.deepcopy(raw)
+    atom(b_raw, "refill")["post"] = ["bucket.tokens < capacity"]
+    p = tmp_path / "b.yaml"; p.write_text(yaml.safe_dump(b_raw)); b = o.load(p)
+    d = o.delta(a, b)
+    assert d["contract_changed"] == ["refill"] and not d["converged"]
+
+
+def test_contracts_list_the_unknowns_that_block_them(tmp_path, raw):
+    raw["atoms"].append({"id": "q-burst", "kind": "Open", "depth": 1, "parent": "limiter", "status": "open",
+                         "statement": "May a client burst?", "blocks": ["take"], "resolve_by": "product owner"})
+    raw["atoms"].append({"id": "q-release", "kind": "Open", "depth": 1, "parent": "limiter", "status": "open",
+                         "statement": "Is the source released?", "blocks": ["limiter"], "resolve_by": "authors"})
+    cs = {c["id"]: c for c in o.contracts(spec_from(raw, tmp_path))}
+    # blocked through the enclosing operation; the system-level unknown does not block contracts
+    assert cs["take-spend"]["blocked_by"] == ["q-burst"] and cs["refill"]["blocked_by"] == []
+
+
 def test_delta_detects_convergence(tmp_path, raw):
     a = spec_from(raw, tmp_path)
     b_raw = copy.deepcopy(raw)
@@ -155,6 +203,25 @@ def test_operad_green_on_the_fixture(tmp_path, raw):
     cert = o.run_stitch(STITCH, snap, term)
     assert cert["verdict"] in ("GREEN", "NOTE"), json.dumps(cert, indent=1)[:2000]
     assert cert["briefs"] == 2  # admit (depth 2) and take (depth 3)
+
+
+@needs_stitch
+def test_refining_a_definition_composes_without_findings(tmp_path, raw):
+    raw["atoms"].append({"id": "bucket-tokens", "kind": "Entity", "depth": 2, "parent": "bucket", "status": "inferred",
+                         "type": "u32", "statement": "The token count field."})
+    cert = o.run_stitch(STITCH, *o.project(spec_from(raw, tmp_path)))
+    assert cert["verdict"] in ("GREEN", "NOTE"), cert["findings"]  # no brief.no-goal any more
+    # ...while reaching into that refinement from outside is still a leak the engine rejects
+    atom(raw, "never-negative")["uses"].append("bucket-tokens")
+    cert = o.run_stitch(STITCH, *o.project(spec_from(raw, tmp_path)))
+    assert cert["verdict"] == "RED" and "port.open" in str(cert["findings"])
+
+
+@needs_stitch
+def test_converged_command_applies_the_stopping_rule(tmp_path, raw, capsys):
+    p = tmp_path / "s.yaml"; p.write_text(yaml.safe_dump(raw))
+    assert o.main(["converged", str(p), str(p)]) == 0
+    assert json.loads(capsys.readouterr().out)["converged"] is True
 
 
 @needs_stitch

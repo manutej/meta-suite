@@ -46,9 +46,11 @@ exist or cross in), `Operation` (what changes things), `Invariant` (what must al
 owner). Fields and examples of each shape: `references/schema.md`.
 
 **S3 · Verify composition.** Run both checks; read every finding.
-- `ontspec.py check ontology.yaml`: the ontology laws O1–O11 (shape, typed references,
-  provenance, one owner per state, coverage by obligations, every input produced, one value per
-  key, leaf atomicity, refinements realised, no reaching into a sibling branch, honest effects).
+- `ontspec.py check ontology.yaml [--max-depth N]`: the ontology laws O1–O13 (shape, typed
+  references, provenance, one owner per state, coverage by obligations of the right strength,
+  every input produced, one value per key, leaf atomicity, refinements realised, no reaching into
+  a sibling branch, honest effects at every level, no unknown fields, constants written as
+  `{key}` references). `--max-depth` holds a pass to its level.
 - `ontspec.py operad ontology.yaml`: projects the tree onto the operadic-stitch engine (each
   refinement becomes a separate brief under a depth frame, inheriting its ancestors' definitions)
   and runs it: typed plugging, closed ports per refinement, one value per key across every depth
@@ -60,9 +62,10 @@ into an `Open` atom with an owner.
 
 **S4 · Deepen and loop.** Refine to depth 2 (sub-mechanisms), 3 (algorithms and data shapes),
 then 4 (atomic contracts), re-running S3 after each level. Every pass appends an edit script to
-`CONVERGENCE.md`: what changed, which findings it closed, which it opened. Stop when the loop
-converges: no RED, every leaf atomic (`check --converging` GREEN), the operad check GREEN, and
-`ontspec.py delta` between the last two passes reports no structural change. If a branch will
+`CONVERGENCE.md`: what changed, which findings it closed, which it opened. Save each pass's
+`ontology.yaml` beside its certificates. Stop when `ontspec.py converged PREV ontology.yaml`
+returns true: every leaf atomic (`check --converging` GREEN), the operad check GREEN, and no
+atom added, removed, or changed in structure or contract since the previous pass. If a branch will
 not converge within four levels, it is a separate system: split the spec. Depth meanings,
 atomicity and the stopping rule: `references/loop.md`.
 
@@ -102,13 +105,14 @@ specs/<id>/
   00-sources.md          pinned sources
   01-verbal.md           depth-0 statement list
   ontology.yaml          THE spec (typed atoms, depth <= 4)
-  certificates/pass-N/   check.json, operad.json, delta.json for every pass
+  certificates/pass-N/   ontology.yaml snapshot + check, converging, operad, delta (from pass 2), converged
   CONVERGENCE.md         the edit script per pass, and why the loop stopped
   contracts/             generated: contracts.json + one .md per contract
   ELEMENTS.md            generated: architecture forces
   ARCH-INVESTIGATION.md  the brief that starts the architecture search
   VERIFICATION-PLAN.md   obligations, methods, order, the 80:20 budget
   SPEC.md                generated: the document a team approves
+  APPROVALS.md           hand-kept: who approved which ontology version, and what they asked to change
 ```
 
 Done means: the last pass is converged with both certificates GREEN (or AMBER with every

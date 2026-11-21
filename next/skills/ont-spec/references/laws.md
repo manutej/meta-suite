@@ -11,12 +11,16 @@ Two checkers, one discipline: every violation is a finding with a question that 
 | O3 provenance | RED | a "stated" atom with no source span; an unknown with no blocked atoms or owner | cite, downgrade to inferred, or give the unknown an owner |
 | O4 ownership | AMBER | two operations write one piece of state | name the owner, or declare `shared_writers` with the reason (that reason is an architecture force) |
 | O5 coverage | AMBER, RED when converging | a leaf operation or invariant nothing verifies; an obligation with no method | add an obligation |
+| O5.weak | AMBER | a pure or deterministic leaf verified only by review | add a proof, model check or test |
 | O6 production | RED / AMBER | an input nothing produces and that does not enter at a boundary (RED); a definition nothing uses (AMBER) | add the producer or boundary; delete the dead definition |
 | O7 one value per key | RED | the same parameter with two values anywhere in the tree | decide which holds; the other is a dispute to record |
 | O8 atomicity | AMBER, RED when converging | a leaf that is not yet a contract (untyped, no effect, no pre/post, writes two things) | refine one level, or complete it |
 | O9 realisation | RED | an operation refined into children none of which is an operation | add the child operations |
 | O10 locality | AMBER | a reference into a sibling branch's private definitions | lift the definition to the common ancestor |
-| O11 effect honesty | RED | a `pure` operation that writes state | return the new state as an output, or change the effect |
+| O11 effect honesty | RED | a `pure` operation that writes state; a refined operation declared weaker than its strongest child (`pure` parent over an `effectful` step) | return the new state as an output; raise the declared effect |
+| O12 closed schema | AMBER | a field the schema does not define (usually a typo) | rename it, or move it into `notes` |
+| O13 constants by reference | RED | a `{key}` in pre, post or formal text that names no Value | fix the key, or add the Value |
+| O1.pass-depth | RED | with `--max-depth N`, an atom deeper than this pass allows | move it to the next pass |
 
 ## Composition laws (`ontspec.py operad`, run by the operadic-stitch engine)
 

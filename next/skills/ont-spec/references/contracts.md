@@ -30,4 +30,9 @@ The effect class decides the projection, which is why O11 (effect honesty) is RE
 Code is regenerated from contracts, never the reverse. When code and contract disagree, the
 contract is the reference: either the code is wrong, or the ontology changes, the contract is
 regenerated, and every obligation on it runs again. Approval is of the ontology and its
-contracts, by a human, recorded in SPEC.md's history.
+contracts, by a human, recorded in the hand-kept APPROVALS.md (SPEC.md is regenerated and
+would lose it).
+
+Each contract lists `blocked_by`: the `Open` atoms on the contract itself, on an enclosing
+operation, or on a definition it uses. A contract with an empty `blocked_by` is final unless the
+ontology changes; the rest are the review queue.
